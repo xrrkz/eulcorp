@@ -241,12 +241,16 @@ body::after {
   animation: wm-shimmer 6s linear infinite;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 60px rgba(122, 47, 208, 0.18);
+  transition: transform .14s ease;
+  transform-origin: 50% 60%;
+  will-change: transform;
 }
 @keyframes wm-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 .wordmark:hover { animation-duration: 2.4s; }
+.wordmark:active { transform: scale(0.985); }
 
 .kicker {
   display: inline-flex; align-items: center; gap: 18px;
@@ -312,6 +316,8 @@ body::after {
       radial-gradient(ellipse 700px 500px at 18% 78%, var(--purple-soft), transparent 60%),
       radial-gradient(ellipse 500px 400px at 85% 18%, var(--purple-faint), transparent 70%);
   }
+  /* mix-blend grain costs paint on every scroll/animation tick; barely visible on phone screens */
+  body::after { display: none; }
 
   .chrome {
     padding: 12px 16px;
@@ -362,23 +368,36 @@ body::after {
   .bd-num-tiny { font-size: 24px; }
 
   .socials {
-    flex-direction: column; gap: 14px;
-    padding: 12px 16px 14px;
-    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    flex-direction: column; gap: 8px;
+    padding: 10px 16px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
     font-size: 10px; letter-spacing: 0.1em;
   }
-  .socials .left, .socials .right { display: none; }
+  .socials .left { display: none; }
+  /* Repurpose .right as a tiny kicker line under the social links */
+  .socials .right {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    color: var(--faint);
+    order: 2;
+  }
   .socials .links {
-    gap: 10px; flex-wrap: wrap;
-    justify-content: center; width: 100%;
+    gap: 6px;
+    justify-content: center;
+    width: 100%;
+    order: 1;
   }
   .socials a {
     font-size: 11px; gap: 6px;
     /* 44px min tap target per WCAG; padding keeps text spacing visually tight */
     min-height: 44px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     border-radius: 8px;
   }
   .socials a:active { background: rgba(122, 47, 208, 0.14); }
@@ -392,17 +411,30 @@ body::after {
   .kicker { font-size: 8.5px; gap: 8px; letter-spacing: 0.24em; }
   .bd-num { font-size: 150px; }
   .bd-num-sm { font-size: 90px; }
+  /* must re-declare after .bd-num here so the .bd-num cascade above doesn't
+     win on elements that carry both classes (e.g. "bd-num bd-num-tiny") */
+  .bd-num-tiny { font-size: 22px; }
 }
 
 /* phones in landscape: fixed bars eat most of the screen — tighten everything */
 @media (max-height: 500px) and (orientation: landscape) {
-  .hero { padding: 80px 24px 90px; }
-  .hero-pre { margin-bottom: 12px; }
-  .kicker { margin-top: 14px; }
+  .hero {
+    padding: 78px 24px 78px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  .hero-pre { margin-bottom: 10px; font-size: 8.5px; letter-spacing: 0.26em; }
+  .kicker { margin-top: 12px; }
   .wordmark { font-size: clamp(40px, 9vh, 96px); }
-  .socials { padding: 8px 16px; }
-  .socials .links { gap: 6px; }
-  .socials a { min-height: 36px; padding: 6px 10px; }
+  .ticker-wrap { display: none; }
+  .socials {
+    flex-direction: row;
+    gap: 8px;
+    padding: 6px 16px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+  .socials .right { display: none; }
+  .socials .links { gap: 4px; flex-wrap: nowrap; width: auto; }
+  .socials a { min-height: 36px; padding: 6px 10px; font-size: 10.5px; }
 }
 
 /* coarse pointers (touch): drop hover-only flourishes that fire on tap */
@@ -596,8 +628,13 @@ body::after {
       s = (s * 1664525 + 1013904223) >>> 0;
       return (s >>> 0) / 4294967296;
     };
+    var vw = window.innerWidth, vh = window.innerHeight;
     // fewer candles on small viewports — cheaper to render and less crowded
-    var N = window.innerWidth < 600 ? 36 : 64;
+    var N = vw < 600 ? 32 : 64;
+    // With viewBox 1600x900 + xMidYMid slice, narrow/portrait viewports crop most
+    // of the SVG horizontally — only a central band stays visible. Reposition the
+    // ghost text into that visible band so it actually renders on phones.
+    var portraitCrop = (vw / vh) < (W / H);
     var candles = [];
     var y = 0.86;
     for (var i = 0; i < N; i++) {
@@ -614,10 +651,19 @@ body::after {
     var step = W / candles.length;
     var bodyW = step * 0.58;
     var parts = [];
-    parts.push('<text x="40" y="280" class="bd-num">50K</text>');
-    parts.push('<text x="' + (W - 380) + '" y="780" class="bd-num bd-num-sm">+24.8%</text>');
-    parts.push('<text x="' + (W * 0.55) + '" y="160" class="bd-num bd-num-tiny">ALL-TIME HIGH</text>');
-    parts.push('<text x="60" y="' + (H - 60) + '" class="bd-num bd-num-tiny">ES · NQ · GC · CL</text>');
+    if (portraitCrop) {
+      // Center text horizontally so it lands inside the visible vertical strip
+      var cx = W / 2;
+      parts.push('<text x="' + cx + '" y="280" text-anchor="middle" class="bd-num">50K</text>');
+      parts.push('<text x="' + cx + '" y="780" text-anchor="middle" class="bd-num bd-num-sm">+24.8%</text>');
+      parts.push('<text x="' + cx + '" y="120" text-anchor="middle" class="bd-num bd-num-tiny">ALL-TIME HIGH</text>');
+      parts.push('<text x="' + cx + '" y="' + (H - 40) + '" text-anchor="middle" class="bd-num bd-num-tiny">ES · NQ · GC · CL</text>');
+    } else {
+      parts.push('<text x="40" y="280" class="bd-num">50K</text>');
+      parts.push('<text x="' + (W - 380) + '" y="780" class="bd-num bd-num-sm">+24.8%</text>');
+      parts.push('<text x="' + (W * 0.55) + '" y="160" class="bd-num bd-num-tiny">ALL-TIME HIGH</text>');
+      parts.push('<text x="60" y="' + (H - 60) + '" class="bd-num bd-num-tiny">ES · NQ · GC · CL</text>');
+    }
     [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
       parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + W + '" y2="' + (g * H) + '" class="bd-grid"/>');
     });
@@ -642,6 +688,12 @@ body::after {
     document.getElementById('backdrop').innerHTML = parts.join('');
   }
   buildBackdrop();
+  // Rotating a phone flips the crop band — rebuild so ghost text stays visible.
+  var rebuildTimer = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(rebuildTimer);
+    rebuildTimer = setTimeout(buildBackdrop, 180);
+  });
 })();
 </script>
 </body>
