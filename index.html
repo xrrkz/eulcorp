@@ -1,524 +1,571 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<!--
-  ============================================================
-  eulcorp.com — personal landing site
-  ============================================================
-  Plain HTML/CSS/vanilla JS. No build step. Deploy as-is.
-
-  WHERE TO SWAP PLACEHOLDER VALUES
-  --------------------------------
-  1. SOCIAL LINKS  — search for `href="#"`. Each social button is
-     marked with a comment ( <!-- X -->, <!-- YouTube --> ... ).
-     Replace `#` with your real profile URL.
-  2. EMAIL         — search for `hello@eulcorp.com` (appears in the
-     contact section and the JSON-LD/meta). Change in all spots.
-  3. TICKER DATA   — see the `watchlist` array in the <script> at the
-     bottom. Static placeholder prices for now; a `TODO` comment marks
-     where to wire a live market-data API.
-  4. ABOUT TEXT    — the paragraph in <section id="about">.
-  5. STAT CARDS    — the three cards in <section id="track">: edit the
-     `.stat-value` and `.stat-label` text directly.
-  6. OG IMAGE      — add a 1200x630 image at /og-image.png (referenced
-     in the <meta property="og:image"> tag below).
-  ============================================================
--->
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#0a0a0a" />
+<meta charset="utf-8">
+<title>eulcorp — one of none</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#050306">
+<meta name="description" content="EULCORP — independent index futures trader. Indices, commodities. One of none.">
 
-  <title>eulcorp — independent index futures trader</title>
-  <meta name="description" content="Eulcorp — independent index futures trader. NQ, ES and YM, with gold and oil alongside. A clean hub for socials and track record." />
+<meta property="og:type" content="website">
+<meta property="og:title" content="eulcorp — one of none">
+<meta property="og:description" content="Independent index futures trader. Indices, commodities.">
+<meta property="og:url" content="https://eulcorp.com">
+<meta property="og:image" content="https://eulcorp.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="eulcorp — one of none">
+<meta name="twitter:description" content="Independent index futures trader. Indices, commodities.">
+<meta name="twitter:image" content="https://eulcorp.com/og-image.png">
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="eulcorp — independent index futures trader" />
-  <meta property="og:description" content="Independent futures trader. Indices first, gold and oil alongside." />
-  <meta property="og:url" content="https://eulcorp.com" />
-  <!-- TODO: add a 1200x630 image at /og-image.png -->
-  <meta property="og:image" content="https://eulcorp.com/og-image.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="eulcorp — independent index futures trader" />
-  <meta name="twitter:description" content="Independent futures trader. Indices first, gold and oil alongside." />
-  <meta name="twitter:image" content="https://eulcorp.com/og-image.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%237A2FD0'/%3E%3Cpath%20d='M16%208L24%2019H19V24H13V19H8Z'%20fill='%23fff'/%3E%3C/svg%3E">
 
-  <!-- Favicon: inline SVG, purple square + up arrow -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%234C1D95'/%3E%3Cpath%20d='M16%208L24%2019H19V24H13V19H8Z'%20fill='%23fff'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@400;500;700&family=Archivo:wght@900&display=swap" rel="stylesheet">
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --purple: #7A2FD0;
+  --purple-soft: rgba(122, 47, 208, 0.22);
+  --purple-faint: rgba(122, 47, 208, 0.12);
+  --bg: #050306;
+  --text: #f5f3f7;
+  --muted: rgba(245, 243, 247, 0.5);
+  --faint: rgba(245, 243, 247, 0.25);
+  --line: rgba(255, 255, 255, 0.08);
+}
 
-  <!-- Tabler icons (webfont, no build step) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+body { position: relative; }
 
-  <style>
-    :root {
-      --bg:          #0a0a0a;
-      --card:        #0e0e0e;
-      --border:      rgba(255, 255, 255, 0.09);
-      --text:        #e9e9e9;
-      --text-dim:    #8a8a8a;
-      --text-faint:  #585858;
-      --purple:      #4C1D95;
-      --purple-lit:  #6D28D9;
-      --up:          #4ADE80;
-      --down:        #F87171;
-      --nav-h:       58px;
-    }
+/* purple glow */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 1200px 800px at 18% 78%, var(--purple-soft), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 85% 18%, var(--purple-faint), transparent 70%);
+  z-index: 0;
+}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* film grain */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
 
-    html { scroll-behavior: smooth; }
+.page { position: relative; z-index: 2; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
+/* ---------- backdrop chart + ghost numbers ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.bd-grid {
+  stroke: rgba(255, 255, 255, 0.035);
+  stroke-width: 1;
+  stroke-dasharray: 2 10;
+}
+.cs-wick { stroke-width: 1; stroke-linecap: round; }
+.cs-body { stroke-width: 1; }
+.cs-bull .cs-wick { stroke: var(--purple); stroke-opacity: 0.55; }
+.cs-bull .cs-body {
+  fill: var(--purple); fill-opacity: 0.38;
+  stroke: var(--purple); stroke-opacity: 0.65;
+}
+.cs-bear .cs-wick { stroke: rgba(255, 255, 255, 0.22); }
+.cs-bear .cs-body { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.22); }
+.bd-dot { fill: var(--purple); fill-opacity: 0.55; }
+.bd-dot-bright {
+  fill: var(--purple); fill-opacity: 1;
+  filter: drop-shadow(0 0 10px var(--purple));
+}
+.bd-num {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 320px;
+  letter-spacing: -0.04em;
+  fill: rgba(255, 255, 255, 0.028);
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.018);
+  stroke-width: 1.5;
+}
+.bd-num-sm { font-size: 180px; fill: rgba(255, 255, 255, 0.022); }
+.bd-num-tiny {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 36px;
+  letter-spacing: 0.06em;
+  fill: rgba(122, 47, 208, 0.18);
+  stroke: none;
+}
 
-    a { color: inherit; text-decoration: none; }
+/* ---------- chrome ---------- */
+.chrome {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  z-index: 20;
+}
+.chrome .brand { display: flex; align-items: center; gap: 12px; color: var(--text); }
+.chrome .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 0 12px var(--purple), 0 0 24px var(--purple);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+.chrome .right { display: flex; gap: 28px; align-items: center; }
+.chrome .time {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  min-width: 88px;
+  text-align: right;
+}
 
-    .wrap {
-      width: 100%;
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+/* ---------- ticker ---------- */
+.ticker-wrap {
+  position: fixed; top: 56px; left: 0; right: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  z-index: 19;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+.ticker {
+  display: flex; gap: 56px;
+  padding: 11px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  white-space: nowrap;
+  width: max-content;
+  animation: scroll 90s linear infinite;
+}
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.tick { display: inline-flex; gap: 10px; align-items: baseline; }
+.tick .sym { color: var(--muted); letter-spacing: 0.12em; font-weight: 500; }
+.tick .px { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+.tick .ch { font-size: 11px; font-variant-numeric: tabular-nums; }
+.tick .ch.up { color: var(--purple); }
+.tick .ch.dn { color: rgba(245, 243, 247, 0.4); }
+.tick .sep { color: var(--line); margin-left: 10px; }
 
-    section { scroll-margin-top: calc(var(--nav-h) + 12px); }
+/* ---------- hero ---------- */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 160px 24px 200px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.hero-pre {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 28px;
+}
+.hero-pre-line { width: 28px; height: 1px; background: var(--purple); }
 
-    /* ---------- nav ---------- */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      height: var(--nav-h);
-      background: var(--bg);
-      border-bottom: 0.5px solid var(--border);
-    }
-    .nav .wrap {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand { display: flex; align-items: center; gap: 9px; }
-    .mark {
-      width: 22px; height: 22px;
-      background: var(--purple);
-      display: flex; align-items: center; justify-content: center;
-      flex: 0 0 auto;
-    }
-    .mark svg { display: block; }
-    .wordmark {
-      font-weight: 600;
-      font-size: 1rem;
-      letter-spacing: -0.03em;
-    }
-    .nav-links { display: flex; gap: 22px; }
-    .nav-links a {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-      transition: color 0.15s ease;
-    }
-    .nav-links a:hover { color: var(--text); }
+.wordmark {
+  font-family: Palatino, 'Palatino Linotype', 'Book Antiqua', 'Instrument Serif', Cambria, Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(64px, 12vw, 200px);
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  background: linear-gradient(
+    110deg,
+    #ece6f3 0%, #ece6f3 38%,
+    var(--purple) 50%,
+    #ece6f3 62%, #ece6f3 100%
+  );
+  background-size: 220% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  animation: wm-shimmer 6s linear infinite;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 60px rgba(122, 47, 208, 0.18);
+}
+@keyframes wm-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.wordmark:hover { animation-duration: 2.4s; }
 
-    /* ---------- hero ---------- */
-    .hero {
-      text-align: center;
-      padding: 86px 0 64px;
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 0.5px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 14px;
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      letter-spacing: 0.01em;
-    }
-    .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--purple-lit);
-      position: relative;
-      flex: 0 0 auto;
-    }
-    .dot::after {
-      content: "";
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 1px solid var(--purple-lit);
-      animation: pulse 2.4s ease-out infinite;
-    }
-    .pill.closed .dot { background: var(--text-faint); }
-    .pill.closed .dot::after { display: none; }
-    @keyframes pulse {
-      0%   { transform: scale(0.5); opacity: 0.7; }
-      100% { transform: scale(1.7); opacity: 0; }
-    }
+.kicker {
+  display: inline-flex; align-items: center; gap: 18px;
+  margin-top: 40px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kicker .bar { display: inline-block; width: 32px; height: 1px; background: var(--purple); }
+.kicker .kdot { color: var(--purple); }
 
-    .hero h1 {
-      margin: 26px 0 0;
-      font-size: clamp(2.6rem, 8vw, 4.4rem);
-      font-weight: 600;
-      letter-spacing: -0.04em;
-      line-height: 1.04;
-    }
-    .hero .subhead {
-      margin: 16px auto 0;
-      max-width: 520px;
-      color: var(--text-dim);
-      font-size: 1.02rem;
-    }
+/* ---------- socials ---------- */
+.socials {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 18px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid var(--line);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 20;
+}
+.socials .left, .socials .right { min-width: 180px; }
+.socials .right { text-align: right; }
+.socials .links { display: flex; gap: 28px; }
+.socials a {
+  color: var(--text);
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: color .2s ease;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+}
+.socials a svg { color: var(--muted); transition: color .2s, transform .25s; }
+.socials a:hover { color: var(--purple); }
+.socials a:hover svg { color: var(--purple); transform: translateY(-1px); }
+.socials a .at { color: var(--faint); margin-right: -1px; }
+.socials a:hover .at { color: var(--purple); }
 
-    /* ---------- social row ---------- */
-    .socials {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 34px;
-    }
-    .social-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 0.5px solid var(--border);
-      padding: 9px 15px;
-      font-size: 0.88rem;
-      color: var(--text-dim);
-      transition: color 0.15s ease, border-color 0.15s ease;
-    }
-    .social-btn i { font-size: 1.05rem; }
-    .social-btn:hover {
-      color: var(--text);
-      border-color: var(--purple-lit);
-    }
+/* ---------- responsive ---------- */
+@media (max-width: 800px) {
+  .chrome {
+    padding: 12px 16px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  .chrome .brand { gap: 10px; }
+  .chrome .brand .slash,
+  .chrome .brand .label { display: none; }
+  .chrome .right { gap: 14px; font-size: 10px; }
+  .chrome .time { min-width: 0; }
 
-    /* ---------- ticker ---------- */
-    .ticker-section { padding: 16px 0 8px; }
-    .ticker {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-    }
-    .tk-card {
-      background: var(--card);
-      border: 0.5px solid var(--border);
-      padding: 14px 14px 13px;
-      min-width: 0;
-    }
-    .tk-sym {
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: var(--text);
-    }
-    .tk-name {
-      font-size: 0.66rem;
-      color: var(--text-faint);
-      margin-top: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .tk-price {
-      font-size: 1.04rem;
-      font-weight: 500;
-      margin-top: 12px;
-      font-variant-numeric: tabular-nums;
-    }
-    .tk-chg {
-      font-size: 0.8rem;
-      margin-top: 2px;
-      font-variant-numeric: tabular-nums;
-    }
-    .up   { color: var(--up); }
-    .down { color: var(--down); }
+  .ticker-wrap { top: 42px; }
+  .ticker { gap: 36px; padding: 9px 0; font-size: 11px; }
+  .tick { gap: 8px; }
+  .tick .sep { margin-left: 4px; }
 
-    /* ---------- generic section heading ---------- */
-    .eyebrow {
-      font-size: 0.74rem;
-      letter-spacing: 0.14em;
-      color: var(--text-faint);
-      margin-bottom: 18px;
-    }
-    .block { padding: 64px 0; border-top: 0.5px solid var(--border); }
+  .hero { padding: 120px 20px 180px; min-height: 100svh; }
+  .hero-pre {
+    font-size: 9px; letter-spacing: 0.28em;
+    margin-bottom: 22px; gap: 10px;
+  }
+  .hero-pre-line { width: 18px; }
+  .wordmark {
+    font-size: clamp(56px, 18vw, 140px);
+    letter-spacing: -0.015em;
+  }
+  .kicker {
+    margin-top: 28px; gap: 10px;
+    font-size: 9px; letter-spacing: 0.3em;
+  }
+  .kicker .bar { width: 18px; }
 
-    #about p {
-      max-width: 600px;
-      font-size: 1.05rem;
-      color: var(--text);
-    }
+  .socials {
+    flex-direction: column; gap: 14px;
+    padding: 14px 16px 18px;
+    font-size: 10px; letter-spacing: 0.1em;
+  }
+  .socials .left, .socials .right { display: none; }
+  .socials .links {
+    gap: 18px; flex-wrap: wrap;
+    justify-content: center; width: 100%;
+  }
+  .socials a { font-size: 11px; gap: 6px; }
+  .socials a svg { width: 13px; height: 13px; }
+}
 
-    /* ---------- stat cards ---------- */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .stat {
-      background: var(--card);
-      border: 0.5px solid var(--border);
-      border-top: 2px solid var(--purple);
-      padding: 22px 20px;
-    }
-    .stat-value {
-      font-size: 1.6rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    .stat-label {
-      margin-top: 6px;
-      font-size: 0.82rem;
-      color: var(--text-dim);
-    }
+@media (max-width: 440px) {
+  .wordmark { font-size: clamp(48px, 17vw, 110px); }
+  .socials .links { gap: 14px; }
+  .socials a { font-size: 10.5px; }
+  .kicker { font-size: 8.5px; gap: 8px; letter-spacing: 0.24em; }
+}
 
-    /* ---------- contact ---------- */
-    #contact .email {
-      display: inline-block;
-      font-size: 1.5rem;
-      font-weight: 500;
-      letter-spacing: -0.02em;
-      border-bottom: 0.5px solid var(--border);
-      padding-bottom: 3px;
-      transition: color 0.15s ease, border-color 0.15s ease;
-    }
-    #contact .email:hover {
-      color: #fff;
-      border-color: var(--purple-lit);
-    }
-    .socials.small { justify-content: flex-start; margin-top: 22px; }
-    .socials.small .social-btn { padding: 8px; }
-    .socials.small .social-btn span { display: none; }
-    .socials.small .social-btn i { font-size: 1.1rem; }
-
-    /* ---------- footer ---------- */
-    .footer {
-      border-top: 0.5px solid var(--border);
-      padding: 28px 0;
-      text-align: center;
-    }
-    .footer span {
-      font-size: 0.72rem;
-      letter-spacing: 0.16em;
-      color: var(--text-faint);
-      font-variant: small-caps;
-    }
-
-    /* ---------- responsive ---------- */
-    @media (max-width: 860px) {
-      .ticker { grid-template-columns: repeat(3, 1fr); }
-      .stats  { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 560px) {
-      .wrap { padding: 0 18px; }
-      .nav-links { gap: 15px; }
-      .nav-links a { font-size: 0.8rem; }
-      .wordmark { font-size: 0.95rem; }
-      .hero { padding: 60px 0 48px; }
-      .ticker { grid-template-columns: repeat(2, 1fr); }
-      .block { padding: 52px 0; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .dot::after { animation: none; }
-    }
-  </style>
+@media (prefers-reduced-motion: reduce) {
+  .wordmark,
+  .chrome .dot,
+  .ticker { animation: none !important; }
+}
+</style>
 </head>
 <body>
+<div class="page">
+  <svg class="backdrop" id="backdrop" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
 
-  <!-- ===================== nav ===================== -->
-  <nav class="nav">
-    <div class="wrap">
-      <a class="brand" href="#top" aria-label="eulcorp home">
-        <span class="mark" aria-hidden="true">
-          <svg width="13" height="13" viewBox="0 0 32 32">
-            <path d="M16 7L25 20H19V25H13V20H7Z" fill="#fff" />
-          </svg>
-        </span>
-        <span class="wordmark">eulcorp</span>
-      </a>
-      <div class="nav-links">
-        <a href="#about">About</a>
-        <a href="#track">Track record</a>
-        <a href="#contact">Contact</a>
-      </div>
+  <header class="chrome">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>EULCORP</span>
+      <span class="slash">/</span>
+      <span class="label">PRIVATE</span>
     </div>
-  </nav>
+    <div class="right">
+      <span id="status">GLOBEX LIVE</span>
+      <span class="time" id="time">--:--:-- ET</span>
+    </div>
+  </header>
 
-  <main id="top">
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker"></div>
+  </div>
 
-    <!-- ===================== hero ===================== -->
-    <header class="hero">
-      <div class="wrap">
-        <div class="pill" id="market-pill">
-          <span class="dot"></span>
-          <span id="market-text">Markets closed</span>
-        </div>
+  <section class="hero">
+    <div class="hero-pre">
+      <span class="hero-pre-line"></span>
+      <span>ONE OF NONE</span>
+    </div>
+    <h1 class="wordmark" id="wordmark" title="click to re-decode">EULCORP</h1>
+    <div class="kicker">
+      <span class="bar"></span>
+      <span>INDICES</span>
+      <span class="kdot">·</span>
+      <span>COMMODITIES</span>
+      <span class="bar"></span>
+    </div>
+  </section>
 
-        <h1>Trading the indices.</h1>
-        <p class="subhead">Independent futures trader — indices first, with gold and oil alongside.</p>
-
-        <div class="socials">
-          <!-- X --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="X"><i class="ti ti-brand-x" aria-hidden="true"></i><span>X</span></a>
-          <!-- YouTube --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="YouTube"><i class="ti ti-brand-youtube" aria-hidden="true"></i><span>YouTube</span></a>
-          <!-- Instagram --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i><span>Instagram</span></a>
-          <!-- Discord --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Discord"><i class="ti ti-brand-discord" aria-hidden="true"></i><span>Discord</span></a>
-          <!-- Email --> <a class="social-btn" href="mailto:hello@eulcorp.com" aria-label="Email"><i class="ti ti-mail" aria-hidden="true"></i><span>Email</span></a>
-        </div>
-      </div>
-    </header>
-
-    <!-- ===================== ticker ===================== -->
-    <section class="ticker-section" aria-label="Watchlist">
-      <div class="wrap">
-        <div class="ticker" id="ticker"></div>
-      </div>
-    </section>
-
-    <!-- ===================== about ===================== -->
-    <section id="about" class="block">
-      <div class="wrap">
-        <p class="eyebrow">ABOUT</p>
-        <p>
-          Eulcorp is the trading desk of an independent futures trader. The focus is
-          intraday execution across the major U.S. equity indices, with selective
-          positions in gold and crude oil. This site is a quiet hub — no signals, no
-          courses, just where to find the work.
-        </p>
-      </div>
-    </section>
-
-    <!-- ===================== track record ===================== -->
-    <section id="track" class="block">
-      <div class="wrap">
-        <p class="eyebrow">TRACK RECORD &amp; PHILOSOPHY</p>
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-value">8</div>
-            <div class="stat-label">Years trading</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">NQ · ES · YM</div>
-            <div class="stat-label">Primary instruments</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">Discretionary intraday</div>
-            <div class="stat-label">Approach</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== contact ===================== -->
-    <section id="contact" class="block">
-      <div class="wrap">
-        <p class="eyebrow">CONTACT</p>
-        <a class="email" href="mailto:hello@eulcorp.com">hello@eulcorp.com</a>
-        <div class="socials small">
-          <!-- X --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="X"><i class="ti ti-brand-x" aria-hidden="true"></i><span>X</span></a>
-          <!-- YouTube --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="YouTube"><i class="ti ti-brand-youtube" aria-hidden="true"></i><span>YouTube</span></a>
-          <!-- Instagram --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i><span>Instagram</span></a>
-          <!-- Discord --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Discord"><i class="ti ti-brand-discord" aria-hidden="true"></i><span>Discord</span></a>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ===================== footer ===================== -->
-  <footer class="footer">
-    <span>eulcorp.com · est. 2026</span>
+  <footer class="socials">
+    <div class="left">© EULCORP MMV</div>
+    <div class="links">
+      <a href="https://x.com/eulcorp" target="_blank" rel="noopener noreferrer" title="X — @eulcorp">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+          <path d="M18.244 2H21l-6.55 7.49L22 22h-6.79l-4.74-6.18L4.96 22H2.2l7.02-8.03L2 2h6.91l4.28 5.66L18.24 2Zm-1.19 18h1.69L7.04 4H5.25l11.8 16Z"/>
+        </svg>
+        <span><span class="at">@</span>eulcorp</span>
+      </a>
+      <a href="https://instagram.com/eulcorp" target="_blank" rel="noopener noreferrer" title="Instagram — @eulcorp">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+        <span><span class="at">@</span>eulcorp</span>
+      </a>
+      <a href="https://tiktok.com/@3ulcorp" target="_blank" rel="noopener noreferrer" title="TikTok — @3ulcorp">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.34 6.34 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.86a8.16 8.16 0 0 0 4.77 1.52V6.93a4.85 4.85 0 0 1-1.84-.24Z"/>
+        </svg>
+        <span><span class="at">@</span>3ulcorp</span>
+      </a>
+    </div>
+    <div class="right">NY · LDN · JPN</div>
   </footer>
+</div>
 
-  <script>
-    /* ============================================================
-       1. WATCHLIST TICKER
-       Static placeholder values. Each entry: symbol, name,
-       price (string, pre-formatted), change (number, percent).
-       ------------------------------------------------------------
-       TODO: fetch live data — replace the static values below with a
-       call to a free market-data API (Finnhub, Twelve Data, etc.) or
-       embed a TradingView widget. After fetching, update each item's
-       `price` / `change` and call renderTicker() again.
-       ============================================================ */
-    var watchlist = [
-      { symbol: 'NQ',     name: 'Nasdaq 100 futures', price: '18,452.25', change:  0.62 },
-      { symbol: 'ES',     name: 'S&P 500 futures',    price: '5,318.50',  change:  0.41 },
-      { symbol: 'YM',     name: 'Dow futures',        price: '39,210',    change: -0.18 },
-      { symbol: 'GC',     name: 'Gold futures',       price: '2,352.40',  change:  0.27 },
-      { symbol: 'CL',     name: 'Crude oil futures',  price: '78.42',     change: -1.04 },
-      { symbol: 'XAUUSD', name: 'Gold spot',          price: '2,349.85',  change:  0.31 }
-    ];
+<script>
+(function () {
+  // ---------- Clock + Globex status ----------
+  function updateClock() {
+    var parts = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false, weekday: 'short'
+    }).formatToParts(new Date()).forEach(function (p) { parts[p.type] = p.value; });
+    var hour = parseInt(parts.hour || '0', 10);
+    var wd = parts.weekday;
+    var status = 'GLOBEX LIVE';
+    if (wd === 'Sat') status = 'WEEKEND';
+    else if (wd === 'Fri' && hour >= 17) status = 'WEEKEND';
+    else if (wd === 'Sun' && hour < 18) status = 'WEEKEND';
+    else if (hour === 17) status = 'MAINT';
+    document.getElementById('time').textContent =
+      parts.hour + ':' + parts.minute + ':' + parts.second + ' ET';
+    document.getElementById('status').textContent = status;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
 
-    function renderTicker() {
-      var el = document.getElementById('ticker');
-      el.innerHTML = watchlist.map(function (q) {
-        var up  = q.change >= 0;
-        var cls = up ? 'up' : 'down';
-        var pct = (up ? '+' : '') + q.change.toFixed(2) + '%';
-        var arrow = up ? '▲' : '▼';
-        return '<div class="tk-card">' +
-                 '<div class="tk-sym">' + q.symbol + '</div>' +
-                 '<div class="tk-name">' + q.name + '</div>' +
-                 '<div class="tk-price">' + q.price + '</div>' +
-                 '<div class="tk-chg ' + cls + '">' + arrow + ' ' + pct + '</div>' +
-               '</div>';
-      }).join('');
-    }
+  // ---------- Live-ish ticker (random walk from real mid-May 2026 levels) ----------
+  var SEED = [
+    { sym: 'ES',  px: 7432.25,  tick: 0.25,  dec: 2 },
+    { sym: 'NQ',  px: 24856.50, tick: 0.25,  dec: 2 },
+    { sym: 'YM',  px: 49526,    tick: 1,     dec: 0 },
+    { sym: 'RTY', px: 2793.30,  tick: 0.10,  dec: 2 },
+    { sym: 'GC',  px: 4561.90,  tick: 0.10,  dec: 2 },
+    { sym: 'MGC', px: 4561.90,  tick: 0.10,  dec: 2 },
+    { sym: 'CL',  px: 99.18,    tick: 0.01,  dec: 2 },
+    { sym: 'SI',  px: 76.42,    tick: 0.005, dec: 3 },
+    { sym: 'VX',  px: 18.43,    tick: 0.05,  dec: 2 }
+  ];
+  var rows = SEED.map(function (s) {
+    return { sym: s.sym, px: s.px, tick: s.tick, dec: s.dec, last: s.px, change: 0, pct: 0 };
+  });
+  function fmt(n, dec) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+  function renderTicker() {
+    var html = rows.concat(rows).map(function (r) {
+      var up = r.change > 0, dn = r.change < 0;
+      var arrow = up ? '▲' : dn ? '▼' : '·';
+      var cls = up ? 'up' : dn ? 'dn' : '';
+      return '<div class="tick">' +
+        '<span class="sym">' + r.sym + '</span>' +
+        '<span class="px">' + fmt(r.px, r.dec) + '</span>' +
+        '<span class="ch ' + cls + '">' + arrow + ' ' + Math.abs(r.pct).toFixed(2) + '%</span>' +
+        '<span class="sep">/</span>' +
+        '</div>';
+    }).join('');
+    document.getElementById('ticker').innerHTML = html;
+  }
+  function tickPrices() {
+    rows.forEach(function (r) {
+      var drift = (Math.random() - 0.5) * r.tick * (r.sym === 'VX' ? 4 : 8);
+      var newPx = r.px + drift;
+      var delta = newPx - r.last;
+      r.px = newPx;
+      r.change = delta;
+      r.pct = (delta / r.last) * 100;
+    });
     renderTicker();
+  }
+  renderTicker();
+  setInterval(tickPrices, 1400);
 
-    /* ============================================================
-       2. MARKET STATUS PILL
-       Regular U.S. equity session: Mon-Fri, 9:30am-4:00pm ET.
-       Uses Intl with the America/New_York time zone so it stays
-       correct through daylight-saving changes.
-       ============================================================ */
-    function isMarketOpen() {
-      var parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/New_York',
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).formatToParts(new Date());
-
-      var get = function (type) {
-        return parts.find(function (p) { return p.type === type; }).value;
-      };
-
-      var day  = get('weekday');                 // 'Mon' ... 'Sun'
-      var hour = parseInt(get('hour'), 10) % 24; // 0-23
-      var mins = hour * 60 + parseInt(get('minute'), 10);
-
-      var weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexOf(day) !== -1;
-      return weekday && mins >= 570 && mins < 960; // 9:30 -> 16:00
+  // ---------- Wordmark scramble decode ----------
+  var SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/$';
+  var TARGET = 'EULCORP';
+  var wm = document.getElementById('wordmark');
+  var raf = 0;
+  function scramble(duration, settle) {
+    duration = duration || 1500;
+    settle = settle || 80;
+    cancelAnimationFrame(raf);
+    var len = TARGET.length;
+    var lock = [];
+    for (var i = 0; i < len; i++) {
+      lock.push(((i + 1) / len) * (duration - settle) + Math.random() * settle);
     }
-
-    function updateMarketStatus() {
-      var open = isMarketOpen();
-      var pill = document.getElementById('market-pill');
-      document.getElementById('market-text').textContent =
-        open ? 'Markets open' : 'Markets closed';
-      pill.classList.toggle('closed', !open);
+    var start = performance.now();
+    function step(now) {
+      var t = now - start;
+      var next = TARGET.split('').map(function (ch, i) {
+        if (ch === ' ') return ' ';
+        if (t >= lock[i]) return ch;
+        return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+      });
+      wm.textContent = next.join('');
+      if (t < duration) raf = requestAnimationFrame(step);
+      else wm.textContent = TARGET;
     }
-    updateMarketStatus();
-    setInterval(updateMarketStatus, 30000);
-  </script>
+    raf = requestAnimationFrame(step);
+  }
+  scramble();
+  wm.addEventListener('click', function () { scramble(); });
+  wm.addEventListener('mouseenter', function () { scramble(); });
 
+  // ---------- Backdrop: bullish candles + ghost numbers ----------
+  function buildBackdrop() {
+    var W = 1600, H = 900;
+    // seeded LCG so candles stay stable across reloads
+    var s = 11;
+    var r = function () {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return (s >>> 0) / 4294967296;
+    };
+    var N = 64;
+    var candles = [];
+    var y = 0.86;
+    for (var i = 0; i < N; i++) {
+      var trend = -0.0085;
+      var noise = (r() - 0.5) * 0.052;
+      var ny = Math.max(0.10, Math.min(0.92, y + trend + noise));
+      var open = y, close = ny;
+      var bull = close < open;
+      var wickHi = Math.min(open, close) - (r() * 0.022 + 0.006);
+      var wickLo = Math.max(open, close) + (r() * 0.022 + 0.006);
+      candles.push({ i: i, open: open, close: close, wickHi: wickHi, wickLo: wickLo, bull: bull });
+      y = ny;
+    }
+    var step = W / candles.length;
+    var bodyW = step * 0.58;
+    var parts = [];
+    parts.push('<text x="40" y="280" class="bd-num">50K</text>');
+    parts.push('<text x="' + (W - 380) + '" y="780" class="bd-num bd-num-sm">+24.8%</text>');
+    parts.push('<text x="' + (W * 0.55) + '" y="160" class="bd-num bd-num-tiny">ALL-TIME HIGH</text>');
+    parts.push('<text x="60" y="' + (H - 60) + '" class="bd-num bd-num-tiny">ES · NQ · GC · CL</text>');
+    [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
+      parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + W + '" y2="' + (g * H) + '" class="bd-grid"/>');
+    });
+    candles.forEach(function (c) {
+      var x = c.i * step + step / 2;
+      var top = Math.min(c.open, c.close) * H;
+      var bot = Math.max(c.open, c.close) * H;
+      var h = Math.max(1.2, bot - top);
+      var wickTop = c.wickHi * H;
+      var wickBot = c.wickLo * H;
+      parts.push(
+        '<g class="cs ' + (c.bull ? 'cs-bull' : 'cs-bear') + '">' +
+          '<line x1="' + x + '" x2="' + x + '" y1="' + wickTop + '" y2="' + top + '" class="cs-wick"/>' +
+          '<line x1="' + x + '" x2="' + x + '" y1="' + bot + '" y2="' + wickBot + '" class="cs-wick"/>' +
+          '<rect x="' + (x - bodyW / 2) + '" y="' + top + '" width="' + bodyW + '" height="' + h + '" class="cs-body" rx="0.5"/>' +
+        '</g>'
+      );
+    });
+    var last = candles[candles.length - 1];
+    var lx = (candles.length - 1) * step + step / 2;
+    parts.push('<circle cx="' + lx + '" cy="' + (last.close * H) + '" r="4" class="bd-dot bd-dot-bright"/>');
+    document.getElementById('backdrop').innerHTML = parts.join('');
+  }
+  buildBackdrop();
+})();
+</script>
 </body>
 </html>

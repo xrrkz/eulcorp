@@ -6,21 +6,33 @@ Plain HTML + CSS + vanilla JS — no framework, no build step.
 ## Files
 
 - `index.html` — the entire site (markup, styles, and script in one file)
+- `vercel.json` — Vercel config (security headers + clean URLs)
 - `README.md` — this file
+
+## What's on the page
+
+- **Chrome bar** — pulsing purple dot, EULCORP / PRIVATE wordmark, live ET clock
+  with Globex session status (`GLOBEX LIVE` / `MAINT` / `WEEKEND`).
+- **Ticker** — scrolling strip of ES, NQ, YM, RTY, GC, MGC, CL, SI, VX seeded at
+  mid-May 2026 levels and drifting on a small random walk every 1.4s.
+- **Hero** — italic `EULCORP` wordmark with a purple-shimmer gradient and a
+  scramble-decode reveal on load (hover or click to re-trigger).
+- **Backdrop** — barely-visible bullish candlestick chart behind the wordmark,
+  with ghost numbers (`50K`, `+24.8%`, `ALL-TIME HIGH`).
+- **Footer** — social handles (X, Instagram, TikTok) and `NY · LDN · JPN`.
 
 ## Editing placeholders
 
-Open `index.html` and read the comment block at the top — it lists every
-placeholder and where to change it:
+Open `index.html` and look for these spots:
 
-1. **Social links** — search for `href="#"`; each button is labelled
-   (`<!-- X -->`, `<!-- YouTube -->`, …). Swap `#` for your real URLs.
-2. **Email** — replace `hello@eulcorp.com` (appears in the hero, contact
-   section, and meta tags).
-3. **Ticker data** — edit the `watchlist` array in the `<script>`. A `TODO`
-   comment marks where to wire a live market-data API later.
-4. **About text**, **stat cards**, and **OG image** — also noted in the
-   top comment block. Add a 1200×630 image at `/og-image.png`.
+1. **Social links** — the three `<a>` tags inside `<footer class="socials">`.
+   Swap the `href` and `@handle` text for each.
+2. **Ticker data** — edit the `SEED` array inside the `<script>` block.
+   Each entry: `{ sym, px, tick, dec }`. The random walk takes over from there.
+   To wire real prices, swap the `setInterval(tickPrices, 1400)` for a fetch
+   to your data source (Polygon, Databento, TradingView widget, etc.).
+3. **OG image** — add a 1200×630 image at `/og-image.png` (already referenced
+   in the `<meta property="og:image">` tag).
 
 ## Deploy to Vercel
 
@@ -28,11 +40,12 @@ The site is fully static, so deployment is just uploading the file.
 
 ### Option A — Vercel dashboard (no CLI)
 
-1. Push this folder to a GitHub/GitLab repo (or keep it local for option B).
+1. Push this folder to a GitHub/GitLab repo.
 2. Go to [vercel.com/new](https://vercel.com/new) and import the repo.
 3. Framework preset: **Other**. Leave build command and output directory
    empty — there is no build step.
-4. Click **Deploy**. Vercel serves `index.html` at the root automatically.
+4. Click **Deploy**. Vercel serves `index.html` at the root automatically and
+   picks up `vercel.json` for headers + clean URLs.
 
 ### Option B — Vercel CLI
 
@@ -54,9 +67,11 @@ automatically.
 
 - Dark theme only, mobile-responsive, no horizontal scroll.
 - No analytics, tracking, or cookies.
-- External CDNs used: Google Fonts (Inter) and Tabler icons webfont.
-  Both are optional — the site degrades gracefully (system font, missing
-  glyphs) if they fail to load.
+- External CDNs used: Google Fonts (Inter Tight, JetBrains Mono,
+  Instrument Serif, Archivo). The site degrades gracefully (system serif and
+  sans fallbacks) if Google Fonts fails to load.
+- `prefers-reduced-motion` disables the wordmark shimmer, ticker scroll,
+  and pulse animations.
 
 ## Deploy to Cloudflare Pages (alternative)
 
