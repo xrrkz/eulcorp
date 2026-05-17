@@ -105,24 +105,13 @@ body::after {
   fill: var(--purple); fill-opacity: 1;
   filter: drop-shadow(0 0 10px var(--purple));
 }
-.bd-num {
-  font-family: 'Archivo', sans-serif;
-  font-weight: 900;
-  font-size: 320px;
-  letter-spacing: -0.04em;
-  fill: rgba(255, 255, 255, 0.028);
-  paint-order: stroke;
-  stroke: rgba(255, 255, 255, 0.018);
+.bd-trend {
+  fill: none;
+  stroke: var(--purple);
+  stroke-opacity: 0.35;
   stroke-width: 1.5;
-}
-.bd-num-sm { font-size: 180px; fill: rgba(255, 255, 255, 0.022); }
-.bd-num-tiny {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  font-size: 36px;
-  letter-spacing: 0.06em;
-  fill: rgba(122, 47, 208, 0.18);
-  stroke: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ---------- chrome ---------- */
@@ -362,11 +351,6 @@ body::after {
   }
   .kicker .bar { width: 18px; }
 
-  /* shrink the giant ghost numerals so they don't dominate small viewports */
-  .bd-num { font-size: 200px; }
-  .bd-num-sm { font-size: 120px; }
-  .bd-num-tiny { font-size: 24px; }
-
   .socials {
     flex-direction: column; gap: 8px;
     padding: 10px 16px 12px;
@@ -409,11 +393,6 @@ body::after {
   .socials .links { gap: 6px; }
   .socials a { font-size: 10.5px; padding: 8px 10px; }
   .kicker { font-size: 8.5px; gap: 8px; letter-spacing: 0.24em; }
-  .bd-num { font-size: 150px; }
-  .bd-num-sm { font-size: 90px; }
-  /* must re-declare after .bd-num here so the .bd-num cascade above doesn't
-     win on elements that carry both classes (e.g. "bd-num bd-num-tiny") */
-  .bd-num-tiny { font-size: 22px; }
 }
 
 /* phones in landscape: fixed bars eat most of the screen — tighten everything */
@@ -619,7 +598,7 @@ body::after {
     wm.addEventListener('mouseenter', function () { scramble(); });
   }
 
-  // ---------- Backdrop: bullish candles + ghost numbers ----------
+  // ---------- Backdrop: bullish candles ----------
   function buildBackdrop() {
     var W = 1600, H = 900;
     // seeded LCG so candles stay stable across reloads
@@ -628,45 +607,35 @@ body::after {
       s = (s * 1664525 + 1013904223) >>> 0;
       return (s >>> 0) / 4294967296;
     };
-    var vw = window.innerWidth, vh = window.innerHeight;
+    var vw = window.innerWidth;
     // fewer candles on small viewports — cheaper to render and less crowded
     var N = vw < 600 ? 32 : 64;
-    // With viewBox 1600x900 + xMidYMid slice, narrow/portrait viewports crop most
-    // of the SVG horizontally — only a central band stays visible. Reposition the
-    // ghost text into that visible band so it actually renders on phones.
-    var portraitCrop = (vw / vh) < (W / H);
     var candles = [];
-    var y = 0.86;
+    var y = 0.88;
+    // total descent in y (= total rise on screen); avgTrend then shaped so the
+    // back half accelerates — integral of (0.7 + 0.6p) over [0,1] = 1, so the
+    // total run stays the same regardless of how the slope is shaped or how
+    // many candles render.
+    var avgTrend = -0.66 / N;
     for (var i = 0; i < N; i++) {
-      var trend = -0.0085;
-      var noise = (r() - 0.5) * 0.052;
-      var ny = Math.max(0.10, Math.min(0.92, y + trend + noise));
+      var progress = N > 1 ? i / (N - 1) : 0;
+      var trend = avgTrend * (0.7 + 0.6 * progress);
+      var noise = (r() - 0.5) * 0.05;
+      var ny = Math.max(0.08, Math.min(0.94, y + trend + noise));
       var open = y, close = ny;
       var bull = close < open;
-      var wickHi = Math.min(open, close) - (r() * 0.022 + 0.006);
-      var wickLo = Math.max(open, close) + (r() * 0.022 + 0.006);
+      var wickHi = Math.min(open, close) - (r() * 0.018 + 0.005);
+      var wickLo = Math.max(open, close) + (r() * 0.018 + 0.005);
       candles.push({ i: i, open: open, close: close, wickHi: wickHi, wickLo: wickLo, bull: bull });
       y = ny;
     }
     var step = W / candles.length;
     var bodyW = step * 0.58;
     var parts = [];
-    if (portraitCrop) {
-      // Center text horizontally so it lands inside the visible vertical strip
-      var cx = W / 2;
-      parts.push('<text x="' + cx + '" y="280" text-anchor="middle" class="bd-num">50K</text>');
-      parts.push('<text x="' + cx + '" y="780" text-anchor="middle" class="bd-num bd-num-sm">+24.8%</text>');
-      parts.push('<text x="' + cx + '" y="120" text-anchor="middle" class="bd-num bd-num-tiny">ALL-TIME HIGH</text>');
-      parts.push('<text x="' + cx + '" y="' + (H - 40) + '" text-anchor="middle" class="bd-num bd-num-tiny">ES · NQ · GC · CL</text>');
-    } else {
-      parts.push('<text x="40" y="280" class="bd-num">50K</text>');
-      parts.push('<text x="' + (W - 380) + '" y="780" class="bd-num bd-num-sm">+24.8%</text>');
-      parts.push('<text x="' + (W * 0.55) + '" y="160" class="bd-num bd-num-tiny">ALL-TIME HIGH</text>');
-      parts.push('<text x="60" y="' + (H - 60) + '" class="bd-num bd-num-tiny">ES · NQ · GC · CL</text>');
-    }
     [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
       parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + W + '" y2="' + (g * H) + '" class="bd-grid"/>');
     });
+    var trendPts = [];
     candles.forEach(function (c) {
       var x = c.i * step + step / 2;
       var top = Math.min(c.open, c.close) * H;
@@ -681,14 +650,16 @@ body::after {
           '<rect x="' + (x - bodyW / 2) + '" y="' + top + '" width="' + bodyW + '" height="' + h + '" class="cs-body" rx="0.5"/>' +
         '</g>'
       );
+      trendPts.push(x + ',' + (c.close * H));
     });
+    parts.push('<polyline points="' + trendPts.join(' ') + '" class="bd-trend"/>');
     var last = candles[candles.length - 1];
     var lx = (candles.length - 1) * step + step / 2;
     parts.push('<circle cx="' + lx + '" cy="' + (last.close * H) + '" r="4" class="bd-dot bd-dot-bright"/>');
     document.getElementById('backdrop').innerHTML = parts.join('');
   }
   buildBackdrop();
-  // Rotating a phone flips the crop band — rebuild so ghost text stays visible.
+  // Candle count flips at 600px; rebuild on resize so density adjusts.
   var rebuildTimer = 0;
   window.addEventListener('resize', function () {
     clearTimeout(rebuildTimer);
