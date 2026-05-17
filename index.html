@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  ============================================================
+  eulcorp.com — personal landing site
+  ============================================================
+  Plain HTML/CSS/vanilla JS. No build step. Deploy as-is.
+
+  WHERE TO SWAP PLACEHOLDER VALUES
+  --------------------------------
+  1. SOCIAL LINKS  — search for `href="#"`. Each social button is
+     marked with a comment ( <!-- X -->, <!-- YouTube --> ... ).
+     Replace `#` with your real profile URL.
+  2. EMAIL         — search for `hello@eulcorp.com` (appears in the
+     contact section and the JSON-LD/meta). Change in all spots.
+  3. TICKER DATA   — see the `watchlist` array in the <script> at the
+     bottom. Static placeholder prices for now; a `TODO` comment marks
+     where to wire a live market-data API.
+  4. ABOUT TEXT    — the paragraph in <section id="about">.
+  5. STAT CARDS    — the three cards in <section id="track">: edit the
+     `.stat-value` and `.stat-label` text directly.
+  6. OG IMAGE      — add a 1200x630 image at /og-image.png (referenced
+     in the <meta property="og:image"> tag below).
+  ============================================================
+-->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <title>eulcorp — independent index futures trader</title>
+  <meta name="description" content="Eulcorp — independent index futures trader. NQ, ES and YM, with gold and oil alongside. A clean hub for socials and track record." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="eulcorp — independent index futures trader" />
+  <meta property="og:description" content="Independent futures trader. Indices first, gold and oil alongside." />
+  <meta property="og:url" content="https://eulcorp.com" />
+  <!-- TODO: add a 1200x630 image at /og-image.png -->
+  <meta property="og:image" content="https://eulcorp.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="eulcorp — independent index futures trader" />
+  <meta name="twitter:description" content="Independent futures trader. Indices first, gold and oil alongside." />
+  <meta name="twitter:image" content="https://eulcorp.com/og-image.png" />
+
+  <!-- Favicon: inline SVG, purple square + up arrow -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%234C1D95'/%3E%3Cpath%20d='M16%208L24%2019H19V24H13V19H8Z'%20fill='%23fff'/%3E%3C/svg%3E" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tabler icons (webfont, no build step) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
+
+  <style>
+    :root {
+      --bg:          #0a0a0a;
+      --card:        #0e0e0e;
+      --border:      rgba(255, 255, 255, 0.09);
+      --text:        #e9e9e9;
+      --text-dim:    #8a8a8a;
+      --text-faint:  #585858;
+      --purple:      #4C1D95;
+      --purple-lit:  #6D28D9;
+      --up:          #4ADE80;
+      --down:        #F87171;
+      --nav-h:       58px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      width: 100%;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section { scroll-margin-top: calc(var(--nav-h) + 12px); }
+
+    /* ---------- nav ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: var(--nav-h);
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav .wrap {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 9px; }
+    .mark {
+      width: 22px; height: 22px;
+      background: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      flex: 0 0 auto;
+    }
+    .mark svg { display: block; }
+    .wordmark {
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: -0.03em;
+    }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      transition: color 0.15s ease;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ---------- hero ---------- */
+    .hero {
+      text-align: center;
+      padding: 86px 0 64px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0.5px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      letter-spacing: 0.01em;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--purple-lit);
+      position: relative;
+      flex: 0 0 auto;
+    }
+    .dot::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px solid var(--purple-lit);
+      animation: pulse 2.4s ease-out infinite;
+    }
+    .pill.closed .dot { background: var(--text-faint); }
+    .pill.closed .dot::after { display: none; }
+    @keyframes pulse {
+      0%   { transform: scale(0.5); opacity: 0.7; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+
+    .hero h1 {
+      margin: 26px 0 0;
+      font-size: clamp(2.6rem, 8vw, 4.4rem);
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1.04;
+    }
+    .hero .subhead {
+      margin: 16px auto 0;
+      max-width: 520px;
+      color: var(--text-dim);
+      font-size: 1.02rem;
+    }
+
+    /* ---------- social row ---------- */
+    .socials {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 34px;
+    }
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0.5px solid var(--border);
+      padding: 9px 15px;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .social-btn i { font-size: 1.05rem; }
+    .social-btn:hover {
+      color: var(--text);
+      border-color: var(--purple-lit);
+    }
+
+    /* ---------- ticker ---------- */
+    .ticker-section { padding: 16px 0 8px; }
+    .ticker {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+    .tk-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      padding: 14px 14px 13px;
+      min-width: 0;
+    }
+    .tk-sym {
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+    .tk-name {
+      font-size: 0.66rem;
+      color: var(--text-faint);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tk-price {
+      font-size: 1.04rem;
+      font-weight: 500;
+      margin-top: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .tk-chg {
+      font-size: 0.8rem;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .up   { color: var(--up); }
+    .down { color: var(--down); }
+
+    /* ---------- generic section heading ---------- */
+    .eyebrow {
+      font-size: 0.74rem;
+      letter-spacing: 0.14em;
+      color: var(--text-faint);
+      margin-bottom: 18px;
+    }
+    .block { padding: 64px 0; border-top: 0.5px solid var(--border); }
+
+    #about p {
+      max-width: 600px;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+
+    /* ---------- stat cards ---------- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .stat {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-top: 2px solid var(--purple);
+      padding: 22px 20px;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .stat-label {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    /* ---------- contact ---------- */
+    #contact .email {
+      display: inline-block;
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 3px;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    #contact .email:hover {
+      color: #fff;
+      border-color: var(--purple-lit);
+    }
+    .socials.small { justify-content: flex-start; margin-top: 22px; }
+    .socials.small .social-btn { padding: 8px; }
+    .socials.small .social-btn span { display: none; }
+    .socials.small .social-btn i { font-size: 1.1rem; }
+
+    /* ---------- footer ---------- */
+    .footer {
+      border-top: 0.5px solid var(--border);
+      padding: 28px 0;
+      text-align: center;
+    }
+    .footer span {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      color: var(--text-faint);
+      font-variant: small-caps;
+    }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 860px) {
+      .ticker { grid-template-columns: repeat(3, 1fr); }
+      .stats  { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .wrap { padding: 0 18px; }
+      .nav-links { gap: 15px; }
+      .nav-links a { font-size: 0.8rem; }
+      .wordmark { font-size: 0.95rem; }
+      .hero { padding: 60px 0 48px; }
+      .ticker { grid-template-columns: repeat(2, 1fr); }
+      .block { padding: 52px 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .dot::after { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== nav ===================== -->
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="eulcorp home">
+        <span class="mark" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 32 32">
+            <path d="M16 7L25 20H19V25H13V20H7Z" fill="#fff" />
+          </svg>
+        </span>
+        <span class="wordmark">eulcorp</span>
+      </a>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#track">Track record</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+
+    <!-- ===================== hero ===================== -->
+    <header class="hero">
+      <div class="wrap">
+        <div class="pill" id="market-pill">
+          <span class="dot"></span>
+          <span id="market-text">Markets closed</span>
+        </div>
+
+        <h1>Trading the indices.</h1>
+        <p class="subhead">Independent futures trader — indices first, with gold and oil alongside.</p>
+
+        <div class="socials">
+          <!-- X --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="X"><i class="ti ti-brand-x" aria-hidden="true"></i><span>X</span></a>
+          <!-- YouTube --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="YouTube"><i class="ti ti-brand-youtube" aria-hidden="true"></i><span>YouTube</span></a>
+          <!-- Instagram --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i><span>Instagram</span></a>
+          <!-- Discord --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Discord"><i class="ti ti-brand-discord" aria-hidden="true"></i><span>Discord</span></a>
+          <!-- Email --> <a class="social-btn" href="mailto:hello@eulcorp.com" aria-label="Email"><i class="ti ti-mail" aria-hidden="true"></i><span>Email</span></a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================== ticker ===================== -->
+    <section class="ticker-section" aria-label="Watchlist">
+      <div class="wrap">
+        <div class="ticker" id="ticker"></div>
+      </div>
+    </section>
+
+    <!-- ===================== about ===================== -->
+    <section id="about" class="block">
+      <div class="wrap">
+        <p class="eyebrow">ABOUT</p>
+        <p>
+          Eulcorp is the trading desk of an independent futures trader. The focus is
+          intraday execution across the major U.S. equity indices, with selective
+          positions in gold and crude oil. This site is a quiet hub — no signals, no
+          courses, just where to find the work.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== track record ===================== -->
+    <section id="track" class="block">
+      <div class="wrap">
+        <p class="eyebrow">TRACK RECORD &amp; PHILOSOPHY</p>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value">8</div>
+            <div class="stat-label">Years trading</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">NQ · ES · YM</div>
+            <div class="stat-label">Primary instruments</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">Discretionary intraday</div>
+            <div class="stat-label">Approach</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== contact ===================== -->
+    <section id="contact" class="block">
+      <div class="wrap">
+        <p class="eyebrow">CONTACT</p>
+        <a class="email" href="mailto:hello@eulcorp.com">hello@eulcorp.com</a>
+        <div class="socials small">
+          <!-- X --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="X"><i class="ti ti-brand-x" aria-hidden="true"></i><span>X</span></a>
+          <!-- YouTube --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="YouTube"><i class="ti ti-brand-youtube" aria-hidden="true"></i><span>YouTube</span></a>
+          <!-- Instagram --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i><span>Instagram</span></a>
+          <!-- Discord --> <a class="social-btn" href="#" target="_blank" rel="noopener" aria-label="Discord"><i class="ti ti-brand-discord" aria-hidden="true"></i><span>Discord</span></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== footer ===================== -->
+  <footer class="footer">
+    <span>eulcorp.com · est. 2026</span>
+  </footer>
+
+  <script>
+    /* ============================================================
+       1. WATCHLIST TICKER
+       Static placeholder values. Each entry: symbol, name,
+       price (string, pre-formatted), change (number, percent).
+       ------------------------------------------------------------
+       TODO: fetch live data — replace the static values below with a
+       call to a free market-data API (Finnhub, Twelve Data, etc.) or
+       embed a TradingView widget. After fetching, update each item's
+       `price` / `change` and call renderTicker() again.
+       ============================================================ */
+    var watchlist = [
+      { symbol: 'NQ',     name: 'Nasdaq 100 futures', price: '18,452.25', change:  0.62 },
+      { symbol: 'ES',     name: 'S&P 500 futures',    price: '5,318.50',  change:  0.41 },
+      { symbol: 'YM',     name: 'Dow futures',        price: '39,210',    change: -0.18 },
+      { symbol: 'GC',     name: 'Gold futures',       price: '2,352.40',  change:  0.27 },
+      { symbol: 'CL',     name: 'Crude oil futures',  price: '78.42',     change: -1.04 },
+      { symbol: 'XAUUSD', name: 'Gold spot',          price: '2,349.85',  change:  0.31 }
+    ];
+
+    function renderTicker() {
+      var el = document.getElementById('ticker');
+      el.innerHTML = watchlist.map(function (q) {
+        var up  = q.change >= 0;
+        var cls = up ? 'up' : 'down';
+        var pct = (up ? '+' : '') + q.change.toFixed(2) + '%';
+        var arrow = up ? '▲' : '▼';
+        return '<div class="tk-card">' +
+                 '<div class="tk-sym">' + q.symbol + '</div>' +
+                 '<div class="tk-name">' + q.name + '</div>' +
+                 '<div class="tk-price">' + q.price + '</div>' +
+                 '<div class="tk-chg ' + cls + '">' + arrow + ' ' + pct + '</div>' +
+               '</div>';
+      }).join('');
+    }
+    renderTicker();
+
+    /* ============================================================
+       2. MARKET STATUS PILL
+       Regular U.S. equity session: Mon-Fri, 9:30am-4:00pm ET.
+       Uses Intl with the America/New_York time zone so it stays
+       correct through daylight-saving changes.
+       ============================================================ */
+    function isMarketOpen() {
+      var parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).formatToParts(new Date());
+
+      var get = function (type) {
+        return parts.find(function (p) { return p.type === type; }).value;
+      };
+
+      var day  = get('weekday');                 // 'Mon' ... 'Sun'
+      var hour = parseInt(get('hour'), 10) % 24; // 0-23
+      var mins = hour * 60 + parseInt(get('minute'), 10);
+
+      var weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexOf(day) !== -1;
+      return weekday && mins >= 570 && mins < 960; // 9:30 -> 16:00
+    }
+
+    function updateMarketStatus() {
+      var open = isMarketOpen();
+      var pill = document.getElementById('market-pill');
+      document.getElementById('market-text').textContent =
+        open ? 'Markets open' : 'Markets closed';
+      pill.classList.toggle('closed', !open);
+    }
+    updateMarketStatus();
+    setInterval(updateMarketStatus, 30000);
+  </script>
+
+</body>
+</html>
