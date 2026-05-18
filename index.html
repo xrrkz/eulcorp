@@ -631,7 +631,7 @@ body::after {
     document.getElementById('status').textContent = status;
   }
   updateClock();
-  setInterval(updateClock, 1000);
+  var clockInterval = setInterval(updateClock, 1000);
 
   // ---------- Live-ish ticker (random walk from real mid-May 2026 levels) ----------
   var SEED = [
@@ -677,7 +677,7 @@ body::after {
     renderTicker();
   }
   renderTicker();
-  setInterval(tickPrices, 1400);
+  var priceInterval = setInterval(tickPrices, 1400);
 
   // ---------- Wordmark scramble decode ----------
   var SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/$';
@@ -762,6 +762,8 @@ body::after {
   var svg = document.getElementById('backdrop');
   var prefersReduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isMobile = window.matchMedia &&
+    window.matchMedia('(max-width: 800px)').matches;
   var loopTimers = [];
 
   function clearTimers() {
@@ -973,8 +975,10 @@ body::after {
       dot.style.opacity = '1';
     }, t + 60));
 
-    // hold, then fade out and replay
-    loopTimers.push(setTimeout(restart, t + 4200));
+    // hold, then fade out and replay — desktop only; mobile holds the settled frame
+    if (!isMobile) {
+      loopTimers.push(setTimeout(restart, t + 4200));
+    }
   }
 
   function restart() {
@@ -991,11 +995,38 @@ body::after {
   }
 
   buildBackdrop();
-  // rebuild on resize so the SVG re-fits cleanly
+  // rebuild on resize so the SVG re-fits cleanly. Ignore height-only changes —
+  // mobile browsers fire `resize` every time the URL/toolbar shows or hides,
+  // which would otherwise reset the whole animation mid-scroll.
   var rebuildTimer = 0;
+  var lastW = window.innerWidth;
   window.addEventListener('resize', function () {
+    var w = window.innerWidth;
+    if (w === lastW) return;
+    lastW = w;
     clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(buildBackdrop, 180);
+  });
+
+  // Pause clock, ticker, and chart animation when the tab is hidden.
+  // Background-tab throttling already slows timers, but on mobile we want
+  // zero work so the OS can suspend the page cleanly.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      clearInterval(clockInterval);
+      clearInterval(priceInterval);
+      clockInterval = priceInterval = 0;
+      clearTimers();
+    } else {
+      if (!clockInterval) {
+        updateClock();
+        clockInterval = setInterval(updateClock, 1000);
+      }
+      if (!priceInterval) {
+        priceInterval = setInterval(tickPrices, 1400);
+      }
+      buildBackdrop();
+    }
   });
 })();
 </script>
