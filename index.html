@@ -547,7 +547,7 @@ body::after {
 </head>
 <body>
 <div class="page">
-  <svg class="backdrop" id="backdrop" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <svg class="backdrop" id="backdrop" viewBox="0 0 1600 900" aria-hidden="true"></svg>
 
   <header class="chrome">
     <div class="brand">
@@ -762,8 +762,18 @@ body::after {
   var svg = document.getElementById('backdrop');
   var prefersReduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var isMobile = window.matchMedia &&
-    window.matchMedia('(max-width: 800px)').matches;
+  function isMobile() {
+    return window.matchMedia && window.matchMedia('(max-width: 800px)').matches;
+  }
+  // Portrait phones are far narrower than the 16:9 chart; `slice` would crop
+  // the sides off. Use `meet` on mobile so the whole pattern stays visible.
+  function setBackdropAspect() {
+    svg.setAttribute(
+      'preserveAspectRatio',
+      isMobile() ? 'xMidYMid meet' : 'xMidYMid slice'
+    );
+  }
+  setBackdropAspect();
   var loopTimers = [];
 
   function clearTimers() {
@@ -789,6 +799,7 @@ body::after {
 
   function buildBackdrop() {
     clearTimers();
+    setBackdropAspect();
     var W = 1600, H = 900;
     var N = STORY.length;
     var step = W / N;
@@ -976,7 +987,7 @@ body::after {
     }, t + 60));
 
     // hold, then fade out and replay — desktop only; mobile holds the settled frame
-    if (!isMobile) {
+    if (!isMobile()) {
       loopTimers.push(setTimeout(restart, t + 4200));
     }
   }
