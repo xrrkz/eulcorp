@@ -502,6 +502,19 @@ body::after {
   }
   .socials a:active { background: rgba(122, 47, 208, 0.14); }
   .socials a svg { width: 13px; height: 13px; }
+
+  /* Portrait viewBox is ~2x smaller per pixel — bump SVG strokes + fonts
+     so the chart reads like the TradingView reference, not pinhole-thin. */
+  .bd-grid { stroke-width: 1.8; stroke-dasharray: 3 14; }
+  .cs-wick, .cs-body { stroke-width: 1.8; }
+  .bd-supply, .bd-setup-zone, .bd-entry-zone,
+  .bd-zone, .bd-stop-box { stroke-width: 1.8; }
+  .bd-target-line { stroke-width: 1.8; }
+  .bd-price-line { stroke-width: 1.8; stroke-dasharray: 6 10; }
+  .bd-time-tick { stroke-width: 1.8; }
+  .bd-price-label { font-size: 24px; }
+  .bd-price-label.tag { font-size: 24px; }
+  .bd-time { font-size: 28px; letter-spacing: 0.05em; }
 }
 
 @media (max-width: 440px) {
@@ -765,13 +778,44 @@ body::after {
   function isMobile() {
     return window.matchMedia && window.matchMedia('(max-width: 800px)').matches;
   }
-  // Portrait phones are far narrower than the 16:9 chart; `slice` would crop
-  // the sides off. Use `meet` on mobile so the whole pattern stays visible.
+  // Two layouts: a 16:9 strip for desktop, and a portrait canvas for phones
+  // that fills the screen like a real mobile trading-app chart.
+  function getLayout() {
+    if (isMobile()) {
+      // Aspect 800:1700 ≈ 0.47 — within a few px of typical phone portrait,
+      // so `slice` barely crops. Right rail needs to fit "29,XXX.XX" at 26px
+      // monospace (~155 viewBox units wide).
+      return {
+        W: 800, H: 1700,
+        rightRailGap: 168,
+        tagW: 156, tagH: 38,
+        tagBgInset: 6,
+        tagTextX: 14,
+        tagTextDy: 10,
+        timeTick: 14,
+        timeOffset: 36,
+        dotR: 7,
+        // i=19 and i=23 fall under the right rail at this width — drop them.
+        timesEnd: 3
+      };
+    }
+    return {
+      W: 1600, H: 900,
+      rightRailGap: 96,
+      tagW: 86, tagH: 18,
+      tagBgInset: 4,
+      tagTextX: 12,
+      tagTextDy: 4,
+      timeTick: 6,
+      timeOffset: 16,
+      dotR: 4,
+      timesEnd: 5
+    };
+  }
   function setBackdropAspect() {
-    svg.setAttribute(
-      'preserveAspectRatio',
-      isMobile() ? 'xMidYMid meet' : 'xMidYMid slice'
-    );
+    var l = getLayout();
+    svg.setAttribute('viewBox', '0 0 ' + l.W + ' ' + l.H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
   }
   setBackdropAspect();
   var loopTimers = [];
@@ -800,12 +844,13 @@ body::after {
   function buildBackdrop() {
     clearTimers();
     setBackdropAspect();
-    var W = 1600, H = 900;
+    var layout = getLayout();
+    var W = layout.W, H = layout.H;
     var N = STORY.length;
     var step = W / N;
     var bodyW = step * 0.55;
     var axisY = 0.96 * H;
-    var rightRailX = W - 96;
+    var rightRailX = W - layout.rightRailGap;
 
     var parts = [];
     [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
@@ -872,23 +917,23 @@ body::after {
     var lx = (N - 1) * step + step / 2;
     var ly = last[1] * H;
     parts.push('<line class="bd-price-line" x1="0" x2="' + rightRailX + '" y1="' + ly + '" y2="' + ly + '"/>');
-    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="4" style="opacity:0"/>');
+    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="' + layout.dotR + '" style="opacity:0"/>');
 
     // --- right-rail price scale (ghost numbers like the screenshot)
     var rail = [29680, 29640, 29600, 29560, 29520, 29480, 29440, 29400];
     rail.forEach(function (p) {
       var py = priceToY(p) * H;
       if (py < 4 || py > H - 4) return;
-      parts.push('<text class="bd-price-label" x="' + (rightRailX + 12) + '" y="' + (py + 4) +
+      parts.push('<text class="bd-price-label" x="' + (rightRailX + layout.tagTextX) + '" y="' + (py + layout.tagTextDy) +
         '">' + fmtPx(p) + '</text>');
     });
 
     // highlighted price tags: current (purple) + target (green band) + stop (purple band)
     function priceTag(y, label, color) {
       var ty = y * H;
-      return '<rect class="bd-price-tag-bg" x="' + (rightRailX + 4) + '" y="' + (ty - 9) +
-             '" width="86" height="18" rx="2" style="fill:' + color + '"/>' +
-             '<text class="bd-price-label tag" x="' + (rightRailX + 12) + '" y="' + (ty + 4) +
+      return '<rect class="bd-price-tag-bg" x="' + (rightRailX + layout.tagBgInset) + '" y="' + (ty - layout.tagH / 2) +
+             '" width="' + layout.tagW + '" height="' + layout.tagH + '" rx="2" style="fill:' + color + '"/>' +
+             '<text class="bd-price-label tag" x="' + (rightRailX + layout.tagTextX) + '" y="' + (ty + layout.tagTextDy) +
              '">' + label + '</text>';
     }
     parts.push(priceTag(priceToY(yToPrice(ly / H)), fmtPx(yToPrice(ly / H)), 'rgba(122,47,208,0.85)'));
@@ -896,11 +941,11 @@ body::after {
     parts.push(priceTag(priceToY(29465.50), '29,465.50', 'rgba(60,60,72,0.85)'));
     parts.push(priceTag(priceToY(29445.50), '29,445.50', 'rgba(60,60,72,0.85)'));
 
-    // x-axis time labels
-    TIMES.forEach(function (t) {
+    // x-axis time labels (last one falls past the right rail on portrait — trimmed there)
+    TIMES.slice(0, layout.timesEnd).forEach(function (t) {
       var tx = t.i * step + step / 2;
-      parts.push('<line class="bd-time-tick" x1="' + tx + '" x2="' + tx + '" y1="' + (axisY - 8) + '" y2="' + (axisY - 2) + '"/>');
-      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + 16) + '" text-anchor="middle">' + t.label + '</text>');
+      parts.push('<line class="bd-time-tick" x1="' + tx + '" x2="' + tx + '" y1="' + (axisY - layout.timeTick - 2) + '" y2="' + (axisY - 2) + '"/>');
+      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + layout.timeOffset) + '" text-anchor="middle">' + t.label + '</text>');
     });
 
     svg.innerHTML = parts.join('');
