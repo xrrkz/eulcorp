@@ -986,10 +986,8 @@ body::after {
       dot.style.opacity = '1';
     }, t + 60));
 
-    // hold, then fade out and replay — desktop only; mobile holds the settled frame
-    if (!isMobile()) {
-      loopTimers.push(setTimeout(restart, t + 4200));
-    }
+    // hold, then fade out and replay
+    loopTimers.push(setTimeout(restart, t + 4200));
   }
 
   function restart() {
