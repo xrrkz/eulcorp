@@ -117,8 +117,8 @@ body::after {
 .cs.in { animation: cs-in 320ms ease-out forwards; }
 .cs.out { animation: cs-out 700ms ease forwards; }
 @keyframes cs-in {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes cs-out {
   to { opacity: 0; }
@@ -131,6 +131,56 @@ body::after {
   transition: opacity 1s ease;
 }
 .bd-zone.show { opacity: 1; }
+
+/* red supply zone — distribution top-left */
+.bd-supply {
+  fill: rgba(255, 90, 110, 0.10);
+  stroke: rgba(255, 90, 110, 0.35);
+  stroke-width: 1; stroke-dasharray: 4 6;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.bd-supply.show { opacity: 1; }
+
+/* vertical "trade setup" green shading covering the whole move */
+.bd-setup-zone {
+  fill: rgba(80, 220, 140, 0.06);
+  stroke: rgba(80, 220, 140, 0.18);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.bd-setup-zone.show { opacity: 1; }
+
+/* darker vertical "entry" zone over the reversal */
+.bd-entry-zone {
+  fill: rgba(122, 47, 208, 0.16);
+  stroke: rgba(122, 47, 208, 0.32);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.bd-entry-zone.show { opacity: 1; }
+
+/* horizontal target line above */
+.bd-target-line {
+  stroke: rgba(80, 220, 140, 0.55);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.bd-target-line.show { opacity: 1; }
+
+/* horizontal stop-loss box below the sweep low */
+.bd-stop-box {
+  fill: var(--purple); fill-opacity: 0.18;
+  stroke: var(--purple); stroke-opacity: 0.40;
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.bd-stop-box.show { opacity: 1; }
+
 .bd-price-line {
   stroke: var(--purple);
   stroke-opacity: 0.45;
@@ -140,6 +190,29 @@ body::after {
   transition: opacity 0.6s ease;
 }
 .bd-price-line.show { opacity: 1; }
+
+/* right-side ghost price labels */
+.bd-price-label {
+  fill: rgba(245, 243, 247, 0.22);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.bd-price-label.show { opacity: 1; }
+.bd-price-label.tag {
+  fill: rgba(245, 243, 247, 0.85);
+  font-size: 11px;
+}
+.bd-price-tag-bg {
+  fill: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.bd-price-tag-bg.show { opacity: 1; }
+
 .bd-time {
   fill: rgba(245, 243, 247, 0.22);
   font-family: 'JetBrains Mono', monospace;
@@ -696,6 +769,22 @@ body::after {
     loopTimers = [];
   }
 
+  // y=0 is top of chart, y=H is bottom. Price-space mapping for right-rail labels.
+  // We pin two anchor candles in normalized y to real prices so all labels stay in sync.
+  var PRICE_AT_TOP    = { y: 0.18, px: 29680 };
+  var PRICE_AT_BOTTOM = { y: 0.94, px: 29445 };
+  function yToPrice(y) {
+    var t = (y - PRICE_AT_TOP.y) / (PRICE_AT_BOTTOM.y - PRICE_AT_TOP.y);
+    return PRICE_AT_TOP.px + t * (PRICE_AT_BOTTOM.px - PRICE_AT_TOP.px);
+  }
+  function priceToY(px) {
+    var t = (px - PRICE_AT_TOP.px) / (PRICE_AT_BOTTOM.px - PRICE_AT_TOP.px);
+    return PRICE_AT_TOP.y + t * (PRICE_AT_BOTTOM.y - PRICE_AT_TOP.y);
+  }
+  function fmtPx(p) {
+    return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   function buildBackdrop() {
     clearTimers();
     var W = 1600, H = 900;
@@ -703,19 +792,49 @@ body::after {
     var step = W / N;
     var bodyW = step * 0.55;
     var axisY = 0.96 * H;
+    var rightRailX = W - 96;
 
     var parts = [];
     [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
-      parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + W + '" y2="' + (g * H) + '" class="bd-grid"/>');
+      parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + rightRailX + '" y2="' + (g * H) + '" class="bd-grid"/>');
     });
 
-    // demand zone box — drawn around the liquidity sweep area, extending right
     var sweepIdx = 16;
+    var reversalIdx = 17;
+
+    // --- vertical "trade setup" green zone (covers the drop + reversal + continuation)
+    var setupX1 = 5 * step;
+    var setupX2 = (N - 1) * step + step;
+    parts.push('<rect class="bd-setup-zone" x="' + setupX1 + '" y="0" width="' +
+      (setupX2 - setupX1) + '" height="' + H + '"/>');
+
+    // --- darker vertical "entry" zone over the reversal candles
+    var entryX1 = sweepIdx * step - step * 0.1;
+    var entryX2 = (reversalIdx + 2) * step;
+    parts.push('<rect class="bd-entry-zone" x="' + entryX1 + '" y="0" width="' +
+      (entryX2 - entryX1) + '" height="' + H + '"/>');
+
+    // --- red supply zone at top-left (distribution)
+    parts.push('<rect class="bd-supply" x="0" y="' + (0.38 * H) +
+      '" width="' + (5 * step) + '" height="' + (0.10 * H) + '" rx="2"/>');
+
+    // --- horizontal target line (above the distribution)
+    var targetY = priceToY(29593.50) * H;
+    parts.push('<line class="bd-target-line" x1="0" x2="' + rightRailX + '" y1="' + targetY + '" y2="' + targetY + '"/>');
+
+    // --- horizontal stop-loss box around the sweep low
+    var stopTop = priceToY(29465.50) * H;
+    var stopBot = priceToY(29445.50) * H;
+    parts.push('<rect class="bd-stop-box" x="' + (sweepIdx * step + step * 0.3) +
+      '" y="' + stopTop + '" width="' + (rightRailX - (sweepIdx * step + step * 0.3)) +
+      '" height="' + (stopBot - stopTop) + '"/>');
+
+    // demand zone box — extends right from the sweep
     var zoneX = sweepIdx * step + step * 0.2;
     var zoneY = 0.74 * H;
     var zoneH = 0.12 * H;
     parts.push('<rect class="bd-zone" x="' + zoneX + '" y="' + zoneY +
-      '" width="' + (W - zoneX) + '" height="' + zoneH + '" rx="2"/>');
+      '" width="' + (rightRailX - zoneX) + '" height="' + zoneH + '" rx="2"/>');
 
     // candles
     STORY.forEach(function (c, idx) {
@@ -739,8 +858,30 @@ body::after {
     var last = STORY[N - 1];
     var lx = (N - 1) * step + step / 2;
     var ly = last[1] * H;
-    parts.push('<line class="bd-price-line" x1="0" x2="' + W + '" y1="' + ly + '" y2="' + ly + '"/>');
+    parts.push('<line class="bd-price-line" x1="0" x2="' + rightRailX + '" y1="' + ly + '" y2="' + ly + '"/>');
     parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="4" style="opacity:0"/>');
+
+    // --- right-rail price scale (ghost numbers like the screenshot)
+    var rail = [29680, 29640, 29600, 29560, 29520, 29480, 29440, 29400];
+    rail.forEach(function (p) {
+      var py = priceToY(p) * H;
+      if (py < 4 || py > H - 4) return;
+      parts.push('<text class="bd-price-label" x="' + (rightRailX + 12) + '" y="' + (py + 4) +
+        '">' + fmtPx(p) + '</text>');
+    });
+
+    // highlighted price tags: current (purple) + target (green band) + stop (purple band)
+    function priceTag(y, label, color) {
+      var ty = y * H;
+      return '<rect class="bd-price-tag-bg" x="' + (rightRailX + 4) + '" y="' + (ty - 9) +
+             '" width="86" height="18" rx="2" style="fill:' + color + '"/>' +
+             '<text class="bd-price-label tag" x="' + (rightRailX + 12) + '" y="' + (ty + 4) +
+             '">' + label + '</text>';
+    }
+    parts.push(priceTag(priceToY(yToPrice(ly / H)), fmtPx(yToPrice(ly / H)), 'rgba(122,47,208,0.85)'));
+    parts.push(priceTag(priceToY(29593.50), '29,593.50', 'rgba(80,180,120,0.70)'));
+    parts.push(priceTag(priceToY(29465.50), '29,465.50', 'rgba(60,60,72,0.85)'));
+    parts.push(priceTag(priceToY(29445.50), '29,445.50', 'rgba(60,60,72,0.85)'));
 
     // x-axis time labels
     TIMES.forEach(function (t) {
@@ -755,8 +896,13 @@ body::after {
       // skip the animation — show the finished frame
       svg.querySelectorAll('.cs').forEach(function (g) { g.classList.add('in'); });
       svg.querySelector('.bd-zone').classList.add('show');
+      svg.querySelector('.bd-supply').classList.add('show');
+      svg.querySelector('.bd-setup-zone').classList.add('show');
+      svg.querySelector('.bd-entry-zone').classList.add('show');
+      svg.querySelector('.bd-target-line').classList.add('show');
+      svg.querySelector('.bd-stop-box').classList.add('show');
       svg.querySelector('.bd-price-line').classList.add('show');
-      svg.querySelectorAll('.bd-time, .bd-time-tick').forEach(function (n) { n.classList.add('show'); });
+      svg.querySelectorAll('.bd-time, .bd-time-tick, .bd-price-label, .bd-price-tag-bg').forEach(function (n) { n.classList.add('show'); });
       svg.querySelector('.bd-dot').style.opacity = '1';
       return;
     }
@@ -767,16 +913,24 @@ body::after {
   function play() {
     var groups = svg.querySelectorAll('.cs');
     var zone = svg.querySelector('.bd-zone');
+    var supply = svg.querySelector('.bd-supply');
+    var setupZone = svg.querySelector('.bd-setup-zone');
+    var entryZone = svg.querySelector('.bd-entry-zone');
+    var targetLine = svg.querySelector('.bd-target-line');
+    var stopBox = svg.querySelector('.bd-stop-box');
     var priceLine = svg.querySelector('.bd-price-line');
     var dot = svg.querySelector('.bd-dot');
     var timeNodes = svg.querySelectorAll('.bd-time, .bd-time-tick');
+    var priceLabels = svg.querySelectorAll('.bd-price-label, .bd-price-tag-bg');
 
-    // reveal time axis up-front (chart frame)
+    // reveal time axis + right-rail price ladder up-front (chart frame)
     loopTimers.push(setTimeout(function () {
       timeNodes.forEach(function (n) { n.classList.add('show'); });
+      priceLabels.forEach(function (n) { n.classList.add('show'); });
     }, 120));
 
     var sweepIdx = 16;
+    var reversalIdx = 17;
     // candle interval — quicker on the reversal so it feels like a real impulse
     function intervalFor(i) {
       if (i < 5) return 230;          // distribution
@@ -789,8 +943,25 @@ body::after {
     var t = 0;
     groups.forEach(function (g, i) {
       loopTimers.push(setTimeout(function () { g.classList.add('in'); }, t));
+      // supply zone draws in once the distribution is established
+      if (i === 4) {
+        loopTimers.push(setTimeout(function () { supply.classList.add('show'); }, t + 60));
+      }
+      // setup zone reveals as the breakdown starts
+      if (i === 5) {
+        loopTimers.push(setTimeout(function () { setupZone.classList.add('show'); }, t + 80));
+      }
+      // entry zone + demand zone + stop box align with the sweep wick
       if (i === sweepIdx) {
-        loopTimers.push(setTimeout(function () { zone.classList.add('show'); }, t + 80));
+        loopTimers.push(setTimeout(function () {
+          zone.classList.add('show');
+          entryZone.classList.add('show');
+          stopBox.classList.add('show');
+        }, t + 80));
+      }
+      // target line resolves once continuation is underway
+      if (i === reversalIdx + 2) {
+        loopTimers.push(setTimeout(function () { targetLine.classList.add('show'); }, t + 60));
       }
       t += intervalFor(i);
     });
@@ -807,7 +978,11 @@ body::after {
   }
 
   function restart() {
-    var nodes = svg.querySelectorAll('.cs, .bd-zone, .bd-price-line, .bd-time, .bd-time-tick, .bd-dot');
+    var nodes = svg.querySelectorAll(
+      '.cs, .bd-zone, .bd-supply, .bd-setup-zone, .bd-entry-zone, .bd-target-line, ' +
+      '.bd-stop-box, .bd-price-line, .bd-time, .bd-time-tick, .bd-dot, ' +
+      '.bd-price-label, .bd-price-tag-bg'
+    );
     nodes.forEach(function (n) {
       n.classList.remove('in', 'show');
       n.classList.add('out');
