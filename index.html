@@ -156,6 +156,39 @@ body::after {
   transition: opacity 0.5s ease;
 }
 .bd-time-tick.show { opacity: 1; }
+.bd-price {
+  fill: rgba(245, 243, 247, 0.18);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.bd-price.show { opacity: 1; }
+.bd-price-current {
+  fill: var(--purple); fill-opacity: 0.85;
+  stroke: var(--purple); stroke-opacity: 0.6;
+  stroke-width: 0.5;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.bd-price-current.show { opacity: 1; }
+.bd-price-current-text {
+  fill: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.bd-price-current-text.show { opacity: 1; }
+@media (max-width: 700px) {
+  .bd-time { font-size: 10px; }
+  .bd-price { font-size: 10px; }
+  .bd-price-current-text { font-size: 9.5px; }
+}
 
 /* ---------- chrome ---------- */
 .chrome {
@@ -690,41 +723,81 @@ body::after {
   var prefersReduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var loopTimers = [];
+  var sweepIdx = 16;
+  // Price scale anchored so candle y values land on round 20-point marks
+  var PRICE_HI = 29700, PRICE_LO = 29365;
 
   function clearTimers() {
     loopTimers.forEach(clearTimeout);
     loopTimers = [];
   }
 
+  function getDims() {
+    var vw = window.innerWidth || 1600;
+    var vh = window.innerHeight || 900;
+    return {
+      W: Math.max(360, vw),
+      H: Math.max(560, vh),
+      mobile: vw < 700
+    };
+  }
+
   function buildBackdrop() {
     clearTimers();
-    var W = 1600, H = 900;
+    var d = getDims();
+    var W = d.W, H = d.H, mobile = d.mobile;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'none');
+
+    // Reserve space: top for chrome+ticker, bottom for time axis+socials,
+    // right for price ladder. Sizes shrink on mobile.
+    var padL = mobile ? 6 : 16;
+    var padR = mobile ? 58 : 96;
+    var padT = mobile ? 108 : 132;
+    var padB = mobile ? 118 : 96;
+    var cw = Math.max(40, W - padL - padR);
+    var ch = Math.max(40, H - padT - padB);
+    var axisY = padT + ch + (mobile ? 18 : 22);
+
     var N = STORY.length;
-    var step = W / N;
-    var bodyW = step * 0.55;
-    var axisY = 0.96 * H;
+    var step = cw / N;
+    var bodyW = Math.max(3, step * 0.55);
+    // y-normalized → pixel
+    function py(yn) { return padT + yn * ch; }
+    function xAt(i) { return padL + i * step + step / 2; }
 
     var parts = [];
-    [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
-      parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + W + '" y2="' + (g * H) + '" class="bd-grid"/>');
+
+    // grid lines spanning chart area
+    [0.0, 0.2, 0.4, 0.6, 0.8, 1.0].forEach(function (g) {
+      var y = py(g);
+      parts.push('<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR + 6) + '" y2="' + y + '" class="bd-grid"/>');
     });
 
-    // demand zone box — drawn around the liquidity sweep area, extending right
-    var sweepIdx = 16;
-    var zoneX = sweepIdx * step + step * 0.2;
-    var zoneY = 0.74 * H;
-    var zoneH = 0.12 * H;
+    // price ladder on the right — every 20 points
+    var span = PRICE_HI - PRICE_LO;
+    for (var p = PRICE_LO; p <= PRICE_HI; p += 20) {
+      var yn = (PRICE_HI - p) / span;
+      var yy = py(yn) + 4;
+      parts.push('<text class="bd-price" x="' + (W - 6) + '" y="' + yy + '" text-anchor="end">' +
+        p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</text>');
+    }
+
+    // demand zone — purple band around the sweep, extending right to the edge
+    var zoneX = xAt(sweepIdx) - step * 0.3;
+    var zoneY = py(0.74);
+    var zoneH = py(0.86) - zoneY;
     parts.push('<rect class="bd-zone" x="' + zoneX + '" y="' + zoneY +
-      '" width="' + (W - zoneX) + '" height="' + zoneH + '" rx="2"/>');
+      '" width="' + (W - padR + 4 - zoneX) + '" height="' + zoneH + '" rx="2"/>');
 
     // candles
     STORY.forEach(function (c, idx) {
-      var x = idx * step + step / 2;
-      var top = Math.min(c[0], c[1]) * H;
-      var bot = Math.max(c[0], c[1]) * H;
+      var x = xAt(idx);
+      var top = py(Math.min(c[0], c[1]));
+      var bot = py(Math.max(c[0], c[1]));
       var h = Math.max(1.2, bot - top);
-      var wickTop = c[2] * H;
-      var wickBot = c[3] * H;
+      var wickTop = py(c[2]);
+      var wickBot = py(c[3]);
       var bull = c[1] < c[0];
       parts.push(
         '<g class="cs ' + (bull ? 'cs-bull' : 'cs-bear') + '" data-i="' + idx + '">' +
@@ -735,79 +808,90 @@ body::after {
       );
     });
 
-    // current price marker — horizontal dashed line + glowing dot at last close
+    // current price marker — dashed line across chart + glowing dot + right-side label chip
     var last = STORY[N - 1];
-    var lx = (N - 1) * step + step / 2;
-    var ly = last[1] * H;
-    parts.push('<line class="bd-price-line" x1="0" x2="' + W + '" y1="' + ly + '" y2="' + ly + '"/>');
-    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="4" style="opacity:0"/>');
+    var lx = xAt(N - 1);
+    var ly = py(last[1]);
+    parts.push('<line class="bd-price-line" x1="' + padL + '" x2="' + (W - padR + 4) + '" y1="' + ly + '" y2="' + ly + '"/>');
+    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="3.5" style="opacity:0"/>');
+    var chipH = mobile ? 16 : 18;
+    var chipW = mobile ? 56 : 72;
+    parts.push('<rect class="bd-price-current" x="' + (W - padR + 4) + '" y="' + (ly - chipH / 2) +
+      '" width="' + chipW + '" height="' + chipH + '" rx="1"/>');
+    var currentPrice = PRICE_HI - last[1] * span;
+    parts.push('<text class="bd-price-current-text" x="' + (W - 6) + '" y="' + (ly + 3.5) +
+      '" text-anchor="end">' +
+      currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+      '</text>');
 
     // x-axis time labels
     TIMES.forEach(function (t) {
-      var tx = t.i * step + step / 2;
+      if (t.i >= N) return;
+      var tx = xAt(t.i);
       parts.push('<line class="bd-time-tick" x1="' + tx + '" x2="' + tx + '" y1="' + (axisY - 8) + '" y2="' + (axisY - 2) + '"/>');
-      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + 16) + '" text-anchor="middle">' + t.label + '</text>');
+      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + 12) + '" text-anchor="middle">' + t.label + '</text>');
     });
 
     svg.innerHTML = parts.join('');
 
     if (prefersReduce) {
-      // skip the animation — show the finished frame
       svg.querySelectorAll('.cs').forEach(function (g) { g.classList.add('in'); });
-      svg.querySelector('.bd-zone').classList.add('show');
-      svg.querySelector('.bd-price-line').classList.add('show');
-      svg.querySelectorAll('.bd-time, .bd-time-tick').forEach(function (n) { n.classList.add('show'); });
-      svg.querySelector('.bd-dot').style.opacity = '1';
+      ['.bd-zone', '.bd-price-line', '.bd-price-current', '.bd-price-current-text'].forEach(function (sel) {
+        var n = svg.querySelector(sel); if (n) n.classList.add('show');
+      });
+      svg.querySelectorAll('.bd-time, .bd-time-tick, .bd-price').forEach(function (n) { n.classList.add('show'); });
+      var d2 = svg.querySelector('.bd-dot'); if (d2) d2.style.opacity = '1';
       return;
     }
 
     play();
   }
 
+  function intervalFor(i) {
+    if (i < 5) return 220;             // distribution
+    if (i < sweepIdx) return 190;      // downtrend
+    if (i === sweepIdx) return 460;    // pause on the sweep wick
+    if (i === sweepIdx + 1) return 130; // reversal candle pops fast
+    return 170;                        // continuation
+  }
+
   function play() {
     var groups = svg.querySelectorAll('.cs');
     var zone = svg.querySelector('.bd-zone');
     var priceLine = svg.querySelector('.bd-price-line');
+    var priceChip = svg.querySelector('.bd-price-current');
+    var priceText = svg.querySelector('.bd-price-current-text');
     var dot = svg.querySelector('.bd-dot');
     var timeNodes = svg.querySelectorAll('.bd-time, .bd-time-tick');
+    var priceLabels = svg.querySelectorAll('.bd-price');
 
-    // reveal time axis up-front (chart frame)
+    // chart frame: price ladder + time axis appear up-front
     loopTimers.push(setTimeout(function () {
       timeNodes.forEach(function (n) { n.classList.add('show'); });
+      priceLabels.forEach(function (n) { n.classList.add('show'); });
     }, 120));
-
-    var sweepIdx = 16;
-    // candle interval — quicker on the reversal so it feels like a real impulse
-    function intervalFor(i) {
-      if (i < 5) return 230;          // distribution
-      if (i < sweepIdx) return 200;   // downtrend
-      if (i === sweepIdx) return 480; // pause on the sweep wick
-      if (i === sweepIdx + 1) return 140; // reversal candle pops fast
-      return 180;                     // continuation
-    }
 
     var t = 0;
     groups.forEach(function (g, i) {
       loopTimers.push(setTimeout(function () { g.classList.add('in'); }, t));
-      if (i === sweepIdx) {
+      if (i === sweepIdx && zone) {
         loopTimers.push(setTimeout(function () { zone.classList.add('show'); }, t + 80));
       }
       t += intervalFor(i);
     });
 
-    // settle: dashed price line + glowing dot
     loopTimers.push(setTimeout(function () {
-      priceLine.classList.add('show');
-      dot.style.transition = 'opacity 0.5s ease';
-      dot.style.opacity = '1';
+      if (priceLine) priceLine.classList.add('show');
+      if (priceChip) priceChip.classList.add('show');
+      if (priceText) priceText.classList.add('show');
+      if (dot) { dot.style.transition = 'opacity 0.5s ease'; dot.style.opacity = '1'; }
     }, t + 60));
 
-    // hold, then fade out and replay
     loopTimers.push(setTimeout(restart, t + 4200));
   }
 
   function restart() {
-    var nodes = svg.querySelectorAll('.cs, .bd-zone, .bd-price-line, .bd-time, .bd-time-tick, .bd-dot');
+    var nodes = svg.querySelectorAll('.cs, .bd-zone, .bd-price-line, .bd-time, .bd-time-tick, .bd-price, .bd-price-current, .bd-price-current-text, .bd-dot');
     nodes.forEach(function (n) {
       n.classList.remove('in', 'show');
       n.classList.add('out');
@@ -816,12 +900,24 @@ body::after {
   }
 
   buildBackdrop();
-  // rebuild on resize so the SVG re-fits cleanly
-  var rebuildTimer = 0;
-  window.addEventListener('resize', function () {
-    clearTimeout(rebuildTimer);
-    rebuildTimer = setTimeout(buildBackdrop, 180);
+
+  // pause the loop while the tab is hidden — saves battery on mobile
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      clearTimers();
+    } else if (!prefersReduce) {
+      buildBackdrop();
+    }
   });
+
+  // rebuild on resize / orientation change so layout re-fits cleanly
+  var rebuildTimer = 0;
+  function scheduleRebuild() {
+    clearTimeout(rebuildTimer);
+    rebuildTimer = setTimeout(buildBackdrop, 200);
+  }
+  window.addEventListener('resize', scheduleRebuild);
+  window.addEventListener('orientationchange', scheduleRebuild);
 })();
 </script>
 </body>
