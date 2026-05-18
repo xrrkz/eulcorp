@@ -113,6 +113,49 @@ body::after {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.cs { opacity: 0; }
+.cs.in { animation: cs-in 320ms ease-out forwards; }
+.cs.out { animation: cs-out 700ms ease forwards; }
+@keyframes cs-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes cs-out {
+  to { opacity: 0; }
+}
+.bd-zone {
+  fill: var(--purple); fill-opacity: 0.10;
+  stroke: var(--purple); stroke-opacity: 0.35;
+  stroke-width: 1; stroke-dasharray: 4 6;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.bd-zone.show { opacity: 1; }
+.bd-price-line {
+  stroke: var(--purple);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.bd-price-line.show { opacity: 1; }
+.bd-time {
+  fill: rgba(245, 243, 247, 0.22);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.bd-time.show { opacity: 1; }
+.bd-time-tick {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.bd-time-tick.show { opacity: 1; }
 
 /* ---------- chrome ---------- */
 .chrome {
@@ -598,68 +641,182 @@ body::after {
     wm.addEventListener('mouseenter', function () { scramble(); });
   }
 
-  // ---------- Backdrop: bullish candles ----------
+  // ---------- Backdrop: scripted price action that plays out over time ----------
+  // OHLC story mirroring the chart: distribution → downtrend → liquidity sweep
+  // → sharp bullish reversal → continuation. y is 0 (top) .. 1 (bottom).
+  // [open, close, wickHi, wickLo]
+  var STORY = [
+    // small bear distribution at top-left
+    [0.40, 0.42, 0.38, 0.44],
+    [0.42, 0.40, 0.39, 0.44],
+    [0.40, 0.44, 0.39, 0.46],
+    [0.44, 0.42, 0.41, 0.46],
+    [0.42, 0.46, 0.41, 0.48],
+    // breakdown
+    [0.46, 0.51, 0.45, 0.53],
+    [0.51, 0.55, 0.50, 0.57],
+    [0.55, 0.53, 0.52, 0.58],
+    [0.53, 0.59, 0.52, 0.61],
+    [0.59, 0.63, 0.58, 0.65],
+    [0.63, 0.67, 0.62, 0.69],
+    [0.67, 0.71, 0.66, 0.73],
+    // accumulation wobble before the sweep
+    [0.71, 0.74, 0.70, 0.76],
+    [0.74, 0.72, 0.71, 0.76],
+    [0.72, 0.78, 0.71, 0.80],
+    [0.78, 0.76, 0.75, 0.80],
+    // liquidity sweep — long lower wick
+    [0.76, 0.74, 0.73, 0.93],
+    // sharp bull reversal — big purple body
+    [0.74, 0.50, 0.73, 0.75],
+    // continuation up
+    [0.50, 0.44, 0.49, 0.52],
+    [0.44, 0.38, 0.43, 0.46],
+    [0.38, 0.33, 0.37, 0.40],
+    [0.33, 0.29, 0.32, 0.35],
+    [0.29, 0.26, 0.26, 0.31],
+    [0.26, 0.22, 0.22, 0.28]
+  ];
+  // x-axis session times — like the screenshot (8AM, 9:30 RTH open, 10, 11)
+  var TIMES = [
+    { i: 1,  label: '08:00' },
+    { i: 8,  label: '09:30' },
+    { i: 14, label: '10:00' },
+    { i: 19, label: '10:30' },
+    { i: 23, label: '11:00' }
+  ];
+
+  var svg = document.getElementById('backdrop');
+  var prefersReduce = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var loopTimers = [];
+
+  function clearTimers() {
+    loopTimers.forEach(clearTimeout);
+    loopTimers = [];
+  }
+
   function buildBackdrop() {
+    clearTimers();
     var W = 1600, H = 900;
-    // seeded LCG so candles stay stable across reloads
-    var s = 11;
-    var r = function () {
-      s = (s * 1664525 + 1013904223) >>> 0;
-      return (s >>> 0) / 4294967296;
-    };
-    var vw = window.innerWidth;
-    // fewer candles on small viewports — cheaper to render and less crowded
-    var N = vw < 600 ? 32 : 64;
-    var candles = [];
-    var y = 0.88;
-    // total descent in y (= total rise on screen); avgTrend then shaped so the
-    // back half accelerates — integral of (0.7 + 0.6p) over [0,1] = 1, so the
-    // total run stays the same regardless of how the slope is shaped or how
-    // many candles render.
-    var avgTrend = -0.66 / N;
-    for (var i = 0; i < N; i++) {
-      var progress = N > 1 ? i / (N - 1) : 0;
-      var trend = avgTrend * (0.7 + 0.6 * progress);
-      var noise = (r() - 0.5) * 0.05;
-      var ny = Math.max(0.08, Math.min(0.94, y + trend + noise));
-      var open = y, close = ny;
-      var bull = close < open;
-      var wickHi = Math.min(open, close) - (r() * 0.018 + 0.005);
-      var wickLo = Math.max(open, close) + (r() * 0.018 + 0.005);
-      candles.push({ i: i, open: open, close: close, wickHi: wickHi, wickLo: wickLo, bull: bull });
-      y = ny;
-    }
-    var step = W / candles.length;
-    var bodyW = step * 0.58;
+    var N = STORY.length;
+    var step = W / N;
+    var bodyW = step * 0.55;
+    var axisY = 0.96 * H;
+
     var parts = [];
     [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
       parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + W + '" y2="' + (g * H) + '" class="bd-grid"/>');
     });
-    var trendPts = [];
-    candles.forEach(function (c) {
-      var x = c.i * step + step / 2;
-      var top = Math.min(c.open, c.close) * H;
-      var bot = Math.max(c.open, c.close) * H;
+
+    // demand zone box — drawn around the liquidity sweep area, extending right
+    var sweepIdx = 16;
+    var zoneX = sweepIdx * step + step * 0.2;
+    var zoneY = 0.74 * H;
+    var zoneH = 0.12 * H;
+    parts.push('<rect class="bd-zone" x="' + zoneX + '" y="' + zoneY +
+      '" width="' + (W - zoneX) + '" height="' + zoneH + '" rx="2"/>');
+
+    // candles
+    STORY.forEach(function (c, idx) {
+      var x = idx * step + step / 2;
+      var top = Math.min(c[0], c[1]) * H;
+      var bot = Math.max(c[0], c[1]) * H;
       var h = Math.max(1.2, bot - top);
-      var wickTop = c.wickHi * H;
-      var wickBot = c.wickLo * H;
+      var wickTop = c[2] * H;
+      var wickBot = c[3] * H;
+      var bull = c[1] < c[0];
       parts.push(
-        '<g class="cs ' + (c.bull ? 'cs-bull' : 'cs-bear') + '">' +
+        '<g class="cs ' + (bull ? 'cs-bull' : 'cs-bear') + '" data-i="' + idx + '">' +
           '<line x1="' + x + '" x2="' + x + '" y1="' + wickTop + '" y2="' + top + '" class="cs-wick"/>' +
           '<line x1="' + x + '" x2="' + x + '" y1="' + bot + '" y2="' + wickBot + '" class="cs-wick"/>' +
           '<rect x="' + (x - bodyW / 2) + '" y="' + top + '" width="' + bodyW + '" height="' + h + '" class="cs-body" rx="0.5"/>' +
         '</g>'
       );
-      trendPts.push(x + ',' + (c.close * H));
     });
-    parts.push('<polyline points="' + trendPts.join(' ') + '" class="bd-trend"/>');
-    var last = candles[candles.length - 1];
-    var lx = (candles.length - 1) * step + step / 2;
-    parts.push('<circle cx="' + lx + '" cy="' + (last.close * H) + '" r="4" class="bd-dot bd-dot-bright"/>');
-    document.getElementById('backdrop').innerHTML = parts.join('');
+
+    // current price marker — horizontal dashed line + glowing dot at last close
+    var last = STORY[N - 1];
+    var lx = (N - 1) * step + step / 2;
+    var ly = last[1] * H;
+    parts.push('<line class="bd-price-line" x1="0" x2="' + W + '" y1="' + ly + '" y2="' + ly + '"/>');
+    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="4" style="opacity:0"/>');
+
+    // x-axis time labels
+    TIMES.forEach(function (t) {
+      var tx = t.i * step + step / 2;
+      parts.push('<line class="bd-time-tick" x1="' + tx + '" x2="' + tx + '" y1="' + (axisY - 8) + '" y2="' + (axisY - 2) + '"/>');
+      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + 16) + '" text-anchor="middle">' + t.label + '</text>');
+    });
+
+    svg.innerHTML = parts.join('');
+
+    if (prefersReduce) {
+      // skip the animation — show the finished frame
+      svg.querySelectorAll('.cs').forEach(function (g) { g.classList.add('in'); });
+      svg.querySelector('.bd-zone').classList.add('show');
+      svg.querySelector('.bd-price-line').classList.add('show');
+      svg.querySelectorAll('.bd-time, .bd-time-tick').forEach(function (n) { n.classList.add('show'); });
+      svg.querySelector('.bd-dot').style.opacity = '1';
+      return;
+    }
+
+    play();
   }
+
+  function play() {
+    var groups = svg.querySelectorAll('.cs');
+    var zone = svg.querySelector('.bd-zone');
+    var priceLine = svg.querySelector('.bd-price-line');
+    var dot = svg.querySelector('.bd-dot');
+    var timeNodes = svg.querySelectorAll('.bd-time, .bd-time-tick');
+
+    // reveal time axis up-front (chart frame)
+    loopTimers.push(setTimeout(function () {
+      timeNodes.forEach(function (n) { n.classList.add('show'); });
+    }, 120));
+
+    var sweepIdx = 16;
+    // candle interval — quicker on the reversal so it feels like a real impulse
+    function intervalFor(i) {
+      if (i < 5) return 230;          // distribution
+      if (i < sweepIdx) return 200;   // downtrend
+      if (i === sweepIdx) return 480; // pause on the sweep wick
+      if (i === sweepIdx + 1) return 140; // reversal candle pops fast
+      return 180;                     // continuation
+    }
+
+    var t = 0;
+    groups.forEach(function (g, i) {
+      loopTimers.push(setTimeout(function () { g.classList.add('in'); }, t));
+      if (i === sweepIdx) {
+        loopTimers.push(setTimeout(function () { zone.classList.add('show'); }, t + 80));
+      }
+      t += intervalFor(i);
+    });
+
+    // settle: dashed price line + glowing dot
+    loopTimers.push(setTimeout(function () {
+      priceLine.classList.add('show');
+      dot.style.transition = 'opacity 0.5s ease';
+      dot.style.opacity = '1';
+    }, t + 60));
+
+    // hold, then fade out and replay
+    loopTimers.push(setTimeout(restart, t + 4200));
+  }
+
+  function restart() {
+    var nodes = svg.querySelectorAll('.cs, .bd-zone, .bd-price-line, .bd-time, .bd-time-tick, .bd-dot');
+    nodes.forEach(function (n) {
+      n.classList.remove('in', 'show');
+      n.classList.add('out');
+    });
+    loopTimers.push(setTimeout(buildBackdrop, 900));
+  }
+
   buildBackdrop();
-  // Candle count flips at 600px; rebuild on resize so density adjusts.
+  // rebuild on resize so the SVG re-fits cleanly
   var rebuildTimer = 0;
   window.addEventListener('resize', function () {
     clearTimeout(rebuildTimer);
