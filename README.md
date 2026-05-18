@@ -6,6 +6,8 @@ Plain HTML + CSS + vanilla JS — no framework, no build step.
 ## Files
 
 - `index.html` — the entire site (markup, styles, and script in one file)
+- `api/eod.js` — Vercel serverless function that calls Claude with web search
+  to look up real end-of-day futures prices for the EOD strip
 - `vercel.json` — Vercel config (security headers + clean URLs)
 - `README.md` — this file
 
@@ -17,8 +19,14 @@ Plain HTML + CSS + vanilla JS — no framework, no build step.
   mid-May 2026 levels and drifting on a small random walk every 1.4s.
 - **Hero** — italic `EULCORP` wordmark with a purple-shimmer gradient and a
   scramble-decode reveal on load (hover or click to re-trigger).
-- **Backdrop** — barely-visible bullish candlestick chart behind the wordmark,
-  with ghost numbers (`50K`, `+24.8%`, `ALL-TIME HIGH`).
+- **Backdrop** — animated TradingView-style chart that loops: chop → wick tap
+  of a purple demand zone → mid-tap → breakout candles that march up and off
+  the top of the frame, with right-edge price ladder, crosshair, live cursor
+  pill, and `NQ1! | 5M` watermark. Re-seeds on every cycle. Separate desktop
+  (landscape) and mobile (portrait) layouts.
+- **EOD strip** — fixed strip above the footer with the previous session's
+  closing prices, fetched at page load from `/api/eod` (Claude + web search).
+  Falls back gracefully to seed prices if the API isn't configured.
 - **Footer** — social handles (X, Instagram, TikTok) and `NY · LDN · JPN`.
 
 ## Editing placeholders
@@ -33,6 +41,12 @@ Open `index.html` and look for these spots:
    to your data source (Polygon, Databento, TradingView widget, etc.).
 3. **OG image** — add a 1200×630 image at `/og-image.png` (already referenced
    in the `<meta property="og:image">` tag).
+4. **EOD API** — `api/eod.js` calls Claude with web search to fetch real EOD
+   prices. Set `ANTHROPIC_API_KEY` in the Vercel project (Settings →
+   Environment Variables). Without it, the endpoint returns 503 and the
+   front-end shows seed prices with status `OFFLINE`. The model is
+   `claude-opus-4-7` — swap to `claude-haiku-4-5` in `api/eod.js` if you
+   prefer the cheaper / faster option. Responses are edge-cached for an hour.
 
 ## Deploy to Vercel
 

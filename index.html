@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bg="deep-black" data-glow="on">
 <head>
 <meta charset="utf-8">
 <title>eulcorp — one of none</title>
@@ -22,18 +22,40 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@400;500;700&family=Archivo:wght@900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Inter+Tight:wght@300;400;500;600;700&family=Archivo:wght@800;900&display=swap" rel="stylesheet">
 
 <style>
 :root {
   --purple: #7A2FD0;
+  --purple-bright: #7A2FD0;
   --purple-soft: rgba(122, 47, 208, 0.22);
   --purple-faint: rgba(122, 47, 208, 0.12);
+
   --bg: #050306;
   --text: #f5f3f7;
   --muted: rgba(245, 243, 247, 0.5);
   --faint: rgba(245, 243, 247, 0.25);
   --line: rgba(255, 255, 255, 0.08);
+
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-bear: rgba(10, 8, 14, 0.95);
+  --chart-bear-wick: rgba(255, 255, 255, 0.45);
+  --chart-bull: var(--purple);
+  --chart-wm: rgba(255, 255, 255, 0.045);
+  --chart-demand: rgba(122, 47, 208, 0.18);
+  --chart-demand-stroke: rgba(122, 47, 208, 0.45);
+  --chart-demand-dash: rgba(255, 255, 255, 0.55);
+  --chart-crosshair: rgba(255, 255, 255, 0.32);
+  --chart-crosshair-h: rgba(255, 255, 255, 0.14);
+  --chart-price: rgba(245, 243, 247, 0.45);
+  --chart-price-strong: rgba(245, 243, 247, 0.85);
+  --chart-pill: #000;
+  --chart-pill-text: #fff;
+  --chart-pill-sub: rgba(255, 255, 255, 0.6);
+  --chart-date: rgba(245, 243, 247, 0.16);
+
+  --wm-a: #ece6f3;
+  --wm-b: #ece6f3;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,8 +82,10 @@ body::before {
   background:
     radial-gradient(ellipse 1200px 800px at 18% 78%, var(--purple-soft), transparent 60%),
     radial-gradient(ellipse 900px 600px at 85% 18%, var(--purple-faint), transparent 70%);
-  z-index: 0;
+  z-index: 1;
+  transition: opacity .4s;
 }
+html[data-glow="off"] body::before { opacity: 0; }
 
 /* film grain */
 body::after {
@@ -71,12 +95,12 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   opacity: 0.06;
   mix-blend-mode: overlay;
-  z-index: 1;
+  z-index: 4;
 }
 
-.page { position: relative; z-index: 2; }
+.page { position: relative; z-index: 3; }
 
-/* ---------- backdrop chart + ghost numbers ---------- */
+/* ---------- backdrop chart ---------- */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -87,148 +111,130 @@ body::after {
   overflow: hidden;
 }
 .bd-grid {
-  stroke: rgba(255, 255, 255, 0.035);
+  stroke: var(--chart-grid);
   stroke-width: 1;
   stroke-dasharray: 2 10;
 }
-.cs-wick { stroke-width: 1; stroke-linecap: round; }
-.cs-body { stroke-width: 1; }
-.cs-bull .cs-wick { stroke: var(--purple); stroke-opacity: 0.55; }
-.cs-bull .cs-body {
-  fill: var(--purple); fill-opacity: 0.38;
-  stroke: var(--purple); stroke-opacity: 0.65;
+
+/* candlesticks */
+.cs {
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
-.cs-bear .cs-wick { stroke: rgba(255, 255, 255, 0.22); }
-.cs-bear .cs-body { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.22); }
-.bd-dot { fill: var(--purple); fill-opacity: 0.55; }
-.bd-dot-bright {
-  fill: var(--purple); fill-opacity: 1;
-  filter: drop-shadow(0 0 10px var(--purple));
+.cs.in {
+  opacity: 1;
+  animation: cs-pop .45s ease-out;
+  transform-origin: center bottom;
 }
-.bd-trend {
-  fill: none;
-  stroke: var(--purple);
-  stroke-opacity: 0.35;
-  stroke-width: 1.5;
+.cs-wick {
+  stroke-width: 1.2;
   stroke-linecap: round;
-  stroke-linejoin: round;
+  transition: y1 .35s linear, y2 .35s linear;
 }
-.cs { opacity: 0; }
-.cs.in { animation: cs-in 320ms ease-out forwards; }
-.cs.out { animation: cs-out 700ms ease forwards; }
-@keyframes cs-in {
-  0%   { opacity: 0; transform: translateY(4px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes cs-out {
-  to { opacity: 0; }
-}
-.bd-zone {
-  fill: var(--purple); fill-opacity: 0.10;
-  stroke: var(--purple); stroke-opacity: 0.35;
-  stroke-width: 1; stroke-dasharray: 4 6;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.bd-zone.show { opacity: 1; }
-
-/* red supply zone — distribution top-left */
-.bd-supply {
-  fill: rgba(255, 90, 110, 0.10);
-  stroke: rgba(255, 90, 110, 0.35);
-  stroke-width: 1; stroke-dasharray: 4 6;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.bd-supply.show { opacity: 1; }
-
-/* vertical "trade setup" green shading covering the whole move */
-.bd-setup-zone {
-  fill: rgba(80, 220, 140, 0.06);
-  stroke: rgba(80, 220, 140, 0.18);
+.cs-body {
   stroke-width: 1;
-  opacity: 0;
-  transition: opacity 1.2s ease;
+  transition: y .35s linear, height .35s linear;
 }
-.bd-setup-zone.show { opacity: 1; }
-
-/* darker vertical "entry" zone over the reversal */
-.bd-entry-zone {
-  fill: rgba(122, 47, 208, 0.16);
-  stroke: rgba(122, 47, 208, 0.32);
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.9s ease;
+.cs-bull .cs-wick { stroke: var(--chart-bull); stroke-opacity: 0.95; }
+.cs-bull .cs-body { fill: var(--chart-bull); fill-opacity: 0.92; stroke: var(--chart-bull); stroke-opacity: 1; }
+.cs-bear .cs-wick { stroke: var(--chart-bear-wick); }
+.cs-bear .cs-body { fill: var(--chart-bear); stroke: var(--chart-bear); }
+.cs-live .cs-body { animation: live-pulse 1.4s ease-in-out infinite; filter: drop-shadow(0 0 8px var(--purple)); }
+.cs-live .cs-wick { animation: live-pulse 1.4s ease-in-out infinite; }
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
 }
-.bd-entry-zone.show { opacity: 1; }
-
-/* horizontal target line above */
-.bd-target-line {
-  stroke: rgba(80, 220, 140, 0.55);
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.6s ease;
+@keyframes cs-pop {
+  from { opacity: 0; transform: translateY(8px) scaleY(0.4); }
+  to   { opacity: 1; transform: translateY(0)   scaleY(1); }
 }
-.bd-target-line.show { opacity: 1; }
 
-/* horizontal stop-loss box below the sweep low */
-.bd-stop-box {
-  fill: var(--purple); fill-opacity: 0.18;
-  stroke: var(--purple); stroke-opacity: 0.40;
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-.bd-stop-box.show { opacity: 1; }
-
-.bd-price-line {
-  stroke: var(--purple);
-  stroke-opacity: 0.45;
-  stroke-width: 1;
-  stroke-dasharray: 3 6;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.bd-price-line.show { opacity: 1; }
-
-/* right-side ghost price labels */
 .bd-price-label {
-  fill: rgba(245, 243, 247, 0.22);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  font-variant-numeric: tabular-nums;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.bd-price-label.show { opacity: 1; }
-.bd-price-label.tag {
-  fill: rgba(245, 243, 247, 0.85);
-  font-size: 11px;
-}
-.bd-price-tag-bg {
-  fill: rgba(0, 0, 0, 0.55);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.bd-price-tag-bg.show { opacity: 1; }
-
-.bd-time {
-  fill: rgba(245, 243, 247, 0.22);
+  fill: var(--chart-price);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  letter-spacing: 0.08em;
-  opacity: 0;
-  transition: opacity 0.5s ease;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
-.bd-time.show { opacity: 1; }
-.bd-time-tick {
-  stroke: rgba(255, 255, 255, 0.08);
+.bd-time-label {
+  fill: var(--chart-price-strong);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.bd-pill {
+  fill: var(--chart-pill);
+  stroke: rgba(255, 255, 255, 0.04);
   stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.5s ease;
 }
-.bd-time-tick.show { opacity: 1; }
+.bd-pill-text {
+  fill: var(--chart-pill-text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.bd-pill-sub {
+  fill: var(--chart-pill-sub);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.bd-date {
+  fill: var(--chart-date);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.bd-symbol-tag {
+  fill: var(--chart-price);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+.bd-tv {
+  fill: var(--chart-price-strong);
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+}
+.bd-crosshair {
+  stroke: var(--chart-crosshair);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+.bd-crosshair-h {
+  stroke: var(--chart-crosshair-h);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+.bd-zone-purple {
+  fill: var(--chart-demand);
+  stroke: var(--chart-demand-stroke);
+  stroke-width: 1;
+}
+.bd-zone-purple-dash {
+  stroke: var(--chart-demand-dash);
+  stroke-width: 1.2;
+  stroke-dasharray: 7 7;
+  fill: none;
+}
+
+/* mobile portrait chart bumps font sizes so labels stay readable */
+.backdrop.bd-mobile .bd-price-label,
+.backdrop.bd-mobile .bd-time-label  { font-size: 22px; }
+.backdrop.bd-mobile .bd-pill-text   { font-size: 22px; }
+.backdrop.bd-mobile .bd-pill-sub    { font-size: 17px; }
+.backdrop.bd-mobile .bd-date        { font-size: 38px; letter-spacing: 0.05em; }
+.backdrop.bd-mobile .bd-symbol-tag  { font-size: 22px; }
+.backdrop.bd-mobile .bd-tv          { font-size: 26px; }
+.backdrop.bd-mobile .bd-grid        { stroke-dasharray: 3 14; }
+.backdrop.bd-mobile .cs-wick        { stroke-width: 1.6; }
+.backdrop.bd-mobile .bd-crosshair,
+.backdrop.bd-mobile .bd-crosshair-h { stroke-width: 1.4; stroke-dasharray: 3 8; }
 
 /* ---------- chrome ---------- */
 .chrome {
@@ -257,12 +263,7 @@ body::after {
   50%      { opacity: 0.5; transform: scale(0.85); }
 }
 .chrome .right { display: flex; gap: 28px; align-items: center; }
-.chrome .time {
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-  min-width: 88px;
-  text-align: right;
-}
+.chrome .time { color: var(--text); font-variant-numeric: tabular-nums; min-width: 88px; text-align: right; }
 
 /* ---------- ticker ---------- */
 .ticker-wrap {
@@ -312,11 +313,13 @@ body::after {
 .hero-pre {
   display: inline-flex; align-items: center; gap: 14px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.32em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--text);
   margin-bottom: 28px;
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
 }
 .hero-pre-line { width: 28px; height: 1px; background: var(--purple); }
 
@@ -329,9 +332,9 @@ body::after {
   letter-spacing: -0.02em;
   background: linear-gradient(
     110deg,
-    #ece6f3 0%, #ece6f3 38%,
+    var(--wm-a) 0%, var(--wm-a) 38%,
     var(--purple) 50%,
-    #ece6f3 62%, #ece6f3 100%
+    var(--wm-b) 62%, var(--wm-b) 100%
   );
   background-size: 220% 100%;
   background-position: 100% 0;
@@ -361,13 +364,79 @@ body::after {
   display: inline-flex; align-items: center; gap: 18px;
   margin-top: 40px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.42em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.44em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text);
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
 }
 .kicker .bar { display: inline-block; width: 32px; height: 1px; background: var(--purple); }
 .kicker .kdot { color: var(--purple); }
+
+/* ---------- EOD strip ---------- */
+.eod-strip {
+  position: fixed;
+  left: 0; right: 0; bottom: 54px;
+  display: flex; align-items: center; gap: 28px;
+  padding: 9px 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.45);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow-x: auto;
+  white-space: nowrap;
+  z-index: 19;
+  scrollbar-width: none;
+}
+.eod-strip::-webkit-scrollbar { display: none; }
+.eod-label {
+  color: var(--purple);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.eod-cell {
+  display: inline-flex; align-items: baseline; gap: 8px;
+}
+.eod-sym {
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  font-weight: 500;
+  font-size: 10.5px;
+}
+.eod-px {
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+.eod-status {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  letter-spacing: 0.22em;
+  font-size: 9.5px;
+  text-transform: uppercase;
+}
+.eod-status::before {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor;
+}
+.eod-status.is-loading { color: var(--muted); animation: eod-blink 1.4s ease-in-out infinite; }
+.eod-status.is-error   { color: rgba(180, 40, 40, 0.85); }
+.eod-status.is-ok      { color: var(--purple); }
+@keyframes eod-blink {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
 
 /* ---------- socials ---------- */
 .socials {
@@ -408,20 +477,16 @@ body::after {
 
 /* ---------- responsive ---------- */
 @media (max-width: 800px) {
-  /* cheaper blur on mobile GPUs; the dark wash still reads */
-  .ticker-wrap,
-  .socials {
+  .ticker-wrap, .socials, .eod-strip {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     background: rgba(0, 0, 0, 0.55);
   }
-  /* the radial glows are huge offscreen ellipses; tighten on mobile */
   body::before {
     background:
       radial-gradient(ellipse 700px 500px at 18% 78%, var(--purple-soft), transparent 60%),
       radial-gradient(ellipse 500px 400px at 85% 18%, var(--purple-faint), transparent 70%);
   }
-  /* mix-blend grain costs paint on every scroll/animation tick; barely visible on phone screens */
   body::after { display: none; }
 
   .chrome {
@@ -433,8 +498,7 @@ body::after {
     letter-spacing: 0.1em;
   }
   .chrome .brand { gap: 10px; }
-  .chrome .brand .slash,
-  .chrome .brand .label { display: none; }
+  .chrome .brand .slash, .chrome .brand .label { display: none; }
   .chrome .right { gap: 14px; font-size: 10px; }
   .chrome .time { min-width: 0; }
 
@@ -447,9 +511,9 @@ body::after {
   .tick .sep { margin-left: 4px; }
 
   .hero {
-    padding: 110px 20px 150px;
+    padding: 110px 20px 180px;
     padding-top: calc(110px + env(safe-area-inset-top));
-    padding-bottom: calc(150px + env(safe-area-inset-bottom));
+    padding-bottom: calc(180px + env(safe-area-inset-bottom));
     min-height: 100svh;
   }
   .hero-pre {
@@ -467,6 +531,14 @@ body::after {
   }
   .kicker .bar { width: 18px; }
 
+  .eod-strip {
+    bottom: 88px;
+    padding: 8px 16px;
+    gap: 20px;
+    font-size: 10px;
+  }
+  .eod-strip .eod-status { display: none; }
+
   .socials {
     flex-direction: column; gap: 8px;
     padding: 10px 16px 12px;
@@ -476,7 +548,6 @@ body::after {
     font-size: 10px; letter-spacing: 0.1em;
   }
   .socials .left { display: none; }
-  /* Repurpose .right as a tiny kicker line under the social links */
   .socials .right {
     display: block;
     min-width: 0;
@@ -495,7 +566,6 @@ body::after {
   }
   .socials a {
     font-size: 11px; gap: 6px;
-    /* 44px min tap target per WCAG; padding keeps text spacing visually tight */
     min-height: 44px;
     padding: 8px 10px;
     border-radius: 8px;
@@ -509,9 +579,12 @@ body::after {
   .socials .links { gap: 6px; }
   .socials a { font-size: 10.5px; padding: 8px 10px; }
   .kicker { font-size: 8.5px; gap: 8px; letter-spacing: 0.24em; }
+  .eod-strip { gap: 16px; padding: 7px 14px; font-size: 9.5px; }
+  .eod-sym { font-size: 9.5px; }
+  .eod-px { font-size: 11px; }
 }
 
-/* phones in landscape: fixed bars eat most of the screen — tighten everything */
+/* phones in landscape: fixed bars eat most of the screen */
 @media (max-height: 500px) and (orientation: landscape) {
   .hero {
     padding: 78px 24px 78px;
@@ -521,6 +594,7 @@ body::after {
   .kicker { margin-top: 12px; }
   .wordmark { font-size: clamp(40px, 9vh, 96px); }
   .ticker-wrap { display: none; }
+  .eod-strip { display: none; }
   .socials {
     flex-direction: row;
     gap: 8px;
@@ -532,22 +606,20 @@ body::after {
   .socials a { min-height: 36px; padding: 6px 10px; font-size: 10.5px; }
 }
 
-/* coarse pointers (touch): drop hover-only flourishes that fire on tap */
 @media (hover: none) {
   .wordmark:hover { animation-duration: 6s; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wordmark,
-  .chrome .dot,
-  .ticker { animation: none !important; }
+  .wordmark, .chrome .dot, .ticker { animation: none !important; }
   body::before, body::after { display: none; }
+  .cs-live .cs-body, .cs-live .cs-wick { animation: none !important; }
 }
 </style>
 </head>
 <body>
 <div class="page">
-  <svg class="backdrop" id="backdrop" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+  <svg class="backdrop" id="backdrop" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
 
   <header class="chrome">
     <div class="brand">
@@ -581,6 +653,8 @@ body::after {
     </div>
   </section>
 
+  <div class="eod-strip" id="eod" aria-label="End of day closing prices"></div>
+
   <footer class="socials">
     <div class="left">© EULCORP MMV</div>
     <div class="links">
@@ -611,6 +685,25 @@ body::after {
 
 <script>
 (function () {
+  // ---------- Shared ----------
+  var SEED = [
+    { sym: 'ES',  name: 'S&P 500',     px: 7432.25,  tick: 0.25,  dec: 2 },
+    { sym: 'NQ',  name: 'NASDAQ 100',  px: 24856.50, tick: 0.25,  dec: 2 },
+    { sym: 'YM',  name: 'DOW',         px: 49526,    tick: 1,     dec: 0 },
+    { sym: 'RTY', name: 'RUSSELL',     px: 2793.30,  tick: 0.10,  dec: 2 },
+    { sym: 'GC',  name: 'GOLD',        px: 4561.90,  tick: 0.10,  dec: 2 },
+    { sym: 'MGC', name: 'MICRO GOLD',  px: 4561.90,  tick: 0.10,  dec: 2 },
+    { sym: 'CL',  name: 'CRUDE',       px: 99.18,    tick: 0.01,  dec: 2 },
+    { sym: 'SI',  name: 'SILVER',      px: 76.42,    tick: 0.005, dec: 3 },
+    { sym: 'VX',  name: 'VIX',         px: 18.43,    tick: 0.05,  dec: 2 }
+  ];
+
+  function fmt(n, dec) {
+    return n.toLocaleString('en-US', {
+      minimumFractionDigits: dec, maximumFractionDigits: dec
+    });
+  }
+
   // ---------- Clock + Globex status ----------
   function updateClock() {
     var parts = {};
@@ -633,24 +726,10 @@ body::after {
   updateClock();
   var clockInterval = setInterval(updateClock, 1000);
 
-  // ---------- Live-ish ticker (random walk from real mid-May 2026 levels) ----------
-  var SEED = [
-    { sym: 'ES',  px: 7432.25,  tick: 0.25,  dec: 2 },
-    { sym: 'NQ',  px: 24856.50, tick: 0.25,  dec: 2 },
-    { sym: 'YM',  px: 49526,    tick: 1,     dec: 0 },
-    { sym: 'RTY', px: 2793.30,  tick: 0.10,  dec: 2 },
-    { sym: 'GC',  px: 4561.90,  tick: 0.10,  dec: 2 },
-    { sym: 'MGC', px: 4561.90,  tick: 0.10,  dec: 2 },
-    { sym: 'CL',  px: 99.18,    tick: 0.01,  dec: 2 },
-    { sym: 'SI',  px: 76.42,    tick: 0.005, dec: 3 },
-    { sym: 'VX',  px: 18.43,    tick: 0.05,  dec: 2 }
-  ];
+  // ---------- Live-ish ticker ----------
   var rows = SEED.map(function (s) {
     return { sym: s.sym, px: s.px, tick: s.tick, dec: s.dec, last: s.px, change: 0, pct: 0 };
   });
-  function fmt(n, dec) {
-    return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-  }
   function renderTicker() {
     var html = rows.concat(rows).map(function (r) {
       var up = r.change > 0, dn = r.change < 0;
@@ -678,6 +757,47 @@ body::after {
   }
   renderTicker();
   var priceInterval = setInterval(tickPrices, 1400);
+
+  // ---------- EOD strip (AI-fetched via /api/eod, with fallback) ----------
+  function renderEod(data, state) {
+    var html = '<span class="eod-label">EOD CLOSE</span>';
+    SEED.forEach(function (s) {
+      var px = data && data[s.sym] != null ? Number(data[s.sym]) : null;
+      var display;
+      if (px != null && !isNaN(px)) display = fmt(px, s.dec);
+      else if (state === 'loading') display = '—';
+      else display = fmt(s.px, s.dec);
+      html += '<span class="eod-cell">' +
+        '<span class="eod-sym">' + s.sym + '</span>' +
+        '<span class="eod-px">' + display + '</span>' +
+      '</span>';
+    });
+    var statusLabel = state === 'loading' ? 'FETCHING' :
+                      state === 'error'   ? 'OFFLINE'  : 'LIVE';
+    var statusClass = state === 'loading' ? 'is-loading' :
+                      state === 'error'   ? 'is-error'   : 'is-ok';
+    html += '<span class="eod-status ' + statusClass + '">' + statusLabel + '</span>';
+    document.getElementById('eod').innerHTML = html;
+  }
+  renderEod(null, 'loading');
+  (function fetchEod() {
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 30000);
+    fetch('/api/eod', ctrl ? { signal: ctrl.signal } : undefined).
+      then(function (r) {
+        if (!r.ok) throw new Error('http ' + r.status);
+        return r.json();
+      }).
+      then(function (data) {
+        clearTimeout(timer);
+        renderEod(data && data.prices ? data.prices : data, 'ok');
+      }).
+      catch(function (e) {
+        clearTimeout(timer);
+        console.warn('EOD fetch failed', e && e.message);
+        renderEod(null, 'error');
+      });
+  })();
 
   // ---------- Wordmark scramble decode ----------
   var SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/$';
@@ -709,306 +829,444 @@ body::after {
   }
   scramble();
   wm.addEventListener('click', function () { scramble(); });
-  // hover-only re-trigger; on touch, mouseenter+click would fire twice per tap
   if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
     wm.addEventListener('mouseenter', function () { scramble(); });
   }
 
-  // ---------- Backdrop: scripted price action that plays out over time ----------
-  // OHLC story mirroring the chart: distribution → downtrend → liquidity sweep
-  // → sharp bullish reversal → continuation. y is 0 (top) .. 1 (bottom).
-  // [open, close, wickHi, wickLo]
-  var STORY = [
-    // small bear distribution at top-left
-    [0.40, 0.42, 0.38, 0.44],
-    [0.42, 0.40, 0.39, 0.44],
-    [0.40, 0.44, 0.39, 0.46],
-    [0.44, 0.42, 0.41, 0.46],
-    [0.42, 0.46, 0.41, 0.48],
-    // breakdown
-    [0.46, 0.51, 0.45, 0.53],
-    [0.51, 0.55, 0.50, 0.57],
-    [0.55, 0.53, 0.52, 0.58],
-    [0.53, 0.59, 0.52, 0.61],
-    [0.59, 0.63, 0.58, 0.65],
-    [0.63, 0.67, 0.62, 0.69],
-    [0.67, 0.71, 0.66, 0.73],
-    // accumulation wobble before the sweep
-    [0.71, 0.74, 0.70, 0.76],
-    [0.74, 0.72, 0.71, 0.76],
-    [0.72, 0.78, 0.71, 0.80],
-    [0.78, 0.76, 0.75, 0.80],
-    // liquidity sweep — long lower wick
-    [0.76, 0.74, 0.73, 0.93],
-    // sharp bull reversal — big purple body
-    [0.74, 0.50, 0.73, 0.75],
-    // continuation up
-    [0.50, 0.44, 0.49, 0.52],
-    [0.44, 0.38, 0.43, 0.46],
-    [0.38, 0.33, 0.37, 0.40],
-    [0.33, 0.29, 0.32, 0.35],
-    [0.29, 0.26, 0.26, 0.31],
-    [0.26, 0.22, 0.22, 0.28]
-  ];
-  // x-axis session times — like the screenshot (8AM, 9:30 RTH open, 10, 11)
-  var TIMES = [
-    { i: 1,  label: '08:00' },
-    { i: 8,  label: '09:30' },
-    { i: 14, label: '10:00' },
-    { i: 19, label: '10:30' },
-    { i: 23, label: '11:00' }
-  ];
+  // ---------- Backdrop chart ----------
+  // Storyline rendered as a live SVG chart:
+  //   chop → wick tap (zone fades in AFTER the wick) → mid-tap of zone midline
+  //   → expansion candles march up and OUT of the top of the frame.
+  // Separate layouts for desktop (landscape) and mobile (portrait).
+
+  var DESKTOP_BD = {
+    W: 1600, H: 900,
+    PAD_L: 8, PAD_R: 138, PAD_T: 8, PAD_B: 70,
+    N: 56,
+    TAP_IDX: 26, MID_TAP_IDX: 27,
+    cursorIdx: 20,
+    bodyRatio: 0.62,
+    pillW: 118, pillH: 30, pillSmallH: 26,
+    timePillW: 268, timePillH: 30,
+    tvBox: 30,
+    symOffsetX: 48,
+    fontClass: ''
+  };
+  var MOBILE_BD = {
+    W: 720, H: 1280,
+    PAD_L: 16, PAD_R: 152, PAD_T: 36, PAD_B: 150,
+    N: 24,
+    TAP_IDX: 11, MID_TAP_IDX: 12,
+    cursorIdx: 8,
+    bodyRatio: 0.62,
+    pillW: 158, pillH: 44, pillSmallH: 38,
+    timePillW: 360, timePillH: 44,
+    tvBox: 44,
+    symOffsetX: 64,
+    fontClass: 'bd-mobile'
+  };
+
+  var P_MIN = 29380, P_MAX = 29640;
+  var DEMAND_LOW = 29453, DEMAND_HIGH = 29481, DEMAND_MID = 29465;
+
+  var DAYS   = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function formatTimeFromMinutes(totalMins) {
+    var m = ((totalMins % (24 * 60)) + 24 * 60) % (24 * 60);
+    var h = Math.floor(m / 60);
+    var mm = m % 60;
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    return pad2(h) + ':' + pad2(mm) + ' ' + ampm;
+  }
+  function formatCursorDate(d) {
+    return DAYS[d.getDay()] + ' ' + pad2(d.getDate()) + ' ' +
+           MONTHS[d.getMonth()] + " '" + pad2(d.getFullYear() % 100);
+  }
+  function formatWatermarkDate(d) {
+    return d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+  }
 
   var svg = document.getElementById('backdrop');
   var prefersReduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function isMobile() {
-    return window.matchMedia && window.matchMedia('(max-width: 800px)').matches;
-  }
-  // Portrait phones are far narrower than the 16:9 chart; `slice` would crop
-  // the sides off. Use `meet` on mobile so the whole pattern stays visible.
-  function setBackdropAspect() {
-    svg.setAttribute(
-      'preserveAspectRatio',
-      isMobile() ? 'xMidYMid meet' : 'xMidYMid slice'
-    );
-  }
-  setBackdropAspect();
-  var loopTimers = [];
+  function isMobileChart() { return window.innerWidth < 800; }
 
-  function clearTimers() {
+  var loopTimers = [];
+  var liveJitterInterval = 0;
+  var liveTickInterval = 0;
+  var cycleTimer = 0;
+  var fadeOutTimer = 0;
+
+  function clearAllTimers() {
     loopTimers.forEach(clearTimeout);
     loopTimers = [];
+    if (liveJitterInterval) { clearInterval(liveJitterInterval); liveJitterInterval = 0; }
+    if (liveTickInterval)   { clearInterval(liveTickInterval);   liveTickInterval = 0; }
+    if (cycleTimer)         { clearTimeout(cycleTimer);          cycleTimer = 0; }
+    if (fadeOutTimer)       { clearTimeout(fadeOutTimer);        fadeOutTimer = 0; }
   }
 
-  // y=0 is top of chart, y=H is bottom. Price-space mapping for right-rail labels.
-  // We pin two anchor candles in normalized y to real prices so all labels stay in sync.
-  var PRICE_AT_TOP    = { y: 0.18, px: 29680 };
-  var PRICE_AT_BOTTOM = { y: 0.94, px: 29445 };
-  function yToPrice(y) {
-    var t = (y - PRICE_AT_TOP.y) / (PRICE_AT_BOTTOM.y - PRICE_AT_TOP.y);
-    return PRICE_AT_TOP.px + t * (PRICE_AT_BOTTOM.px - PRICE_AT_TOP.px);
+  function generateCandles(L) {
+    var s = (Math.random() * 0xFFFFFFFF) >>> 0;
+    function r() {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      return s / 4294967296;
+    }
+    var arr = [];
+    var p = 29478;
+    for (var i = 0; i < L.N; i++) {
+      var open = p, close, high, low;
+      if (i < L.TAP_IDX) {
+        var drift = (r() - 0.5) * 7;
+        close = Math.max(29466, Math.min(29494, open + drift));
+        high = Math.max(open, close) + r() * 4 + 1;
+        low  = Math.min(open, close) - r() * 4 - 1;
+      } else if (i === L.TAP_IDX) {
+        open  = 29478;
+        close = 29470 + r() * 3;
+        high  = Math.max(open, close) + r() * 3 + 1;
+        low   = DEMAND_LOW;
+      } else if (i === L.MID_TAP_IDX) {
+        open  = p;
+        close = DEMAND_HIGH + 1 + r() * 2;
+        high  = Math.max(open, close) + r() * 2 + 1;
+        low   = DEMAND_MID;
+      } else {
+        var d = 38 + r() * 28;
+        close = open + d;
+        high  = close + r() * 12 + 2;
+        low   = open - r() * 6 - 1;
+      }
+      arr.push({ open: open, close: close, high: high, low: low });
+      p = close;
+    }
+    return arr;
   }
-  function priceToY(px) {
-    var t = (px - PRICE_AT_TOP.px) / (PRICE_AT_BOTTOM.px - PRICE_AT_TOP.px);
-    return PRICE_AT_TOP.y + t * (PRICE_AT_BOTTOM.y - PRICE_AT_TOP.y);
-  }
-  function fmtPx(p) {
-    return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
+
+  var currentCandles = [];
+  var currentLayout = null;
+  var liveCandleIdx = 0;
+  var barCount = 0;
 
   function buildBackdrop() {
-    clearTimers();
-    setBackdropAspect();
-    var W = 1600, H = 900;
-    var N = STORY.length;
-    var step = W / N;
-    var bodyW = step * 0.55;
-    var axisY = 0.96 * H;
-    var rightRailX = W - 96;
+    clearAllTimers();
+    var mobile = isMobileChart();
+    var L = mobile ? MOBILE_BD : DESKTOP_BD;
+    currentLayout = L;
+    barCount = 0;
+
+    svg.setAttribute('viewBox', '0 0 ' + L.W + ' ' + L.H);
+    svg.setAttribute('preserveAspectRatio', mobile ? 'xMidYMid meet' : 'xMidYMid slice');
+    svg.setAttribute('class', 'backdrop ' + L.fontClass);
+
+    var chartW = L.W - L.PAD_L - L.PAD_R;
+    var chartH = L.H - L.PAD_T - L.PAD_B;
+    var step = chartW / L.N;
+    var bodyW = step * L.bodyRatio;
+
+    function yFor(p) {
+      return L.PAD_T + (1 - (p - P_MIN) / (P_MAX - P_MIN)) * chartH;
+    }
+    function xFor(i) {
+      return L.PAD_L + (i + 0.5) * step;
+    }
+
+    currentCandles = generateCandles(L);
+
+    var upperLabels = [29620, 29600, 29560, 29540, 29520, 29500, 29480];
+    var lowerLabels = [29441, 29429, 29416.5, 29404.5, 29392.5];
+    var allLabels = upperLabels.concat(lowerLabels);
 
     var parts = [];
-    [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
-      parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + rightRailX + '" y2="' + (g * H) + '" class="bd-grid"/>');
+    parts.push('<g id="bd-fade" style="opacity:1;transition:opacity 0.85s ease">');
+
+    // grid lines
+    allLabels.forEach(function (p) {
+      parts.push('<line x1="' + L.PAD_L + '" y1="' + yFor(p) +
+        '" x2="' + (L.W - L.PAD_R) + '" y2="' + yFor(p) +
+        '" class="bd-grid"/>');
     });
 
-    var sweepIdx = 16;
-    var reversalIdx = 17;
+    // demand zone (hidden initially)
+    var demandX1 = xFor(L.TAP_IDX) - bodyW / 2 - (mobile ? 4 : 6);
+    var demandY1 = yFor(DEMAND_HIGH);
+    var demandY2 = yFor(DEMAND_LOW);
+    var demandMid = yFor(DEMAND_MID);
+    parts.push('<g id="bd-demand" style="opacity:0;transition:opacity 0.7s ease">');
+    parts.push('<rect x="' + demandX1 + '" y="' + demandY1 +
+      '" width="' + (L.W - L.PAD_R - demandX1) + '" height="' +
+      (demandY2 - demandY1) + '" class="bd-zone-purple"/>');
+    parts.push('<line x1="' + demandX1 + '" y1="' + demandMid +
+      '" x2="' + (L.W - L.PAD_R) + '" y2="' + demandMid +
+      '" class="bd-zone-purple-dash"/>');
+    parts.push('</g>');
 
-    // --- vertical "trade setup" green zone (covers the drop + reversal + continuation)
-    var setupX1 = 5 * step;
-    var setupX2 = (N - 1) * step + step;
-    parts.push('<rect class="bd-setup-zone" x="' + setupX1 + '" y="0" width="' +
-      (setupX2 - setupX1) + '" height="' + H + '"/>');
-
-    // --- darker vertical "entry" zone over the reversal candles
-    var entryX1 = sweepIdx * step - step * 0.1;
-    var entryX2 = (reversalIdx + 2) * step;
-    parts.push('<rect class="bd-entry-zone" x="' + entryX1 + '" y="0" width="' +
-      (entryX2 - entryX1) + '" height="' + H + '"/>');
-
-    // --- red supply zone at top-left (distribution)
-    parts.push('<rect class="bd-supply" x="0" y="' + (0.38 * H) +
-      '" width="' + (5 * step) + '" height="' + (0.10 * H) + '" rx="2"/>');
-
-    // --- horizontal target line (above the distribution)
-    var targetY = priceToY(29593.50) * H;
-    parts.push('<line class="bd-target-line" x1="0" x2="' + rightRailX + '" y1="' + targetY + '" y2="' + targetY + '"/>');
-
-    // --- horizontal stop-loss box around the sweep low
-    var stopTop = priceToY(29465.50) * H;
-    var stopBot = priceToY(29445.50) * H;
-    parts.push('<rect class="bd-stop-box" x="' + (sweepIdx * step + step * 0.3) +
-      '" y="' + stopTop + '" width="' + (rightRailX - (sweepIdx * step + step * 0.3)) +
-      '" height="' + (stopBot - stopTop) + '"/>');
-
-    // demand zone box — extends right from the sweep
-    var zoneX = sweepIdx * step + step * 0.2;
-    var zoneY = 0.74 * H;
-    var zoneH = 0.12 * H;
-    parts.push('<rect class="bd-zone" x="' + zoneX + '" y="' + zoneY +
-      '" width="' + (rightRailX - zoneX) + '" height="' + zoneH + '" rx="2"/>');
-
-    // candles
-    STORY.forEach(function (c, idx) {
-      var x = idx * step + step / 2;
-      var top = Math.min(c[0], c[1]) * H;
-      var bot = Math.max(c[0], c[1]) * H;
-      var h = Math.max(1.2, bot - top);
-      var wickTop = c[2] * H;
-      var wickBot = c[3] * H;
-      var bull = c[1] < c[0];
-      parts.push(
-        '<g class="cs ' + (bull ? 'cs-bull' : 'cs-bear') + '" data-i="' + idx + '">' +
-          '<line x1="' + x + '" x2="' + x + '" y1="' + wickTop + '" y2="' + top + '" class="cs-wick"/>' +
-          '<line x1="' + x + '" x2="' + x + '" y1="' + bot + '" y2="' + wickBot + '" class="cs-wick"/>' +
-          '<rect x="' + (x - bodyW / 2) + '" y="' + top + '" width="' + bodyW + '" height="' + h + '" class="cs-body" rx="0.5"/>' +
-        '</g>'
-      );
+    // candles (all rendered, hidden via .cs initial opacity 0; .in reveals)
+    currentCandles.forEach(function (c, i) {
+      var x = xFor(i);
+      var top = yFor(Math.max(c.open, c.close));
+      var bot = yFor(Math.min(c.open, c.close));
+      var wickTop = yFor(c.high);
+      var wickBot = yFor(c.low);
+      var bull = c.close > c.open;
+      var cls = 'cs ' + (bull ? 'cs-bull' : 'cs-bear');
+      parts.push('<g id="cs-' + i + '" class="' + cls + '">');
+      parts.push('<line x1="' + x + '" x2="' + x +
+        '" y1="' + wickTop + '" y2="' + wickBot + '" class="cs-wick"/>');
+      parts.push('<rect x="' + (x - bodyW / 2) + '" y="' + top +
+        '" width="' + bodyW + '" height="' + Math.max(1.4, bot - top) +
+        '" class="cs-body"/>');
+      parts.push('</g>');
     });
 
-    // current price marker — horizontal dashed line + glowing dot at last close
-    var last = STORY[N - 1];
-    var lx = (N - 1) * step + step / 2;
-    var ly = last[1] * H;
-    parts.push('<line class="bd-price-line" x1="0" x2="' + rightRailX + '" y1="' + ly + '" y2="' + ly + '"/>');
-    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="4" style="opacity:0"/>');
+    // overlay group: crosshair + pills + date watermark
+    var cursorIdx = L.cursorIdx;
+    var cursorX = xFor(cursorIdx);
+    var cursorY = yFor(DEMAND_MID);
 
-    // --- right-rail price scale (ghost numbers like the screenshot)
-    var rail = [29680, 29640, 29600, 29560, 29520, 29480, 29440, 29400];
-    rail.forEach(function (p) {
-      var py = priceToY(p) * H;
-      if (py < 4 || py > H - 4) return;
-      parts.push('<text class="bd-price-label" x="' + (rightRailX + 12) + '" y="' + (py + 4) +
-        '">' + fmtPx(p) + '</text>');
+    parts.push('<g id="bd-overlay" style="opacity:0;transition:opacity 0.7s ease">');
+    parts.push('<line x1="' + L.PAD_L + '" y1="' + cursorY +
+      '" x2="' + (L.W - L.PAD_R) + '" y2="' + cursorY +
+      '" class="bd-crosshair-h"/>');
+    parts.push('<line x1="' + cursorX + '" y1="' + L.PAD_T +
+      '" x2="' + cursorX + '" y2="' + (L.H - L.PAD_B) +
+      '" class="bd-crosshair"/>');
+
+    var watermarkY = L.H - L.PAD_B - (mobile ? 22 : 14);
+    parts.push('<text id="bd-watermark" x="' + cursorX + '" y="' + watermarkY +
+      '" class="bd-date" text-anchor="middle">' +
+      formatWatermarkDate(new Date()) + '</text>');
+
+    // live price pill (anchored dynamically)
+    parts.push('<g id="bd-live-pill" transform="translate(' + (L.W - L.PAD_R + 6) + ',0)">');
+    parts.push('<rect width="' + L.pillW + '" height="' + L.pillH +
+      '" rx="3" class="bd-pill"/>');
+    parts.push('<text id="bd-live-px" x="' + (L.pillW / 2) + '" y="' +
+      (L.pillH * 0.45) + '" class="bd-pill-text" text-anchor="middle">--</text>');
+    parts.push('<text id="bd-live-time" x="' + (L.pillW / 2) + '" y="' +
+      (L.pillH * 0.85) + '" class="bd-pill-sub" text-anchor="middle">--</text>');
+    parts.push('</g>');
+
+    // cursor price pill
+    var cursorPx = 29397.75;
+    parts.push('<g transform="translate(' + (L.W - L.PAD_R + 6) + ',' +
+      (cursorY - L.pillSmallH / 2) + ')">');
+    parts.push('<rect width="' + L.pillW + '" height="' + L.pillSmallH +
+      '" rx="3" class="bd-pill"/>');
+    parts.push('<text id="bd-cursor-px" x="' + (L.pillW / 2) + '" y="' +
+      (L.pillSmallH * 0.68) + '" class="bd-pill-text" text-anchor="middle">' +
+      fmt(cursorPx, 2) + '</text>');
+    parts.push('</g>');
+
+    // time pill below crosshair
+    parts.push('<g transform="translate(' + (cursorX - L.timePillW / 2) + ',' +
+      (L.H - L.PAD_B + 8) + ')">');
+    parts.push('<rect width="' + L.timePillW + '" height="' + L.timePillH +
+      '" rx="3" class="bd-pill"/>');
+    parts.push('<text id="bd-time-pill" x="' + (L.timePillW / 2) + '" y="' +
+      (L.timePillH * 0.66) + '" class="bd-pill-text" text-anchor="middle">' +
+      formatCursorDate(new Date()) + '   ' +
+      formatTimeFromMinutes(9 * 60 + 30) + '</text>');
+    parts.push('</g>');
+    parts.push('</g>'); // close overlay
+
+    // price ladder (always visible)
+    allLabels.forEach(function (p) {
+      parts.push('<text x="' + (L.W - L.PAD_R + 14) + '" y="' + (yFor(p) + 5) +
+        '" class="bd-price-label">' + fmt(p, 2) + '</text>');
     });
 
-    // highlighted price tags: current (purple) + target (green band) + stop (purple band)
-    function priceTag(y, label, color) {
-      var ty = y * H;
-      return '<rect class="bd-price-tag-bg" x="' + (rightRailX + 4) + '" y="' + (ty - 9) +
-             '" width="86" height="18" rx="2" style="fill:' + color + '"/>' +
-             '<text class="bd-price-label tag" x="' + (rightRailX + 12) + '" y="' + (ty + 4) +
-             '">' + label + '</text>';
-    }
-    parts.push(priceTag(priceToY(yToPrice(ly / H)), fmtPx(yToPrice(ly / H)), 'rgba(122,47,208,0.85)'));
-    parts.push(priceTag(priceToY(29593.50), '29,593.50', 'rgba(80,180,120,0.70)'));
-    parts.push(priceTag(priceToY(29465.50), '29,465.50', 'rgba(60,60,72,0.85)'));
-    parts.push(priceTag(priceToY(29445.50), '29,445.50', 'rgba(60,60,72,0.85)'));
+    // time axis labels (frame chrome)
+    parts.push('<text x="' + (L.PAD_L + 24) + '" y="' +
+      (L.H - (mobile ? 50 : 22)) +
+      '" class="bd-time-label">09:00 AM</text>');
+    parts.push('<text x="' + (L.W - L.PAD_R - (mobile ? 120 : 88)) + '" y="' +
+      (L.H - (mobile ? 50 : 22)) +
+      '" class="bd-time-label">10:00 AM</text>');
 
-    // x-axis time labels
-    TIMES.forEach(function (t) {
-      var tx = t.i * step + step / 2;
-      parts.push('<line class="bd-time-tick" x1="' + tx + '" x2="' + tx + '" y1="' + (axisY - 8) + '" y2="' + (axisY - 2) + '"/>');
-      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + 16) + '" text-anchor="middle">' + t.label + '</text>');
-    });
+    // TV mark + symbol tag
+    parts.push('<g>');
+    parts.push('<rect x="' + (L.PAD_L + 4) + '" y="' + (L.H - L.tvBox - 8) +
+      '" width="' + L.tvBox + '" height="' + L.tvBox +
+      '" rx="4" fill="rgba(122,47,208,0.10)"/>');
+    parts.push('<text x="' + (L.PAD_L + 4 + L.tvBox / 2) + '" y="' +
+      (L.H - L.tvBox / 2) + '" class="bd-tv" text-anchor="middle">TV</text>');
+    parts.push('<text x="' + (L.PAD_L + L.tvBox + L.symOffsetX - 30) + '" y="' +
+      (L.H - L.tvBox / 2) + '" class="bd-symbol-tag">NQ1!  |  5M</text>');
+    parts.push('</g>');
+
+    parts.push('</g>'); // close master fade group
 
     svg.innerHTML = parts.join('');
 
     if (prefersReduce) {
-      // skip the animation — show the finished frame
-      svg.querySelectorAll('.cs').forEach(function (g) { g.classList.add('in'); });
-      svg.querySelector('.bd-zone').classList.add('show');
-      svg.querySelector('.bd-supply').classList.add('show');
-      svg.querySelector('.bd-setup-zone').classList.add('show');
-      svg.querySelector('.bd-entry-zone').classList.add('show');
-      svg.querySelector('.bd-target-line').classList.add('show');
-      svg.querySelector('.bd-stop-box').classList.add('show');
-      svg.querySelector('.bd-price-line').classList.add('show');
-      svg.querySelectorAll('.bd-time, .bd-time-tick, .bd-price-label, .bd-price-tag-bg').forEach(function (n) { n.classList.add('show'); });
-      svg.querySelector('.bd-dot').style.opacity = '1';
+      // skip animation — show finished frame
+      for (var i = 0; i < L.N; i++) {
+        var el = document.getElementById('cs-' + i);
+        if (el) el.classList.add('in');
+      }
+      document.getElementById('bd-demand').style.opacity = '1';
+      document.getElementById('bd-overlay').style.opacity = '1';
+      positionLivePill(L, xFor, yFor);
       return;
     }
 
-    play();
+    runBuildAnimation(L, xFor, yFor);
   }
 
-  function play() {
-    var groups = svg.querySelectorAll('.cs');
-    var zone = svg.querySelector('.bd-zone');
-    var supply = svg.querySelector('.bd-supply');
-    var setupZone = svg.querySelector('.bd-setup-zone');
-    var entryZone = svg.querySelector('.bd-entry-zone');
-    var targetLine = svg.querySelector('.bd-target-line');
-    var stopBox = svg.querySelector('.bd-stop-box');
-    var priceLine = svg.querySelector('.bd-price-line');
-    var dot = svg.querySelector('.bd-dot');
-    var timeNodes = svg.querySelectorAll('.bd-time, .bd-time-tick');
-    var priceLabels = svg.querySelectorAll('.bd-price-label, .bd-price-tag-bg');
-
-    // reveal time axis + right-rail price ladder up-front (chart frame)
-    loopTimers.push(setTimeout(function () {
-      timeNodes.forEach(function (n) { n.classList.add('show'); });
-      priceLabels.forEach(function (n) { n.classList.add('show'); });
-    }, 120));
-
-    var sweepIdx = 16;
-    var reversalIdx = 17;
-    // candle interval — quicker on the reversal so it feels like a real impulse
-    function intervalFor(i) {
-      if (i < 5) return 230;          // distribution
-      if (i < sweepIdx) return 200;   // downtrend
-      if (i === sweepIdx) return 480; // pause on the sweep wick
-      if (i === sweepIdx + 1) return 140; // reversal candle pops fast
-      return 180;                     // continuation
-    }
-
+  function runBuildAnimation(L, xFor, yFor) {
     var t = 0;
-    groups.forEach(function (g, i) {
-      loopTimers.push(setTimeout(function () { g.classList.add('in'); }, t));
-      // supply zone draws in once the distribution is established
-      if (i === 4) {
-        loopTimers.push(setTimeout(function () { supply.classList.add('show'); }, t + 60));
-      }
-      // setup zone reveals as the breakdown starts
-      if (i === 5) {
-        loopTimers.push(setTimeout(function () { setupZone.classList.add('show'); }, t + 80));
-      }
-      // entry zone + demand zone + stop box align with the sweep wick
-      if (i === sweepIdx) {
-        loopTimers.push(setTimeout(function () {
-          zone.classList.add('show');
-          entryZone.classList.add('show');
-          stopBox.classList.add('show');
-        }, t + 80));
-      }
-      // target line resolves once continuation is underway
-      if (i === reversalIdx + 2) {
-        loopTimers.push(setTimeout(function () { targetLine.classList.add('show'); }, t + 60));
-      }
-      t += intervalFor(i);
-    });
 
-    // settle: dashed price line + glowing dot
-    loopTimers.push(setTimeout(function () {
-      priceLine.classList.add('show');
-      dot.style.transition = 'opacity 0.5s ease';
-      dot.style.opacity = '1';
-    }, t + 60));
-
-    // hold, then fade out and replay — desktop only; mobile holds the settled frame
-    if (!isMobile()) {
-      loopTimers.push(setTimeout(restart, t + 4200));
+    // chop candles (one per 70ms)
+    for (var i = 0; i < L.TAP_IDX; i++) {
+      (function (idx, delay) {
+        loopTimers.push(setTimeout(function () { showCandle(idx); }, delay));
+      })(i, t);
+      t += 70;
     }
+
+    // TAP candle (dramatic 800ms beat after)
+    loopTimers.push(setTimeout(function () { showCandle(L.TAP_IDX); }, t));
+    t += 800;
+
+    // ZONE_BEAT — demand zone fades in (no new candle)
+    loopTimers.push(setTimeout(function () {
+      var d = document.getElementById('bd-demand');
+      if (d) d.style.opacity = '1';
+    }, t));
+    t += 700;
+
+    // MID-TAP candle
+    loopTimers.push(setTimeout(function () { showCandle(L.MID_TAP_IDX); }, t));
+    t += 700;
+
+    // breakout candles (280ms each)
+    for (var j = L.MID_TAP_IDX + 1; j < L.N; j++) {
+      (function (idx, delay) {
+        loopTimers.push(setTimeout(function () { showCandle(idx); }, delay));
+      })(j, t);
+      t += 280;
+    }
+
+    // overlay (crosshair + pills) fades in
+    loopTimers.push(setTimeout(function () {
+      var ov = document.getElementById('bd-overlay');
+      if (ov) ov.style.opacity = '1';
+    }, t));
+    t += 500;
+
+    // live mode
+    loopTimers.push(setTimeout(function () {
+      startLiveMode(L, xFor, yFor);
+    }, t));
+
+    // hold ~3.5s then fade out and restart
+    cycleTimer = setTimeout(function () { cycleRestart(); }, t + 3500);
   }
 
-  function restart() {
-    var nodes = svg.querySelectorAll(
-      '.cs, .bd-zone, .bd-supply, .bd-setup-zone, .bd-entry-zone, .bd-target-line, ' +
-      '.bd-stop-box, .bd-price-line, .bd-time, .bd-time-tick, .bd-dot, ' +
-      '.bd-price-label, .bd-price-tag-bg'
-    );
-    nodes.forEach(function (n) {
-      n.classList.remove('in', 'show');
-      n.classList.add('out');
-    });
-    loopTimers.push(setTimeout(buildBackdrop, 900));
+  function showCandle(i) {
+    var el = document.getElementById('cs-' + i);
+    if (el) el.classList.add('in');
+  }
+
+  function positionLivePill(L, xFor, yFor) {
+    var idx = 0;
+    for (var i = currentCandles.length - 1; i >= 0; i--) {
+      if (currentCandles[i].close <= P_MAX) { idx = i; break; }
+    }
+    liveCandleIdx = idx;
+    var live = currentCandles[idx];
+    var ly = yFor(live.close);
+    var pill = document.getElementById('bd-live-pill');
+    if (pill) {
+      pill.setAttribute('transform',
+        'translate(' + (L.W - L.PAD_R + 6) + ',' + (ly - L.pillH / 2) + ')');
+    }
+    var pxEl = document.getElementById('bd-live-px');
+    var tEl  = document.getElementById('bd-live-time');
+    if (pxEl) pxEl.textContent = fmt(live.close, 2);
+    if (tEl) {
+      var liveTime = 9 * 60 + 30 + (idx - L.cursorIdx) * 5;
+      tEl.textContent = formatTimeFromMinutes(liveTime);
+    }
+    var liveEl = document.getElementById('cs-' + idx);
+    if (liveEl) liveEl.classList.add('cs-live');
+  }
+
+  function startLiveMode(L, xFor, yFor) {
+    positionLivePill(L, xFor, yFor);
+
+    // jitter rightmost on-frame candle
+    liveJitterInterval = setInterval(function () {
+      if (!currentCandles.length) return;
+      var idx = liveCandleIdx;
+      var c = currentCandles[idx];
+      var drift = (Math.random() - 0.5) * 7;
+      c.close = c.close + drift;
+      c.high = Math.max(c.high, c.close + Math.random() * 1.5);
+      c.low  = Math.min(c.low,  c.close - Math.random() * 1.5);
+
+      var x = xFor(idx);
+      var step = (L.W - L.PAD_L - L.PAD_R) / L.N;
+      var bodyW = step * L.bodyRatio;
+      var top = yFor(Math.max(c.open, c.close));
+      var bot = yFor(Math.min(c.open, c.close));
+      var wickTop = yFor(c.high);
+      var wickBot = yFor(c.low);
+      var bull = c.close > c.open;
+
+      var el = document.getElementById('cs-' + idx);
+      if (el) {
+        el.setAttribute('class', 'cs in cs-live ' + (bull ? 'cs-bull' : 'cs-bear'));
+        var wick = el.querySelector('.cs-wick');
+        var body = el.querySelector('.cs-body');
+        if (wick) { wick.setAttribute('y1', wickTop); wick.setAttribute('y2', wickBot); }
+        if (body) { body.setAttribute('y', top); body.setAttribute('height', Math.max(1.4, bot - top)); }
+      }
+
+      var pill = document.getElementById('bd-live-pill');
+      if (pill) {
+        pill.setAttribute('transform',
+          'translate(' + (L.W - L.PAD_R + 6) + ',' + (yFor(c.close) - L.pillH / 2) + ')');
+      }
+      var pxEl = document.getElementById('bd-live-px');
+      if (pxEl) pxEl.textContent = fmt(c.close, 2);
+    }, 800);
+
+    // cursor "bar" advances; refreshes time/date on the pills
+    liveTickInterval = setInterval(function () {
+      barCount += 1;
+      var baseMinutes = 9 * 60 + 30 + barCount * 5;
+      var cursorPxVal = 29397.75 + Math.sin(barCount * 0.6) * 8;
+      var cursorPxEl = document.getElementById('bd-cursor-px');
+      if (cursorPxEl) cursorPxEl.textContent = fmt(cursorPxVal, 2);
+      var timePillEl = document.getElementById('bd-time-pill');
+      if (timePillEl) {
+        timePillEl.textContent = formatCursorDate(new Date()) + '   ' +
+          formatTimeFromMinutes(baseMinutes);
+      }
+      var tEl = document.getElementById('bd-live-time');
+      if (tEl) {
+        var liveTime = baseMinutes + (liveCandleIdx - L.cursorIdx) * 5;
+        tEl.textContent = formatTimeFromMinutes(liveTime);
+      }
+    }, 6000);
+  }
+
+  function cycleRestart() {
+    var fade = document.getElementById('bd-fade');
+    if (fade) fade.style.opacity = '0';
+    if (liveJitterInterval) { clearInterval(liveJitterInterval); liveJitterInterval = 0; }
+    if (liveTickInterval)   { clearInterval(liveTickInterval);   liveTickInterval = 0; }
+    fadeOutTimer = setTimeout(function () { buildBackdrop(); }, 900);
   }
 
   buildBackdrop();
-  // rebuild on resize so the SVG re-fits cleanly. Ignore height-only changes —
-  // mobile browsers fire `resize` every time the URL/toolbar shows or hides,
-  // which would otherwise reset the whole animation mid-scroll.
+
+  // rebuild on width changes only (avoid mobile URL-bar resize storms)
   var rebuildTimer = 0;
   var lastW = window.innerWidth;
   window.addEventListener('resize', function () {
@@ -1019,15 +1277,19 @@ body::after {
     rebuildTimer = setTimeout(buildBackdrop, 180);
   });
 
-  // Pause clock, ticker, and chart animation when the tab is hidden.
-  // Background-tab throttling already slows timers, but on mobile we want
-  // zero work so the OS can suspend the page cleanly.
+  // refresh watermark / cursor-date at midnight so the chart text stays current
+  setInterval(function () {
+    var wmEl = document.getElementById('bd-watermark');
+    if (wmEl) wmEl.textContent = formatWatermarkDate(new Date());
+  }, 60000);
+
+  // ---------- Visibility: pause when hidden ----------
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
       clearInterval(clockInterval);
       clearInterval(priceInterval);
       clockInterval = priceInterval = 0;
-      clearTimers();
+      clearAllTimers();
     } else {
       if (!clockInterval) {
         updateClock();
