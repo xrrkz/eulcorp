@@ -1046,6 +1046,65 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   50%      { opacity: 1; }
 }
 
+/* -------- Home bg: cosmic horizon + perspective grid -------- */
+.hbg-star { fill: #fff; }
+@keyframes hbg-twinkle {
+  0%, 100% { opacity: var(--hbg-op, 0.4); }
+  50%      { opacity: 0; }
+}
+.hbg-grid {
+  stroke: rgba(255,255,255,0.10);
+  stroke-width: 1;
+  fill: none;
+}
+.hbg-grid-faint {
+  stroke: rgba(255,255,255,0.05);
+  stroke-width: 1;
+  fill: none;
+}
+.hbg-horizon {
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 1;
+}
+.hbg-sun-ring {
+  fill: none;
+  stroke: rgba(255,255,255,0.28);
+  stroke-width: 1;
+}
+.hbg-orbit {
+  fill: none;
+  stroke: rgba(255,255,255,0.18);
+  stroke-width: 1;
+  stroke-dasharray: 2 9;
+}
+@keyframes hbg-orbit-dash {
+  to { stroke-dashoffset: -110; }
+}
+@keyframes hbg-orbit-dash-rev {
+  to { stroke-dashoffset: 110; }
+}
+@keyframes hbg-scan {
+  0%   { transform: translateY(-220px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(220px); opacity: 0; }
+}
+.hbg-sun-core {
+  animation: hbg-sun-pulse 6s ease-in-out infinite;
+  transform-origin: 800px 540px;
+  transform-box: fill-box;
+}
+@keyframes hbg-sun-pulse {
+  0%, 100% { opacity: 0.92; }
+  50%      { opacity: 1; }
+}
+@keyframes hbg-meteor {
+  0%   { transform: translate(0,0);     opacity: 0; }
+  8%   { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translate(560px,260px); opacity: 0; }
+}
+
 /* -------- Contact bg: radar -------- */
 .bg-coord-ring {
   fill: none;
@@ -2528,15 +2587,163 @@ function ContactBg() {
   );
 }
 
+// -------- Home: cosmic horizon — perspective grid, glowing sun, starfield --------
+function HomeBg() {
+  const VANISH_X = 800;
+  const HORIZON_Y = 540;
+
+  const stars = _s_R.useMemo(() => {
+    const rnd = (n) => {
+      const x = Math.sin(n * 12.9898) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    return Array.from({ length: 120 }, (_, i) => ({
+      cx: rnd(i + 1) * 1600,
+      cy: rnd(i + 200) * (HORIZON_Y - 40),
+      r:  0.5 + rnd(i + 300) * 1.4,
+      op: 0.25 + rnd(i + 400) * 0.7,
+      dur: 2.4 + rnd(i + 500) * 4.2,
+      delay: -rnd(i + 600) * 6,
+    }));
+  }, []);
+
+  const verticals = [];
+  for (let i = -12; i <= 12; i++) {
+    const bx = VANISH_X + i * 360;
+    verticals.push(
+      <line key={`v${i}`} x1={bx} y1={900} x2={VANISH_X} y2={HORIZON_Y}
+            className={i === 0 ? "hbg-grid" : "hbg-grid-faint"} />
+    );
+  }
+
+  const ROWS = 11;
+  const rowDur = 7.2;
+  const rows = Array.from({ length: ROWS }, (_, i) => {
+    const begin = -(i * (rowDur / ROWS));
+    return (
+      <line key={`h${i}`} x1="0" x2="1600" y1={HORIZON_Y} y2={HORIZON_Y} className="hbg-grid">
+        <animate attributeName="y1"
+          values={`${HORIZON_Y};900`} keyTimes="0;1"
+          calcMode="spline" keySplines="0.45 0 1 1"
+          dur={`${rowDur}s`} begin={`${begin}s`} repeatCount="indefinite" />
+        <animate attributeName="y2"
+          values={`${HORIZON_Y};900`} keyTimes="0;1"
+          calcMode="spline" keySplines="0.45 0 1 1"
+          dur={`${rowDur}s`} begin={`${begin}s`} repeatCount="indefinite" />
+        <animate attributeName="opacity"
+          values="0;1;1;0" keyTimes="0;0.12;0.85;1"
+          dur={`${rowDur}s`} begin={`${begin}s`} repeatCount="indefinite" />
+      </line>
+    );
+  });
+
+  const SCANS = 5;
+  const scanDur = 6.5;
+  const sunScan = Array.from({ length: SCANS }, (_, i) => (
+    <rect
+      key={`s${i}`}
+      x={VANISH_X - 215} y={HORIZON_Y - 4}
+      width="430" height="5"
+      fill="#000"
+      style={{ animation: `hbg-scan ${scanDur}s linear ${-(i * (scanDur / SCANS))}s infinite` }}
+    />
+  ));
+
+  const meteors = Array.from({ length: 3 }, (_, i) => {
+    const x = 200 + i * 480;
+    const y = 80 + i * 70;
+    const dur = 7 + i * 2.5;
+    const delay = -i * 4.2;
+    return (
+      <g key={`m${i}`} style={{ animation: `hbg-meteor ${dur}s ease-in ${delay}s infinite` }}>
+        <line x1={x} y1={y} x2={x - 80} y2={y - 36}
+              stroke="rgba(255,255,255,0.85)" strokeWidth="1.2"
+              strokeLinecap="round" />
+        <circle cx={x} cy={y} r="1.6" fill="#fff" />
+      </g>
+    );
+  });
+
+  return (
+    <svg
+      className="bg-svg bg-home"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="hbg-sun" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0"    stopColor="#fff" stopOpacity="0.92" />
+          <stop offset="0.32" stopColor="#fff" stopOpacity="0.22" />
+          <stop offset="1"    stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="hbg-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0.05" />
+        </linearGradient>
+        <linearGradient id="hbg-ground" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.06" />
+          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id="hbg-vignette" cx="0.5" cy="0.42" r="0.62">
+          <stop offset="0"    stopColor="#000" stopOpacity="0.55" />
+          <stop offset="0.55" stopColor="#000" stopOpacity="0.18" />
+          <stop offset="1"    stopColor="#000" stopOpacity="0" />
+        </radialGradient>
+        <clipPath id="hbg-ground-clip">
+          <rect x="0" y={HORIZON_Y} width="1600" height={900 - HORIZON_Y} />
+        </clipPath>
+        <clipPath id="hbg-sun-clip">
+          <circle cx={VANISH_X} cy={HORIZON_Y} r="218" />
+        </clipPath>
+      </defs>
+
+      <rect x="0" y="0" width="1600" height={HORIZON_Y} fill="url(#hbg-sky)" />
+      <rect x="0" y={HORIZON_Y} width="1600" height={900 - HORIZON_Y} fill="url(#hbg-ground)" />
+
+      <g>
+        {stars.map((s, i) => (
+          <circle
+            key={i} cx={s.cx} cy={s.cy} r={s.r} className="hbg-star"
+            style={{
+              "--hbg-op": s.op,
+              opacity: s.op,
+              animation: `hbg-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+            }}
+          />
+        ))}
+      </g>
+
+      {meteors}
+
+      <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="720" ry="138"
+               className="hbg-orbit"
+               style={{ animation: "hbg-orbit-dash 26s linear infinite", opacity: 0.45 }} />
+      <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="520" ry="96"
+               className="hbg-orbit"
+               style={{ animation: "hbg-orbit-dash-rev 18s linear infinite" }} />
+
+      <circle cx={VANISH_X} cy={HORIZON_Y} r="220" fill="url(#hbg-sun)" className="hbg-sun-core" />
+      <circle cx={VANISH_X} cy={HORIZON_Y} r="138" className="hbg-sun-ring" />
+      <g clipPath="url(#hbg-sun-clip)">{sunScan}</g>
+
+      <line x1="0" y1={HORIZON_Y} x2="1600" y2={HORIZON_Y} className="hbg-horizon" />
+
+      <g clipPath="url(#hbg-ground-clip)">
+        {verticals}
+        {rows}
+      </g>
+
+      <rect x="0" y="0" width="1600" height="900" fill="url(#hbg-vignette)" />
+    </svg>
+  );
+}
+
 // -------- Background stack: crossfades between sections --------
 function BackgroundStack({ active }) {
-  // `Backdrop` (the trading chart) lives on window — re-use it for #home
-  const Trading = window.Backdrop;
   return (
     <div className="bg-stack" aria-hidden="true">
-      <div className={`bg-layer ${active === "home" ? "is-active" : ""}`}>
-        {Trading ? <Trading /> : null}
-      </div>
+      <div className={`bg-layer ${active === "home" ? "is-active" : ""}`}><HomeBg /></div>
       <div className={`bg-layer ${active === "about" ? "is-active" : ""}`}><AboutBg /></div>
       <div className={`bg-layer ${active === "portfolio" ? "is-active" : ""}`}><PortfolioBg /></div>
       <div className={`bg-layer ${active === "contact" ? "is-active" : ""}`}><ContactBg /></div>
