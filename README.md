@@ -1,38 +1,50 @@
 # eulcorp.com
 
-Single-page personal landing site for an independent index futures trader.
-Plain HTML + CSS + vanilla JS — no framework, no build step.
+One-page site for Eulcorp — a diversified holding company building across
+markets, real estate, construction, and technology.
+
+Single self-contained `index.html`: markup, styles, and scripts in one file,
+no build step. The UI is built with React 18, transpiled in the browser by
+Babel standalone (both loaded from a CDN).
 
 ## Files
 
-- `index.html` — the entire site (markup, styles, and script in one file)
+- `index.html` — the entire site (styles + four inlined `text/babel` modules)
 - `vercel.json` — Vercel config (security headers + clean URLs)
 - `README.md` — this file
 
 ## What's on the page
 
-- **Chrome bar** — pulsing purple dot, EULCORP / PRIVATE wordmark, live ET clock
-  with Globex session status (`GLOBEX LIVE` / `MAINT` / `WEEKEND`).
-- **Ticker** — scrolling strip of ES, NQ, YM, RTY, GC, MGC, CL, SI, VX seeded at
-  mid-May 2026 levels and drifting on a small random walk every 1.4s.
-- **Hero** — italic `EULCORP` wordmark with a purple-shimmer gradient and a
-  scramble-decode reveal on load (hover or click to re-trigger).
-- **Backdrop** — barely-visible bullish candlestick chart behind the wordmark,
-  with ghost numbers (`50K`, `+24.8%`, `ALL-TIME HIGH`).
+The page is one continuous scroll with four snap sections and a fixed chrome
+bar. Each section crossfades to its own animated black-and-white background.
+
+- **Chrome bar** — EULCORP wordmark, `HOME / ABOUT / PORTFOLIO / CONTACT` nav
+  that tracks the active section, live ET clock with Globex session status
+  (`GLOBEX LIVE` / `MAINT` / `WEEKEND`).
+- **EOD strip** — end-of-day closing prices for ES, NQ, YM, RTY, GC, MGC, CL,
+  SI, VX. Looked up via `window.claude.complete` when available; falls back to
+  seed values (and an `OFFLINE` status) outside that environment.
+- **Home** — animated `EULCORP` wordmark (scramble-decode reveal + shimmer,
+  hover/click to re-trigger) with corner annotations, over a looping SVG
+  candlestick chart (chop → wick tap → demand zone → mid-tap → breakout).
+- **About** — philosophy statement and a four-item principles list, over a
+  drifting-words background.
+- **Portfolio** — three verticals (Eulcorp Capital, Build, Estate), over an
+  isometric blueprint background.
+- **Contact** — social channels, over a radar-sweep background.
 - **Footer** — social handles (X, Instagram, TikTok) and `NY · LDN · JPN`.
+- **Tweaks panel** — toolbar-triggered controls for accent, background,
+  glow, wordmark style, and ticker.
 
 ## Editing placeholders
 
-Open `index.html` and look for these spots:
+Open `index.html` and look in the inlined `text/babel` modules:
 
-1. **Social links** — the three `<a>` tags inside `<footer class="socials">`.
-   Swap the `href` and `@handle` text for each.
-2. **Ticker data** — edit the `SEED` array inside the `<script>` block.
-   Each entry: `{ sym, px, tick, dec }`. The random walk takes over from there.
-   To wire real prices, swap the `setInterval(tickPrices, 1400)` for a fetch
-   to your data source (Polygon, Databento, TradingView widget, etc.).
-3. **OG image** — add a 1200×630 image at `/og-image.png` (already referenced
-   in the `<meta property="og:image">` tag).
+1. **Social links** — the `SOCIALS` array (`app.jsx` module) and the
+   `ContactSection` rows (`site.jsx` module).
+2. **Section copy** — `AboutSection`, `VERTICALS`, and `ContactSection` in the
+   `site.jsx` module.
+3. **EOD / ticker symbols** — the `SEED` array in the `app.jsx` module.
 
 ## Deploy to Vercel
 
@@ -65,13 +77,11 @@ automatically.
 
 ## Notes
 
-- Dark theme only, mobile-responsive, no horizontal scroll.
+- Black-and-white theme, mobile-responsive, no horizontal scroll.
 - No analytics, tracking, or cookies.
-- External CDNs used: Google Fonts (Inter Tight, JetBrains Mono,
-  Instrument Serif, Archivo). The site degrades gracefully (system serif and
-  sans fallbacks) if Google Fonts fails to load.
-- `prefers-reduced-motion` disables the wordmark shimmer, ticker scroll,
-  and pulse animations.
+- External CDNs used: React 18 + Babel standalone, and Google Fonts (Inter
+  Tight, JetBrains Mono, Instrument Serif, Archivo).
+- `prefers-reduced-motion` is honored by the animated layers.
 
 ## Deploy to Cloudflare Pages (alternative)
 
