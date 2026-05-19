@@ -1176,6 +1176,433 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   .contact-value { font-size: 22px; }
   .contact-meta  { flex-direction: column; gap: 6px; }
 }
+
+/* ====================================================================== */
+/* COOL ANIMATIONS — scroll reveals, card tilt+spotlight, magnetics, glitch */
+/* ====================================================================== */
+
+/* --- scroll reveal: fade up + soft de-blur, with per-element stagger --- */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  filter: blur(6px);
+  transition:
+    opacity 0.95s cubic-bezier(.2,.7,.2,1),
+    transform 0.95s cubic-bezier(.2,.7,.2,1),
+    filter 0.95s cubic-bezier(.2,.7,.2,1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* the eyebrow rule grows in from the left as its row reveals */
+[data-reveal] .eyebrow-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.9s cubic-bezier(.2,.7,.2,1) var(--reveal-delay, 0ms);
+}
+[data-reveal].is-in .eyebrow-line { transform: scaleX(1); }
+
+/* per-character cascade inside section titles (chars injected by JS) */
+.section-title .ch {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40%) rotate(2deg);
+  transition:
+    opacity 0.7s cubic-bezier(.2,.7,.2,1),
+    transform 0.7s cubic-bezier(.2,.7,.2,1);
+  transition-delay: calc(var(--reveal-delay, 0ms) + var(--ch-i, 0) * 22ms);
+  will-change: opacity, transform;
+}
+.section-title.is-in .ch {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- portfolio cards: spotlight + 3D tilt + corner bloom --- */
+.card {
+  --mx: 50%;
+  --my: 50%;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  isolation: isolate;
+  transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.22s cubic-bezier(.2,.7,.2,1),
+    box-shadow 0.4s cubic-bezier(.2,.7,.2,1);
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx) var(--my),
+    rgba(255,255,255,0.13),
+    rgba(255,255,255,0) 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.card:hover::before { opacity: 1; }
+.card:hover {
+  box-shadow:
+    0 24px 70px -28px rgba(255,255,255,0.18),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.card-corner {
+  transition:
+    width 0.45s cubic-bezier(.2,.7,.2,1),
+    height 0.45s cubic-bezier(.2,.7,.2,1),
+    opacity 0.3s ease;
+}
+.card:hover .card-corner { width: 26px; height: 26px; opacity: 1; }
+
+/* --- contact rows: cursor sweep ribbon, arrow lift --- */
+.contact-row {
+  --mx: 50%;
+  overflow: hidden;
+}
+.contact-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.085) 0%,
+    rgba(255,255,255,0) 55%
+  );
+  transform: translateX(-101%);
+  transition: transform 0.55s cubic-bezier(.2,.7,.2,1);
+  z-index: 0;
+}
+.contact-row:hover::before { transform: translateX(0); }
+.contact-row > * { position: relative; z-index: 1; }
+.contact-row:hover .contact-arrow { transform: translate(8px, -8px); }
+
+/* --- magnetic nav links + social handles --- */
+.nav-link, .socials a {
+  --mag-x: 0px;
+  --mag-y: 0px;
+  transform: translate3d(var(--mag-x), var(--mag-y), 0);
+  transition:
+    color 0.2s ease,
+    transform 0.32s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+}
+
+/* --- principles list: indent + leading bar on hover --- */
+.principles li {
+  position: relative;
+  transition:
+    padding-left 0.35s cubic-bezier(.2,.7,.2,1),
+    border-top-color 0.35s ease;
+}
+.principles li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 1px;
+  background: var(--text);
+  opacity: 0;
+  transition:
+    width 0.35s cubic-bezier(.2,.7,.2,1),
+    opacity 0.25s ease;
+}
+.principles li:hover {
+  padding-left: 28px;
+  border-top-color: rgba(255,255,255,0.55);
+}
+.principles li:hover::after { width: 18px; opacity: 1; }
+
+/* --- hero wordmark: holographic glitch on hover --- */
+.wordmark.is-glitch {
+  animation:
+    wm-shimmer 2.4s linear infinite,
+    wm-glitch 0.9s steps(2) infinite;
+}
+@keyframes wm-glitch {
+  0%   { text-shadow: 0 0 60px rgba(255,255,255,0.18); }
+  20%  { text-shadow:
+          2px 0 0 rgba(255,255,255,0.55),
+          -2px 0 0 rgba(255,255,255,0.35),
+          0 0 60px rgba(255,255,255,0.28); }
+  40%  { text-shadow:
+          -3px 1px 0 rgba(255,255,255,0.65),
+          3px -1px 0 rgba(255,255,255,0.45),
+          0 0 60px rgba(255,255,255,0.28); }
+  60%  { text-shadow:
+          1px 2px 0 rgba(255,255,255,0.45),
+          -2px -1px 0 rgba(255,255,255,0.65); }
+  80%  { text-shadow:
+          -1px 0 0 rgba(255,255,255,0.55),
+          2px 1px 0 rgba(255,255,255,0.35); }
+  100% { text-shadow: 0 0 60px rgba(255,255,255,0.18); }
+}
+
+/* --- live ticker: hover slows briefly for readability --- */
+.ticker-wrap:hover .ticker { animation-duration: 180s; }
+
+/* --- nav active-state little dot tick --- */
+.nav-link.is-active::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text);
+  transform: translate(-50%, 0);
+  box-shadow: 0 0 8px var(--text);
+  animation: nav-tick 1.8s ease-in-out infinite;
+}
+@keyframes nav-tick {
+  0%, 100% { opacity: 0.4; transform: translate(-50%, 0) scale(0.85); }
+  50%      { opacity: 1;   transform: translate(-50%, 0) scale(1.1); }
+}
+
+/* ====================================================================== */
+/* TRADING + REAL-ESTATE FLAVOR — sparkline ticks, foundation rise, P&L   */
+/* ====================================================================== */
+
+/* eyebrow: trailing mini-sparkline histogram (5 bars) injected by JS */
+.eb-spark {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  margin-left: 14px;
+  height: 12px;
+  vertical-align: middle;
+}
+.eb-spark span {
+  width: 2px;
+  background: var(--text);
+  opacity: 0.55;
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  transition: transform 0.55s cubic-bezier(.2,.7,.2,1);
+}
+.eb-spark span:nth-child(1) { height: 4px;  transition-delay: calc(var(--reveal-delay, 0ms) + 200ms); }
+.eb-spark span:nth-child(2) { height: 8px;  transition-delay: calc(var(--reveal-delay, 0ms) + 280ms); }
+.eb-spark span:nth-child(3) { height: 5px;  transition-delay: calc(var(--reveal-delay, 0ms) + 360ms); }
+.eb-spark span:nth-child(4) { height: 11px; transition-delay: calc(var(--reveal-delay, 0ms) + 440ms); }
+.eb-spark span:nth-child(5) {
+  height: 12px;
+  transition-delay: calc(var(--reveal-delay, 0ms) + 520ms);
+  opacity: 1;
+  background: var(--purple);
+  box-shadow: 0 0 6px var(--purple);
+}
+[data-reveal].is-in .eb-spark span { transform: scaleY(1); }
+
+/* section-title chart-line underline + price-dot (drawn by JS as SVG) */
+.title-tape {
+  display: block;
+  position: relative;
+  width: clamp(140px, 28%, 320px);
+  height: 16px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  overflow: visible;
+}
+.title-tape .tt-path {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 360;
+  stroke-dashoffset: 360;
+  opacity: 0.7;
+  transition:
+    stroke-dashoffset 1.3s cubic-bezier(.2,.7,.2,1)
+      calc(var(--reveal-delay, 0ms) + 380ms);
+}
+.title-tape.is-in .tt-path { stroke-dashoffset: 0; }
+.title-tape .tt-dot {
+  fill: var(--purple);
+  opacity: 0;
+  transition: opacity 0.3s ease calc(var(--reveal-delay, 0ms) + 1500ms);
+}
+.title-tape.is-in .tt-dot {
+  opacity: 1;
+  animation: tt-dot-pulse 1.8s ease-in-out 1700ms infinite;
+}
+@keyframes tt-dot-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%      { transform: scale(1.55); opacity: 0.55; }
+}
+.title-tape .tt-dot-ring {
+  fill: none;
+  stroke: var(--purple);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease calc(var(--reveal-delay, 0ms) + 1500ms);
+}
+.title-tape.is-in .tt-dot-ring {
+  opacity: 0.85;
+  animation: tt-dot-ring 1.8s ease-out 1700ms infinite;
+}
+@keyframes tt-dot-ring {
+  0%   { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+/* the SVG transform-origin per-element is tricky; use group origin via box */
+.title-tape .tt-dot,
+.title-tape .tt-dot-ring {
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* portfolio cards: "rise from foundation" — clip from bottom upward */
+.card.fx-rise {
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  transition:
+    clip-path 0.9s cubic-bezier(.2,.7,.2,1) var(--reveal-delay, 0ms),
+    opacity 0.6s cubic-bezier(.2,.7,.2,1) var(--reveal-delay, 0ms),
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.22s cubic-bezier(.2,.7,.2,1),
+    box-shadow 0.4s cubic-bezier(.2,.7,.2,1);
+}
+.card.fx-rise.is-in {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+/* foundation-line drawn under each card while rising */
+.card.fx-rise::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: var(--text);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(.2,.7,.2,1) var(--reveal-delay, 0ms);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 2;
+}
+.card.fx-rise.is-in::after {
+  transform: scaleX(1);
+  transition-delay: 0ms;
+  opacity: 0;
+  transition:
+    transform 0ms,
+    opacity 0.6s ease 1.0s;
+}
+
+/* card-stat: a live-pulse dot to the right of each value (price-tick feel) */
+.card-stat { position: relative; padding-right: 14px; }
+.card-stat dd::after {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px;
+  margin-left: 10px;
+  border-radius: 50%;
+  background: var(--purple);
+  vertical-align: middle;
+  opacity: 0.45;
+  animation: cs-tick 2.6s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--purple);
+}
+.card-stat:nth-child(2) dd::after { animation-delay: 0.6s; }
+.card-stat:nth-child(3) dd::after { animation-delay: 1.2s; }
+@keyframes cs-tick {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+/* principles: number scrambles in (handled by JS) — keep wide tabular slot */
+.p-num {
+  display: inline-block;
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
+}
+.p-num.is-scrambling { color: var(--text); text-shadow: 0 0 10px var(--text); }
+
+/* wordmark P&L flash chip — appears above wordmark on hover */
+.wordmark-frame {
+  position: relative;
+}
+.wm-pnl {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translate(-50%, -10px);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: #000;
+  background: var(--purple);
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(.2,.7,.2,1);
+  box-shadow: 0 0 16px rgba(255,255,255,0.35);
+  z-index: 3;
+}
+.wm-pnl .arr { font-size: 10px; }
+.wordmark-frame:hover .wm-pnl,
+.wordmark-frame:focus-within .wm-pnl {
+  opacity: 1;
+  transform: translate(-50%, -22px);
+}
+@media (max-width: 800px) {
+  .wm-pnl { top: 6px; font-size: 10px; padding: 3px 8px; letter-spacing: 0.14em; }
+  .title-tape { width: 50%; }
+}
+
+/* contact rows: subtle bid/ask bracket on the right when hovered */
+.contact-row::after {
+  content: "";
+  position: absolute;
+  right: 64px;
+  top: 50%;
+  width: 0;
+  height: 1px;
+  background: var(--text);
+  transition: width 0.45s cubic-bezier(.2,.7,.2,1);
+  z-index: 1;
+  opacity: 0.85;
+}
+.contact-row:hover::after { width: 28px; }
+
+/* respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
+  [data-reveal] .eyebrow-line { transform: none; transition: none; }
+  .section-title .ch { opacity: 1; transform: none; transition: none; }
+  .card { transform: none; transition: border-color 0.3s ease, background 0.3s ease; }
+  .card.fx-rise { clip-path: none; opacity: 1; transition: border-color 0.3s ease, background 0.3s ease; }
+  .card.fx-rise::after { display: none; }
+  .wordmark.is-glitch { animation: wm-shimmer 6s linear infinite; }
+  .nav-link.is-active::before { animation: none; }
+  .eb-spark span { transform: scaleY(1); transition: none; }
+  .title-tape .tt-path { stroke-dashoffset: 0; transition: none; }
+  .title-tape .tt-dot,
+  .title-tape .tt-dot-ring { animation: none; opacity: 0.9; }
+  .card-stat dd::after { animation: none; opacity: 0.7; }
+}
 </style>
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
@@ -3181,6 +3608,269 @@ function hexA(hex, a) {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<script>
+/* ============================================================
+ * fx.js — scroll reveals, 3D card tilt, magnetic nav,
+ *         chart-line title underlines, sparkline eyebrow ticks,
+ *         price-decode principle numbers, P&L wordmark chip.
+ *         Vanilla JS, runs after React mounts, idempotent via flags.
+ * ============================================================ */
+(function () {
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- 1. Split section titles into per-character spans ----------- */
+  function splitTitles(root) {
+    root.querySelectorAll('.section-title:not([data-split])').forEach((el) => {
+      el.setAttribute('data-split', '1');
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+      const textNodes = [];
+      let n;
+      while ((n = walker.nextNode())) textNodes.push(n);
+      let i = 0;
+      textNodes.forEach((tn) => {
+        const text = tn.textContent;
+        const frag = document.createDocumentFragment();
+        for (const c of text) {
+          if (c === ' ') { frag.appendChild(document.createTextNode(' ')); continue; }
+          const span = document.createElement('span');
+          span.className = 'ch';
+          span.style.setProperty('--ch-i', i++);
+          span.textContent = c;
+          frag.appendChild(span);
+        }
+        tn.replaceWith(frag);
+      });
+    });
+  }
+
+  /* ---- 2. Inject mini sparkline bars into each eyebrow ------------ */
+  function injectSparklines(root) {
+    root.querySelectorAll('.section-eyebrow:not([data-spark])').forEach((eb) => {
+      eb.setAttribute('data-spark', '1');
+      const spark = document.createElement('span');
+      spark.className = 'eb-spark';
+      spark.setAttribute('aria-hidden', 'true');
+      for (let i = 0; i < 5; i++) spark.appendChild(document.createElement('span'));
+      eb.appendChild(spark);
+    });
+  }
+
+  /* ---- 3. Inject SVG chart-line underline after each title -------- */
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function injectTitleTape(root) {
+    root.querySelectorAll('.section-title:not([data-tape])').forEach((title) => {
+      title.setAttribute('data-tape', '1');
+      const svg = document.createElementNS(SVG_NS, 'svg');
+      svg.setAttribute('class', 'title-tape');
+      svg.setAttribute('viewBox', '0 0 360 16');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      svg.setAttribute('aria-hidden', 'true');
+      // chart-style polyline (mild uptrend with a small dip)
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('class', 'tt-path');
+      path.setAttribute('d', 'M0 12 L60 10 L110 13 L160 7 L210 9 L260 4 L300 6 L340 2');
+      svg.appendChild(path);
+      // live-price ring + dot at the end of the line
+      const ring = document.createElementNS(SVG_NS, 'circle');
+      ring.setAttribute('class', 'tt-dot-ring');
+      ring.setAttribute('cx', '340'); ring.setAttribute('cy', '2'); ring.setAttribute('r', '3');
+      svg.appendChild(ring);
+      const dot = document.createElementNS(SVG_NS, 'circle');
+      dot.setAttribute('class', 'tt-dot');
+      dot.setAttribute('cx', '340'); dot.setAttribute('cy', '2'); dot.setAttribute('r', '2.4');
+      svg.appendChild(dot);
+      // place after the title node so it doesn't interfere with .ch spans
+      title.insertAdjacentElement('afterend', svg);
+      // copy reveal delay var so dash + dot timing aligns with parent
+      // (the SVG is a sibling, but its own [data-reveal] hop is handled below)
+      svg.setAttribute('data-reveal', '');
+      svg.style.setProperty('--reveal-delay', title.style.getPropertyValue('--reveal-delay') || '0ms');
+    });
+  }
+
+  /* ---- 4. Tag elements as reveal targets, with parent-stagger ----- */
+  const REVEAL_SELECTORS = [
+    '.section-eyebrow',
+    '.section-title',
+    '.section-lede',
+    '.principles li',
+    '.cards .card',
+    '.contact-grid .contact-row',
+    '.contact-meta',
+  ];
+  function tagReveal(root) {
+    REVEAL_SELECTORS.forEach((sel) => {
+      root.querySelectorAll(sel).forEach((el) => {
+        if (el.hasAttribute('data-reveal')) return;
+        el.setAttribute('data-reveal', '');
+        const parent = el.parentElement;
+        if (!parent) return;
+        const sibs = Array.from(parent.children).filter((s) =>
+          s.matches('.section-eyebrow, .section-title, .section-lede, .principles > li, .contact-grid > .contact-row, .cards > .card, .contact-meta')
+        );
+        const ix = sibs.indexOf(el);
+        if (ix >= 0) el.style.setProperty('--reveal-delay', `${ix * 90}ms`);
+      });
+    });
+    // cards also get the "foundation rise" treatment
+    root.querySelectorAll('.cards .card[data-reveal]:not(.fx-rise)').forEach((c) => {
+      c.classList.add('fx-rise');
+    });
+  }
+
+  /* ---- 5. IntersectionObserver to set .is-in on reveal targets ---- */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-in');
+        // when a principles <li> reveals, scramble its number briefly
+        if (e.target.matches('.principles li')) scramblePNum(e.target);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+  function observeAll(root) {
+    root.querySelectorAll('[data-reveal]:not(.is-in)').forEach((el) => io.observe(el));
+  }
+
+  /* ---- 6. Price-tape scramble for principles numbers -------------- */
+  const SCRAMBLE_GLYPHS = '0123456789';
+  function scramblePNum(li) {
+    const num = li.querySelector('.p-num');
+    if (!num || num.dataset.scrambleDone) return;
+    num.dataset.scrambleDone = '1';
+    const target = num.textContent.trim();
+    if (!target.match(/^\d+$/)) return;
+    num.classList.add('is-scrambling');
+    const start = performance.now();
+    const dur = 520;
+    function tick(now) {
+      const t = now - start;
+      const out = target.split('').map((c, i) => {
+        const lock = (i + 1) * (dur / (target.length + 1));
+        if (t >= lock) return c;
+        return SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)];
+      }).join('');
+      num.textContent = out;
+      if (t < dur) requestAnimationFrame(tick);
+      else { num.textContent = target; num.classList.remove('is-scrambling'); }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---- 7. Card spotlight + 3D tilt -------------------------------- */
+  function attachCardFX(card) {
+    if (card.__fx) return; card.__fx = true;
+    const TILT_MAX = 6;
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      card.style.setProperty('--mx', `${px * 100}%`);
+      card.style.setProperty('--my', `${py * 100}%`);
+      if (!REDUCED) {
+        card.style.setProperty('--tilt-y', `${(px - 0.5) * 2 * TILT_MAX}deg`);
+        card.style.setProperty('--tilt-x', `${-(py - 0.5) * 2 * TILT_MAX}deg`);
+      }
+    });
+    card.addEventListener('pointerleave', () => {
+      card.style.setProperty('--tilt-x', '0deg');
+      card.style.setProperty('--tilt-y', '0deg');
+    });
+  }
+
+  /* ---- 8. Contact row spotlight (left → right ribbon) ------------- */
+  function attachRowFX(row) {
+    if (row.__fx) return; row.__fx = true;
+    row.addEventListener('pointermove', (e) => {
+      const r = row.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      row.style.setProperty('--mx', `${px * 100}%`);
+    });
+  }
+
+  /* ---- 9. Magnetic nav + social links ----------------------------- */
+  function attachMagnetic(el, strength) {
+    if (el.__mag) return; el.__mag = true;
+    const r0 = () => el.getBoundingClientRect();
+    el.addEventListener('pointermove', (e) => {
+      const r = r0();
+      const dx = e.clientX - (r.left + r.width / 2);
+      const dy = e.clientY - (r.top + r.height / 2);
+      el.style.setProperty('--mag-x', `${dx * strength}px`);
+      el.style.setProperty('--mag-y', `${dy * strength}px`);
+    });
+    el.addEventListener('pointerleave', () => {
+      el.style.setProperty('--mag-x', '0px');
+      el.style.setProperty('--mag-y', '0px');
+    });
+  }
+
+  /* ---- 10. Wordmark glitch + P&L flash chip ---------------------- */
+  function attachWordmarkFX(root) {
+    // glitch on hover
+    root.querySelectorAll('.wordmark:not([data-glitch-bound])').forEach((el) => {
+      el.setAttribute('data-glitch-bound', '1');
+      el.addEventListener('pointerenter', () => el.classList.add('is-glitch'));
+      el.addEventListener('pointerleave', () => el.classList.remove('is-glitch'));
+    });
+    // P&L flash chip hovering above the wordmark frame
+    root.querySelectorAll('.wordmark-frame:not([data-pnl])').forEach((frame) => {
+      frame.setAttribute('data-pnl', '1');
+      const chip = document.createElement('span');
+      chip.className = 'wm-pnl';
+      chip.setAttribute('aria-hidden', 'true');
+      chip.innerHTML = '<span class="val">+1.34%</span><span class="arr">▲</span>';
+      frame.appendChild(chip);
+      // randomize a fresh "tick" each time the user enters
+      frame.addEventListener('pointerenter', () => {
+        const up = Math.random() > 0.32;
+        const pct = (Math.random() * 2.4 + 0.05).toFixed(2);
+        chip.querySelector('.val').textContent = (up ? '+' : '-') + pct + '%';
+        chip.querySelector('.arr').textContent = up ? '▲' : '▼';
+        chip.style.background = up ? '#ffffff' : 'rgba(255,255,255,0.78)';
+      });
+    });
+  }
+
+  /* ---- decorate runner -------------------------------------------- */
+  function decorate(root) {
+    splitTitles(root);
+    injectSparklines(root);
+    tagReveal(root);            // sets --reveal-delay on titles/eyebrows/etc.
+    injectTitleTape(root);      // copies that delay onto the chart-line SVG
+    observeAll(root);
+    root.querySelectorAll('.cards .card').forEach(attachCardFX);
+    root.querySelectorAll('.contact-grid .contact-row').forEach(attachRowFX);
+    root.querySelectorAll('.nav-link').forEach((el) => attachMagnetic(el, 0.22));
+    root.querySelectorAll('.socials a').forEach((el) => attachMagnetic(el, 0.18));
+    attachWordmarkFX(root);
+  }
+
+  function init() {
+    const root = document.getElementById('root') || document.body;
+    decorate(root);
+    // React reconciles in place, but new nodes can still appear (tweaks panel, etc).
+    // Re-run decoration whenever the tree changes.
+    const mo = new MutationObserver(() => decorate(root));
+    mo.observe(root, { childList: true, subtree: true });
+  }
+
+  /* Run immediately so MutationObserver is wired up BEFORE React mounts the
+   * tree. This way reveal/rise classes are applied within the same task that
+   * inserts the nodes — no flash of fully-visible cards followed by a
+   * fade-out. We also re-run after DOMContentLoaded as a safety net. */
+  init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('root') || document.body;
+      decorate(root);
+    });
+  }
+})();
 </script>
 </body>
 </html>
