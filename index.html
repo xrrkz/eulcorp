@@ -1,58 +1,81 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bg="deep-black" data-glow="on">
 <head>
 <meta charset="utf-8">
-<title>eulcorp — one of none</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#050306">
-<meta name="description" content="EULCORP — independent index futures trader. Indices, commodities. One of none.">
-
-<meta property="og:type" content="website">
-<meta property="og:title" content="eulcorp — one of none">
-<meta property="og:description" content="Independent index futures trader. Indices, commodities.">
-<meta property="og:url" content="https://eulcorp.com">
-<meta property="og:image" content="https://eulcorp.com/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="eulcorp — one of none">
-<meta name="twitter:description" content="Independent index futures trader. Indices, commodities.">
-<meta name="twitter:image" content="https://eulcorp.com/og-image.png">
-
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%237A2FD0'/%3E%3Cpath%20d='M16%208L24%2019H19V24H13V19H8Z'%20fill='%23fff'/%3E%3C/svg%3E">
-
+<title>eulcorp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@400;500;700&family=Archivo:wght@900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Inter+Tight:wght@300;400;500;600;700&family=Archivo:wght@800;900&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --purple: #7A2FD0;
-  --purple-soft: rgba(122, 47, 208, 0.22);
-  --purple-faint: rgba(122, 47, 208, 0.12);
-  --bg: #050306;
-  --text: #f5f3f7;
-  --muted: rgba(245, 243, 247, 0.5);
-  --faint: rgba(245, 243, 247, 0.25);
-  --line: rgba(255, 255, 255, 0.08);
+  /* monochrome accent (was purple). Kept the same var name so the rest of
+     the system keeps working without renaming every reference. */
+  --purple: #ffffff;
+  --purple-bright: #ffffff;
+  --purple-soft: rgba(255,255,255,0.10);
+  --purple-faint: rgba(255,255,255,0.05);
+
+  /* black-and-white theme (default) */
+  --bg: #000000;
+  --text: #ffffff;
+  --muted: rgba(255,255,255,0.62);
+  --faint: rgba(255,255,255,0.32);
+  --line: rgba(255,255,255,0.10);
+
+  /* chart palette — white bulls, dark bears on a black canvas */
+  --chart-grid: rgba(255,255,255,0.08);
+  --chart-bear: #1a1a1a;
+  --chart-bear-wick: rgba(255,255,255,0.55);
+  --chart-bull: #ffffff;
+  --chart-wm: rgba(255,255,255,0.06);
+  --chart-fvg: rgba(255,255,255,0.08);
+  --chart-fvg-soft: rgba(255,255,255,0.04);
+  --chart-fvg-line: rgba(255,255,255,0.35);
+  --chart-demand: rgba(255,255,255,0.10);
+  --chart-demand-stroke: rgba(255,255,255,0.42);
+  --chart-demand-dash: rgba(255,255,255,0.75);
+  --chart-crosshair: rgba(255,255,255,0.45);
+  --chart-crosshair-h: rgba(255,255,255,0.20);
+  --chart-price: rgba(255,255,255,0.62);
+  --chart-price-strong: rgba(255,255,255,0.85);
+  --chart-pill: #ffffff;
+  --chart-pill-text: #000000;
+  --chart-pill-sub: rgba(0,0,0,0.6);
+  --chart-date: rgba(255,255,255,0.42);
+
+  /* hero wordmark gradient stops */
+  --wm-a: #ffffff;
+  --wm-b: #ffffff;
+  --wm-shimmer: rgba(255,255,255,0.28);
+}
+
+/* legacy dark-bg data-attrs map to the same B&W theme */
+html[data-bg="pure-black"], html[data-bg="deep-black"] {
+  --bg: #000000;
+  --text: #ffffff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scroll-padding-top: 56px;     /* don't snap behind the fixed chrome */
+}
 html, body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   min-height: 100vh;
-  min-height: 100dvh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
-  text-rendering: optimizeLegibility;
 }
-body { position: relative; }
-a, button, [role="button"] { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-
-/* purple glow */
+body {
+  position: relative;
+  min-height: 100vh;
+}
+/* purple glow layers */
 body::before {
   content: "";
   position: fixed; inset: 0;
@@ -60,8 +83,10 @@ body::before {
   background:
     radial-gradient(ellipse 1200px 800px at 18% 78%, var(--purple-soft), transparent 60%),
     radial-gradient(ellipse 900px 600px at 85% 18%, var(--purple-faint), transparent 70%);
-  z-index: 0;
+  z-index: 1;
+  transition: opacity .4s;
 }
+html[data-glow="off"] body::before { opacity: 0; }
 
 /* film grain */
 body::after {
@@ -69,183 +94,70 @@ body::after {
   position: fixed; inset: 0;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: 0.06;
-  mix-blend-mode: overlay;
-  z-index: 1;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  z-index: 4;
 }
+html[data-bg="pure-black"] body::after,
+html[data-bg="deep-black"] body::after { mix-blend-mode: overlay; opacity: 0.06; }
+.page { position: relative; z-index: 25; }
 
-.page { position: relative; z-index: 2; }
-
-/* ---------- backdrop chart + ghost numbers ---------- */
-.backdrop {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
-}
-.bd-grid {
-  stroke: rgba(255, 255, 255, 0.035);
-  stroke-width: 1;
-  stroke-dasharray: 2 10;
-}
-.cs-wick { stroke-width: 1; stroke-linecap: round; }
-.cs-body { stroke-width: 1; }
-.cs-bull .cs-wick { stroke: var(--purple); stroke-opacity: 0.55; }
-.cs-bull .cs-body {
-  fill: var(--purple); fill-opacity: 0.38;
-  stroke: var(--purple); stroke-opacity: 0.65;
-}
-.cs-bear .cs-wick { stroke: rgba(255, 255, 255, 0.22); }
-.cs-bear .cs-body { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.22); }
-.bd-dot { fill: var(--purple); fill-opacity: 0.55; }
-.bd-dot-bright {
-  fill: var(--purple); fill-opacity: 1;
-  filter: drop-shadow(0 0 10px var(--purple));
-}
-.bd-trend {
-  fill: none;
-  stroke: var(--purple);
-  stroke-opacity: 0.35;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.cs { opacity: 0; }
-.cs.in { animation: cs-in 320ms ease-out forwards; }
-.cs.out { animation: cs-out 700ms ease forwards; }
-@keyframes cs-in {
-  0%   { opacity: 0; transform: translateY(4px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes cs-out {
-  to { opacity: 0; }
-}
-.bd-zone {
-  fill: var(--purple); fill-opacity: 0.10;
-  stroke: var(--purple); stroke-opacity: 0.35;
-  stroke-width: 1; stroke-dasharray: 4 6;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.bd-zone.show { opacity: 1; }
-
-/* red supply zone — distribution top-left */
-.bd-supply {
-  fill: rgba(255, 90, 110, 0.10);
-  stroke: rgba(255, 90, 110, 0.35);
-  stroke-width: 1; stroke-dasharray: 4 6;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.bd-supply.show { opacity: 1; }
-
-/* vertical "trade setup" green shading covering the whole move */
-.bd-setup-zone {
-  fill: rgba(80, 220, 140, 0.06);
-  stroke: rgba(80, 220, 140, 0.18);
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
-.bd-setup-zone.show { opacity: 1; }
-
-/* darker vertical "entry" zone over the reversal */
-.bd-entry-zone {
-  fill: rgba(122, 47, 208, 0.16);
-  stroke: rgba(122, 47, 208, 0.32);
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.9s ease;
-}
-.bd-entry-zone.show { opacity: 1; }
-
-/* horizontal target line above */
-.bd-target-line {
-  stroke: rgba(80, 220, 140, 0.55);
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.bd-target-line.show { opacity: 1; }
-
-/* horizontal stop-loss box below the sweep low */
-.bd-stop-box {
-  fill: var(--purple); fill-opacity: 0.18;
-  stroke: var(--purple); stroke-opacity: 0.40;
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-.bd-stop-box.show { opacity: 1; }
-
-.bd-price-line {
-  stroke: var(--purple);
-  stroke-opacity: 0.45;
-  stroke-width: 1;
-  stroke-dasharray: 3 6;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.bd-price-line.show { opacity: 1; }
-
-/* right-side ghost price labels */
-.bd-price-label {
-  fill: rgba(245, 243, 247, 0.22);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  font-variant-numeric: tabular-nums;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.bd-price-label.show { opacity: 1; }
-.bd-price-label.tag {
-  fill: rgba(245, 243, 247, 0.85);
-  font-size: 11px;
-}
-.bd-price-tag-bg {
-  fill: rgba(0, 0, 0, 0.55);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.bd-price-tag-bg.show { opacity: 1; }
-
-.bd-time {
-  fill: rgba(245, 243, 247, 0.22);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.bd-time.show { opacity: 1; }
-.bd-time-tick {
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 1;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.bd-time-tick.show { opacity: 1; }
-
-/* ---------- chrome ---------- */
+/* ---------- chrome (with nav) ---------- */
 .chrome {
   position: fixed; top: 0; left: 0; right: 0;
-  display: flex; justify-content: space-between; align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   padding: 20px 32px;
-  padding-top: max(20px, env(safe-area-inset-top));
-  padding-left: max(32px, env(safe-area-inset-left));
-  padding-right: max(32px, env(safe-area-inset-right));
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-  z-index: 20;
+  z-index: 26;
 }
-.chrome .brand { display: flex; align-items: center; gap: 12px; color: var(--text); }
+.chrome .brand { display: flex; align-items: center; gap: 12px; color: var(--text); justify-self: start; }
+.chrome .right { display: flex; gap: 28px; align-items: center; justify-self: end; }
+
+/* nav links inside chrome center column */
+.navbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  justify-self: center;
+}
+.nav-link {
+  position: relative;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  padding: 6px 4px;
+  transition: color 0.2s ease;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 4px; right: 4px; bottom: 0;
+  height: 1px;
+  background: var(--text);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s ease;
+}
+.nav-link:hover { color: var(--text); }
+.nav-link:hover::after { transform: scaleX(1); }
+.nav-link.is-active {
+  color: var(--text);
+}
+.nav-link.is-active::after {
+  transform: scaleX(1);
+}
+
+/* legacy chrome bits we kept around but aren't using anymore */
+.chrome .brand .slash,
+.chrome .brand .label { display: none; }
 .chrome .dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--purple);
@@ -257,19 +169,14 @@ body::after {
   50%      { opacity: 0.5; transform: scale(0.85); }
 }
 .chrome .right { display: flex; gap: 28px; align-items: center; }
-.chrome .time {
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-  min-width: 88px;
-  text-align: right;
-}
+.chrome .time { color: var(--text); font-variant-numeric: tabular-nums; min-width: 88px; text-align: right; }
 
 /* ---------- ticker ---------- */
 .ticker-wrap {
   position: fixed; top: 56px; left: 0; right: 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0,0,0,0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   overflow: hidden;
@@ -277,6 +184,8 @@ body::after {
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
 }
+html[data-bg="pure-black"] .ticker-wrap,
+html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
 .ticker {
   display: flex; gap: 56px;
   padding: 11px 0;
@@ -295,43 +204,56 @@ body::after {
 .tick .px { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
 .tick .ch { font-size: 11px; font-variant-numeric: tabular-nums; }
 .tick .ch.up { color: var(--purple); }
-.tick .ch.dn { color: rgba(245, 243, 247, 0.4); }
+.tick .ch.dn { color: var(--muted); }
 .tick .sep { color: var(--line); margin-left: 10px; }
 
 /* ---------- hero ---------- */
 .hero {
   min-height: 100vh;
-  min-height: 100dvh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 160px 24px 200px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 180px 24px 300px;     /* extra bottom space so wordmark corners stay clear of socials */
   text-align: center;
   position: relative;
   z-index: 2;
 }
-.hero-pre {
-  display: inline-flex; align-items: center; gap: 14px;
+
+/* wordmark with corner annotations */
+.wordmark-frame {
+  position: relative;
+  display: inline-block;
+  padding: 28px 36px;
+  isolation: isolate;
+}
+.wf-corner {
+  position: absolute;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--faint);
-  margin-bottom: 28px;
+  color: var(--text);
+  white-space: nowrap;
+  text-shadow: 0 0 12px rgba(0,0,0,0.95), 0 0 24px rgba(0,0,0,0.7);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
 }
-.hero-pre-line { width: 28px; height: 1px; background: var(--purple); }
+.wf-tl { top: 0;    left:  0;  }
+.wf-tr { top: 0;    right: 0;  }
+.wf-bl { bottom: 4px; left:  0; }
+.wf-br { bottom: 4px; right: 0; color: var(--muted); }
 
+/* wordmark variants */
 .wordmark {
-  font-family: Palatino, 'Palatino Linotype', 'Book Antiqua', 'Instrument Serif', Cambria, Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
   font-size: clamp(64px, 12vw, 200px);
   line-height: 0.86;
   letter-spacing: -0.02em;
   background: linear-gradient(
     110deg,
-    #ece6f3 0%, #ece6f3 38%,
-    var(--purple) 50%,
-    #ece6f3 62%, #ece6f3 100%
+    var(--wm-a) 0%,
+    var(--wm-a) 38%,
+    var(--wm-shimmer) 50%,
+    var(--wm-b) 62%,
+    var(--wm-b) 100%
   );
   background-size: 220% 100%;
   background-position: 100% 0;
@@ -339,43 +261,355 @@ body::after {
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+  position: relative;
+  font-weight: 400;
   cursor: pointer;
   user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
   animation: wm-shimmer 6s linear infinite;
+  /* tabular-ish so letters don't jiggle while scrambling */
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 60px rgba(122, 47, 208, 0.18);
-  transition: transform .14s ease;
-  transform-origin: 50% 60%;
-  will-change: transform;
+  text-shadow: 0 0 60px rgba(255, 255, 255, 0.18);
 }
 @keyframes wm-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-.wordmark:hover { animation-duration: 2.4s; }
-.wordmark:active { transform: scale(0.985); }
+.wordmark:hover {
+  animation-duration: 2.4s;
+}
+
+/* ---------- backdrop chart + ghost numbers ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;        /* above ticker (19); below page/chrome/footers (25+) */
+  overflow: visible;
+}
+.bd-grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+  stroke-dasharray: 2 10;
+}
+
+/* candlesticks */
+.cs {
+  transition: transform 0.7s cubic-bezier(.4,.0,.2,1);
+}
+.cs-wick {
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  transition: y1 .35s linear, y2 .35s linear;
+}
+.cs-body {
+  stroke-width: 1;
+  transition: y .35s linear, height .35s linear;
+}
+.cs-bull .cs-wick { stroke: var(--chart-bull); stroke-opacity: 0.95; }
+.cs-bull .cs-body { fill: var(--chart-bull); fill-opacity: 0.92; stroke: var(--chart-bull); stroke-opacity: 1; }
+.cs-bear .cs-wick { stroke: var(--chart-bear-wick); }
+.cs-bear .cs-body { fill: var(--chart-bear); stroke: var(--chart-bear); }
+.cs-live .cs-body { animation: live-pulse 1.4s ease-in-out infinite; filter: drop-shadow(0 0 8px var(--purple)); }
+.cs-live .cs-wick { animation: live-pulse 1.4s ease-in-out infinite; }
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+.cs-new { animation: cs-pop .45s ease-out; transform-origin: center bottom; }
+@keyframes cs-pop {
+  from { opacity: 0; transform: translateY(8px) scaleY(0.4); }
+  to   { opacity: 1; transform: translateY(0)   scaleY(1); }
+}
+
+/* chart axis + labels */
+.bd-price-label {
+  fill: var(--chart-price);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.bd-time-label {
+  fill: var(--chart-price-strong);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.bd-pill {
+  fill: var(--chart-pill);
+  stroke: rgba(255,255,255,0.04);
+  stroke-width: 1;
+}
+.bd-pill-text {
+  fill: var(--chart-pill-text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.bd-pill-sub {
+  fill: var(--chart-pill-sub);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.bd-date {
+  fill: var(--chart-date);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.bd-nq-watermark {
+  fill: var(--chart-wm);
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 360px;
+  letter-spacing: -0.05em;
+}
+.bd-symbol-tag {
+  fill: var(--chart-price);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+.bd-tv {
+  fill: var(--chart-price-strong);
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+}
+.bd-crosshair {
+  stroke: var(--chart-crosshair);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+.bd-crosshair-h {
+  stroke: var(--chart-crosshair-h);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+.bd-zone-green {
+  fill: var(--chart-fvg);
+  stroke: var(--chart-fvg-line);
+  stroke-width: 1;
+  stroke-opacity: 0.4;
+}
+.bd-zone-green-soft {
+  fill: var(--chart-fvg-soft);
+}
+.bd-zone-purple {
+  fill: var(--chart-demand);
+  stroke: var(--chart-demand-stroke);
+  stroke-width: 1;
+}
+.bd-zone-purple-dash {
+  stroke: var(--chart-demand-dash);
+  stroke-width: 1.2;
+  stroke-dasharray: 7 7;
+  fill: none;
+}
+.bd-limit-green {
+  stroke: var(--chart-fvg-line);
+  stroke-width: 1;
+}
+
+/* buy execution mark (entry at 09:30 AM @ 29,466) */
+.bd-buy-line {
+  stroke: var(--text);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  stroke-opacity: 0.55;
+}
+.bd-buy-badge {
+  fill: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+}
+.bd-buy-price,
+.bd-buy-time {
+  fill: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.backdrop.bd-mobile .bd-buy-badge { font-size: 14px; }
+.backdrop.bd-mobile .bd-buy-price,
+.backdrop.bd-mobile .bd-buy-time  { font-size: 16px; }
+
+/* mobile: viewBox is 720x1280 — chart fits entirely (no crop) and labels read */
+.backdrop.bd-mobile {
+  background: var(--bg);   /* fill the letterbox bars cleanly */
+}
+.backdrop.bd-mobile .bd-price-label,
+.backdrop.bd-mobile .bd-time-label  { font-size: 22px; }
+.backdrop.bd-mobile .bd-pill-text   { font-size: 22px; }
+.backdrop.bd-mobile .bd-pill-sub    { font-size: 17px; }
+.backdrop.bd-mobile .bd-date        { font-size: 38px; letter-spacing: 0.05em; }
+.backdrop.bd-mobile .bd-symbol-tag  { font-size: 22px; }
+.backdrop.bd-mobile .bd-tv          { font-size: 26px; }
+.backdrop.bd-mobile .bd-grid        { stroke-dasharray: 3 14; }
+.backdrop.bd-mobile .cs-wick        { stroke-width: 1.6; }
+.backdrop.bd-mobile .bd-crosshair,
+.backdrop.bd-mobile .bd-crosshair-h { stroke-width: 1.4; stroke-dasharray: 3 8; }
+
+.bd-dot {
+  fill: var(--purple);
+  fill-opacity: 0.55;
+}
+.bd-dot-bright {
+  fill: var(--purple);
+  fill-opacity: 1;
+  filter: drop-shadow(0 0 10px var(--purple));
+}
+.bd-num {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 320px;
+  letter-spacing: -0.04em;
+  fill: rgba(255, 255, 255, 0.028);
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.018);
+  stroke-width: 1.5;
+}
+.bd-num-sm {
+  font-size: 180px;
+  fill: rgba(255, 255, 255, 0.022);
+}
+.bd-num-tiny {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 36px;
+  letter-spacing: 0.06em;
+  fill: rgba(122, 47, 208, 0.18);
+  stroke: none;
+}
+.wm-serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+}
+.wm-sans {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+}
+.wm-stencil {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.wm-dot {
+  color: var(--purple);
+  -webkit-text-fill-color: var(--purple);
+  background: none;
+  text-shadow: 0 0 40px var(--purple);
+}
 
 .kicker {
   display: inline-flex; align-items: center; gap: 18px;
   margin-top: 40px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.42em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.44em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text);
+  text-shadow: 0 0 12px rgba(0,0,0,0.95), 0 0 24px rgba(0,0,0,0.7);
 }
-.kicker .bar { display: inline-block; width: 32px; height: 1px; background: var(--purple); }
+.kicker .bar {
+  display: inline-block; width: 32px; height: 1px;
+  background: var(--purple);
+}
 .kicker .kdot { color: var(--purple); }
+
+/* ---------- EOD strip (Claude-fetched closing prices, top of page) ---------- */
+.eod-strip {
+  position: fixed;
+  left: 0; right: 0; top: 56px;
+  display: flex; align-items: center; gap: 28px;
+  padding: 9px 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: rgba(0,0,0,0.55);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow-x: auto;
+  white-space: nowrap;
+  z-index: 26;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+.eod-strip::-webkit-scrollbar { display: none; }
+html[data-bg="pure-black"] .eod-strip,
+html[data-bg="deep-black"] .eod-strip { background: rgba(0,0,0,0.45); }
+.eod-label {
+  color: var(--purple);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.eod-cell {
+  display: inline-flex; align-items: baseline; gap: 8px;
+}
+.eod-sym {
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  font-weight: 500;
+  font-size: 10.5px;
+}
+.eod-px {
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+.eod-status {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  letter-spacing: 0.22em;
+  font-size: 9.5px;
+  text-transform: uppercase;
+}
+.eod-status::before {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor;
+}
+.eod-status.is-loading { color: var(--muted); animation: eod-blink 1.4s ease-in-out infinite; }
+.eod-status.is-error   { color: rgba(180,40,40,0.85); }
+.eod-status.is-ok      { color: var(--purple); }
+@keyframes eod-blink {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+@media (max-width: 800px) {
+  .eod-strip {
+    top: 42px;            /* below mobile chrome */
+    padding: 8px 16px;
+    gap: 20px;
+    font-size: 10px;
+  }
+  .eod-strip .eod-status { display: none; }
+}
 
 /* ---------- socials ---------- */
 .socials {
   position: fixed; bottom: 0; left: 0; right: 0;
   padding: 18px 32px;
-  padding-bottom: max(18px, env(safe-area-inset-bottom));
-  padding-left: max(32px, env(safe-area-inset-left));
-  padding-right: max(32px, env(safe-area-inset-right));
   display: flex; justify-content: space-between; align-items: center;
   border-top: 1px solid var(--line);
   font-family: 'JetBrains Mono', monospace;
@@ -383,14 +617,18 @@ body::after {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0,0,0,0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  z-index: 20;
+  z-index: 26;
 }
+html[data-bg="pure-black"] .socials,
+html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
 .socials .left, .socials .right { min-width: 180px; }
 .socials .right { text-align: right; }
-.socials .links { display: flex; gap: 28px; }
+.socials .links {
+  display: flex; gap: 28px;
+}
 .socials a {
   color: var(--text);
   text-decoration: none;
@@ -408,638 +646,2334 @@ body::after {
 
 /* ---------- responsive ---------- */
 @media (max-width: 800px) {
-  /* cheaper blur on mobile GPUs; the dark wash still reads */
-  .ticker-wrap,
-  .socials {
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    background: rgba(0, 0, 0, 0.55);
+  .wordmark-frame {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
   }
-  /* the radial glows are huge offscreen ellipses; tighten on mobile */
-  body::before {
-    background:
-      radial-gradient(ellipse 700px 500px at 18% 78%, var(--purple-soft), transparent 60%),
-      radial-gradient(ellipse 500px 400px at 85% 18%, var(--purple-faint), transparent 70%);
+  .wf-corner {
+    position: static;
+    display: block;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.26em;
   }
-  /* mix-blend grain costs paint on every scroll/animation tick; barely visible on phone screens */
-  body::after { display: none; }
+  /* TL + TR stay near wordmark (above it). BL + BR pin to viewport above
+     the socials bar so the date + locations remain visible no matter how
+     short the screen is. */
+  .wf-tl { order: 0; }
+  .wf-tr { order: 1; color: var(--muted); }
+  .wordmark-frame .wordmark { order: 2; }
+  .wf-bl, .wf-br {
+    position: fixed;
+    bottom: 96px;            /* above mobile socials (~80-90px tall) */
+    z-index: 26;
+    padding: 6px 12px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 2px;
+    pointer-events: none;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+  }
+  .wf-bl { left: 16px; }
+  .wf-br { right: 16px; color: var(--muted); }
+
+  /* Only show the fixed bottom bar while user is on the home section */
+  html:not([data-active="home"]) .wf-bl,
+  html:not([data-active="home"]) .wf-br { display: none; }
 
   .chrome {
     padding: 12px 16px;
-    padding-top: max(12px, env(safe-area-inset-top));
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
     font-size: 10px;
     letter-spacing: 0.1em;
   }
   .chrome .brand { gap: 10px; }
-  .chrome .brand .slash,
+  .chrome .brand .slash { display: none; }
   .chrome .brand .label { display: none; }
   .chrome .right { gap: 14px; font-size: 10px; }
   .chrome .time { min-width: 0; }
 
-  .ticker-wrap { top: calc(42px + env(safe-area-inset-top)); }
-  .ticker {
-    gap: 36px; padding: 9px 0; font-size: 11px;
-    animation-duration: 60s;
-  }
+  .ticker-wrap { top: 42px; }
+  .ticker { gap: 36px; padding: 9px 0; font-size: 11px; }
   .tick { gap: 8px; }
   .tick .sep { margin-left: 4px; }
 
-  .hero {
-    padding: 110px 20px 150px;
-    padding-top: calc(110px + env(safe-area-inset-top));
-    padding-bottom: calc(150px + env(safe-area-inset-bottom));
-    min-height: 100svh;
-  }
+  .hero { padding: 140px 20px 260px; min-height: 100svh; }
+
   .hero-pre {
     font-size: 9px; letter-spacing: 0.28em;
     margin-bottom: 22px; gap: 10px;
   }
   .hero-pre-line { width: 18px; }
+
   .wordmark {
     font-size: clamp(56px, 18vw, 140px);
     letter-spacing: -0.015em;
   }
+
   .kicker {
-    margin-top: 28px; gap: 10px;
-    font-size: 9px; letter-spacing: 0.3em;
+    margin-top: 28px;
+    gap: 10px; font-size: 9px; letter-spacing: 0.3em;
   }
   .kicker .bar { width: 18px; }
 
   .socials {
-    flex-direction: column; gap: 8px;
-    padding: 10px 16px 12px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
+    flex-direction: column; gap: 14px; padding: 14px 16px 18px;
     font-size: 10px; letter-spacing: 0.1em;
   }
-  .socials .left { display: none; }
-  /* Repurpose .right as a tiny kicker line under the social links */
-  .socials .right {
-    display: block;
-    min-width: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 9px;
-    letter-spacing: 0.32em;
-    color: var(--faint);
-    order: 2;
-  }
+  .socials .left, .socials .right { display: none; }
   .socials .links {
-    gap: 6px;
-    justify-content: center;
-    width: 100%;
-    order: 1;
+    gap: 18px; flex-wrap: wrap; justify-content: center; width: 100%;
   }
-  .socials a {
-    font-size: 11px; gap: 6px;
-    /* 44px min tap target per WCAG; padding keeps text spacing visually tight */
-    min-height: 44px;
-    padding: 8px 10px;
-    border-radius: 8px;
-  }
-  .socials a:active { background: rgba(122, 47, 208, 0.14); }
+  .socials a { font-size: 11px; gap: 6px; }
   .socials a svg { width: 13px; height: 13px; }
 }
 
 @media (max-width: 440px) {
   .wordmark { font-size: clamp(48px, 17vw, 110px); }
-  .socials .links { gap: 6px; }
-  .socials a { font-size: 10.5px; padding: 8px 10px; }
+  .socials .links { gap: 14px; }
+  .socials a { font-size: 10.5px; }
   .kicker { font-size: 8.5px; gap: 8px; letter-spacing: 0.24em; }
 }
 
-/* phones in landscape: fixed bars eat most of the screen — tighten everything */
-@media (max-height: 500px) and (orientation: landscape) {
-  .hero {
-    padding: 78px 24px 78px;
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
-  }
-  .hero-pre { margin-bottom: 10px; font-size: 8.5px; letter-spacing: 0.26em; }
-  .kicker { margin-top: 12px; }
-  .wordmark { font-size: clamp(40px, 9vh, 96px); }
-  .ticker-wrap { display: none; }
-  .socials {
-    flex-direction: row;
+/* root mount */
+#root { min-height: 100vh; }
+
+/* ====================================================================== */
+/* SECTIONS (scroll-driven) + background stack                             */
+/* ====================================================================== */
+
+.sections {
+  position: relative;
+  z-index: 2;
+}
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 140px 32px 140px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.section-home { padding: 0; min-height: 100vh; }
+
+.section-inner {
+  width: 100%;
+  max-width: 1120px;
+  position: relative;
+}
+
+.section-eyebrow {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+.eyebrow-line { width: 38px; height: 1px; background: var(--text); }
+
+.section-title {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 32px;
+  max-width: 18ch;
+  text-shadow: 0 0 18px rgba(0,0,0,0.85), 0 0 36px rgba(0,0,0,0.55);
+}
+.section-lede {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  max-width: 60ch;
+  margin-bottom: 56px;
+  text-shadow: 0 0 14px rgba(0,0,0,0.85);
+}
+
+/* -------- About: principles list -------- */
+.principles {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 56px;
+  max-width: 880px;
+}
+.principles li {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.p-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.p-text {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text);
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+}
+
+/* -------- Portfolio: cards grid -------- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.card {
+  position: relative;
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  padding: 28px 26px 26px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.card:hover {
+  border-color: var(--text);
+  background: rgba(0,0,0,0.62);
+}
+.card-head {
+  display: flex; align-items: flex-start; gap: 18px;
+}
+.card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+}
+.card-name {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.card-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.card-blurb {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.78);
+  flex: 1;
+}
+.card-stats {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.card-stat {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+}
+.card-stat dt { color: var(--muted); }
+.card-stat dd { color: var(--text); margin: 0; font-weight: 500; }
+/* corner crops */
+.card-corner {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: var(--text);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.7;
+}
+.card-corner-tl { top: -1px; left: -1px;  border-top-width: 1px; border-left-width: 1px; }
+.card-corner-tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+.card-corner-bl { bottom: -1px; left: -1px;  border-bottom-width: 1px; border-left-width: 1px; }
+.card-corner-br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* -------- Contact: socials list -------- */
+.contact-grid {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+  max-width: 720px;
+}
+.contact-row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+  transition: padding-left 0.25s ease, color 0.25s ease;
+}
+.contact-row:hover {
+  padding-left: 16px;
+  color: var(--text);
+}
+.contact-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--muted);
+}
+.contact-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  letter-spacing: -0.005em;
+}
+.contact-arrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  color: var(--muted);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+.contact-row:hover .contact-arrow {
+  transform: translate(4px, -4px);
+  color: var(--text);
+}
+.contact-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 56px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+  max-width: 720px;
+}
+
+/* ====================================================================== */
+/* BACKGROUND STACK — fixed layers that crossfade on section change       */
+/* ====================================================================== */
+
+.bg-stack {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.bg-layer.is-active {
+  opacity: 1;
+}
+.bg-layer .backdrop { z-index: 1; }   /* trading bg uses its own positioning */
+
+.bg-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* -------- About bg: drifting words -------- */
+.bg-word {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  fill: rgba(255,255,255,0.04);
+  paint-order: stroke;
+  stroke: rgba(255,255,255,0.025);
+  stroke-width: 1.5;
+  white-space: pre;
+  will-change: transform;
+}
+.bg-line {
+  stroke: rgba(255,255,255,0.05);
+  stroke-width: 1;
+  stroke-dasharray: 2 14;
+}
+@keyframes about-drift-r {
+  from { transform: translateX(-18%); }
+  to   { transform: translateX(18%); }
+}
+@keyframes about-drift-l {
+  from { transform: translateX(18%); }
+  to   { transform: translateX(-18%); }
+}
+
+/* -------- Portfolio bg: isometric blueprint -------- */
+.bg-iso-line {
+  stroke: rgba(255,255,255,0.045);
+  stroke-width: 1;
+}
+.bg-bldg polygon {
+  fill: rgba(255,255,255,0.04);
+  stroke: rgba(255,255,255,0.35);
+  stroke-width: 1;
+}
+.bg-bldg {
+  animation: bldg-pulse 4.2s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes bldg-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 1; }
+}
+
+/* -------- Contact bg: radar -------- */
+.bg-coord-ring {
+  fill: none;
+  stroke: rgba(255,255,255,0.08);
+  stroke-width: 1;
+}
+.bg-city-ring {
+  fill: none;
+  stroke: rgba(255,255,255,0.45);
+  stroke-width: 1;
+}
+.bg-city-dot {
+  fill: var(--text);
+}
+.bg-city-label {
+  fill: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes city-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* ---------- responsive: chrome + nav + sections + cards ---------- */
+@media (max-width: 800px) {
+  html { scroll-padding-top: 42px; }
+  .chrome {
+    grid-template-columns: auto 1fr auto;
+    padding: 12px 14px;
     gap: 8px;
-    padding: 6px 16px;
-    padding-bottom: max(6px, env(safe-area-inset-bottom));
   }
-  .socials .right { display: none; }
-  .socials .links { gap: 4px; flex-wrap: nowrap; width: auto; }
-  .socials a { min-height: 36px; padding: 6px 10px; font-size: 10.5px; }
-}
+  .navbar { gap: 12px; }
+  .nav-link {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 4px 2px;
+  }
+  .chrome .brand span:nth-child(2) { display: none; } /* hide brand text, keep dot */
+  .chrome .right .status { display: none; }
 
-/* coarse pointers (touch): drop hover-only flourishes that fire on tap */
-@media (hover: none) {
-  .wordmark:hover { animation-duration: 6s; }
-}
+  .section { padding: 100px 18px 100px; }
+  .section-title { font-size: clamp(40px, 11vw, 64px); }
+  .section-lede  { font-size: 15px; margin-bottom: 36px; }
 
-@media (prefers-reduced-motion: reduce) {
-  .wordmark,
-  .chrome .dot,
-  .ticker { animation: none !important; }
-  body::before, body::after { display: none; }
+  .principles {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .card { min-height: 0; padding: 22px 20px; }
+  .card-name { font-size: 22px; }
+
+  .contact-row {
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    padding: 18px 0;
+  }
+  .contact-value { font-size: 22px; }
+  .contact-meta  { flex-direction: column; gap: 6px; }
 }
 </style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 </head>
-<body>
-<div class="page">
-  <svg class="backdrop" id="backdrop" viewBox="0 0 1600 900" aria-hidden="true"></svg>
+<body style="font-family: &quot;Instrument Serif&quot;">
+<div id="root"></div>
 
-  <header class="chrome">
-    <div class="brand">
-      <span class="dot"></span>
-      <span>EULCORP</span>
-      <span class="slash">/</span>
-      <span class="label">PRIVATE</span>
-    </div>
-    <div class="right">
-      <span id="status">GLOBEX LIVE</span>
-      <span class="time" id="time">--:--:-- ET</span>
-    </div>
-  </header>
+<script type="text/babel" data-module="tweaks-panel.jsx">
+/* ===== tweaks-panel.jsx ===== */
 
-  <div class="ticker-wrap">
-    <div class="ticker" id="ticker"></div>
-  </div>
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
 
-  <section class="hero">
-    <div class="hero-pre">
-      <span class="hero-pre-line"></span>
-      <span>ONE OF NONE</span>
-    </div>
-    <h1 class="wordmark" id="wordmark" title="click to re-decode">EULCORP</h1>
-    <div class="kicker">
-      <span class="bar"></span>
-      <span>INDICES</span>
-      <span class="kdot">·</span>
-      <span>COMMODITIES</span>
-      <span class="bar"></span>
-    </div>
-  </section>
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
 
-  <footer class="socials">
-    <div class="left">© EULCORP MMV</div>
-    <div class="links">
-      <a href="https://x.com/eulcorp" target="_blank" rel="noopener noreferrer" title="X — @eulcorp">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-          <path d="M18.244 2H21l-6.55 7.49L22 22h-6.79l-4.74-6.18L4.96 22H2.2l7.02-8.03L2 2h6.91l4.28 5.66L18.24 2Zm-1.19 18h1.69L7.04 4H5.25l11.8 16Z"/>
-        </svg>
-        <span><span class="at">@</span>eulcorp</span>
-      </a>
-      <a href="https://instagram.com/eulcorp" target="_blank" rel="noopener noreferrer" title="Instagram — @eulcorp">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-          <rect x="3" y="3" width="18" height="18" rx="5"/>
-          <circle cx="12" cy="12" r="4"/>
-          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
-        </svg>
-        <span><span class="at">@</span>eulcorp</span>
-      </a>
-      <a href="https://tiktok.com/@3ulcorp" target="_blank" rel="noopener noreferrer" title="TikTok — @3ulcorp">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.34 6.34 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.86a8.16 8.16 0 0 0 4.77 1.52V6.93a4.85 4.85 0 0 1-1.84-.24Z"/>
-        </svg>
-        <span><span class="at">@</span>3ulcorp</span>
-      </a>
-    </div>
-    <div class="right">NY · LDN · JPN</div>
-  </footer>
-</div>
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
 
-<script>
-(function () {
-  // ---------- Clock + Globex status ----------
-  function updateClock() {
-    var parts = {};
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false, weekday: 'short'
-    }).formatToParts(new Date()).forEach(function (p) { parts[p.type] = p.value; });
-    var hour = parseInt(parts.hour || '0', 10);
-    var wd = parts.weekday;
-    var status = 'GLOBEX LIVE';
-    if (wd === 'Sat') status = 'WEEKEND';
-    else if (wd === 'Fri' && hour >= 17) status = 'WEEKEND';
-    else if (wd === 'Sun' && hour < 18) status = 'WEEKEND';
-    else if (hour === 17) status = 'MAINT';
-    document.getElementById('time').textContent =
-      parts.hour + ':' + parts.minute + ':' + parts.second + ' ET';
-    document.getElementById('status').textContent = status;
-  }
-  updateClock();
-  var clockInterval = setInterval(updateClock, 1000);
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
 
-  // ---------- Live-ish ticker (random walk from real mid-May 2026 levels) ----------
-  var SEED = [
-    { sym: 'ES',  px: 7432.25,  tick: 0.25,  dec: 2 },
-    { sym: 'NQ',  px: 24856.50, tick: 0.25,  dec: 2 },
-    { sym: 'YM',  px: 49526,    tick: 1,     dec: 0 },
-    { sym: 'RTY', px: 2793.30,  tick: 0.10,  dec: 2 },
-    { sym: 'GC',  px: 4561.90,  tick: 0.10,  dec: 2 },
-    { sym: 'MGC', px: 4561.90,  tick: 0.10,  dec: 2 },
-    { sym: 'CL',  px: 99.18,    tick: 0.01,  dec: 2 },
-    { sym: 'SI',  px: 76.42,    tick: 0.005, dec: 3 },
-    { sym: 'VX',  px: 18.43,    tick: 0.05,  dec: 2 }
-  ];
-  var rows = SEED.map(function (s) {
-    return { sym: s.sym, px: s.px, tick: s.tick, dec: s.dec, last: s.px, change: 0, pct: 0 };
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', noDeckControls = false, children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  // Auto-inject a rail toggle when a <deck-stage> is on the page. The
+  // toggle drives the deck's per-viewer _railVisible via window message;
+  // state is mirrored from the same localStorage key the deck reads so
+  // the control reflects reality across reloads. The mechanism is the
+  // message — authors who want custom placement can post it directly
+  // and pass noDeckControls to suppress this one.
+  const hasDeckStage = React.useMemo(
+    () => typeof document !== 'undefined' && !!document.querySelector('deck-stage'),
+    [],
+  );
+  // deck-stage enables its rail in connectedCallback, but this panel can
+  // mount before that element has upgraded. The initial read catches the
+  // common case; the listener covers mounting first. (Older deck-stage.js
+  // copies still wait for the host's __omelette_rail_enabled postMessage —
+  // same listener handles those.)
+  const [railEnabled, setRailEnabled] = React.useState(
+    () => hasDeckStage && !!document.querySelector('deck-stage')?._railEnabled,
+  );
+  React.useEffect(() => {
+    if (!hasDeckStage || railEnabled) return undefined;
+    const onMsg = (e) => {
+      if (e.data && e.data.type === '__omelette_rail_enabled') setRailEnabled(true);
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [hasDeckStage, railEnabled]);
+  const [railVisible, setRailVisible] = React.useState(() => {
+    try { return localStorage.getItem('deck-stage.railVisible') !== '0'; } catch (e) { return true; }
   });
-  function fmt(n, dec) {
-    return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-  }
-  function renderTicker() {
-    var html = rows.concat(rows).map(function (r) {
-      var up = r.change > 0, dn = r.change < 0;
-      var arrow = up ? '▲' : dn ? '▼' : '·';
-      var cls = up ? 'up' : dn ? 'dn' : '';
-      return '<div class="tick">' +
-        '<span class="sym">' + r.sym + '</span>' +
-        '<span class="px">' + fmt(r.px, r.dec) + '</span>' +
-        '<span class="ch ' + cls + '">' + arrow + ' ' + Math.abs(r.pct).toFixed(2) + '%</span>' +
-        '<span class="sep">/</span>' +
-        '</div>';
-    }).join('');
-    document.getElementById('ticker').innerHTML = html;
-  }
-  function tickPrices() {
-    rows.forEach(function (r) {
-      var drift = (Math.random() - 0.5) * r.tick * (r.sym === 'VX' ? 4 : 8);
-      var newPx = r.px + drift;
-      var delta = newPx - r.last;
-      r.px = newPx;
-      r.change = delta;
-      r.pct = (delta / r.last) * 100;
-    });
-    renderTicker();
-  }
-  renderTicker();
-  var priceInterval = setInterval(tickPrices, 1400);
+  const toggleRail = (on) => {
+    setRailVisible(on);
+    window.postMessage({ type: '__deck_rail_visible', on }, '*');
+  };
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
 
-  // ---------- Wordmark scramble decode ----------
-  var SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/$';
-  var TARGET = 'EULCORP';
-  var wm = document.getElementById('wordmark');
-  var raf = 0;
-  function scramble(duration, settle) {
-    duration = duration || 1500;
-    settle = settle || 80;
-    cancelAnimationFrame(raf);
-    var len = TARGET.length;
-    var lock = [];
-    for (var i = 0; i < len; i++) {
-      lock.push(((i + 1) / len) * (duration - settle) + Math.random() * settle);
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
     }
-    var start = performance.now();
-    function step(now) {
-      var t = now - start;
-      var next = TARGET.split('').map(function (ch, i) {
-        if (ch === ' ') return ' ';
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-noncommentable=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+          {hasDeckStage && railEnabled && !noDeckControls && (
+            <TweakSection label="Deck">
+              <TweakToggle label="Thumbnail rail" value={railVisible} onChange={toggleRail} />
+            </TweakSection>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+</script>
+<script type="text/babel" data-module="backdrop.jsx">
+/* ===== backdrop.jsx ===== */
+// ---------- Backdrop: animated EULCORP chart (NQ1! 5M) ----------
+//
+// Storyline rendered as a live SVG chart:
+//   chop → wick tap (zone fades in AFTER the wick) → mid-tap of zone midline
+//   → expansion candles march up and OUT of the top of the frame.
+//   - price ladder on the right edge
+//   - vertical crosshair on a frozen cursor candle (chop region, stays in view)
+//   - cursor pill: "Day DD Mon 'YY  HH:MM AM/PM" (live date, ticking minutes)
+//   - watermark date below crosshair (live, D/M/YYYY)
+//   - TV mark + "NQ1! | 5M" tag in bottom-left
+// Separate layouts for desktop (landscape) and mobile (portrait).
+
+const _b_R = React;
+
+function _useIsMobileBD() {
+  const [m, setM] = _b_R.useState(
+    () => typeof window !== "undefined" && window.innerWidth < 800
+  );
+  _b_R.useEffect(() => {
+    const onResize = () => setM(window.innerWidth < 800);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  return m;
+}
+
+const DESKTOP_BD = {
+  W: 1600, H: 900,
+  PAD_L: 8, PAD_R: 138, PAD_T: 8, PAD_B: 70,
+  N: 56,
+  TAP_IDX: 26, MID_TAP_IDX: 27,
+  cursorIdx: 27,                  // crosshair on MID-TAP candle (= 09:30 AM bar)
+  bodyRatio: 0.62,
+  pillW: 118, pillH: 30, pillSmallH: 26,
+  timePillW: 268, timePillH: 30,
+  tvBox: 30,
+  symOffsetX: 48,
+  fontClass: "",
+  fitMode: "slice",
+};
+
+const MOBILE_BD = {
+  W: 720, H: 1280,
+  PAD_L: 16, PAD_R: 152, PAD_T: 36, PAD_B: 150,
+  N: 24,
+  TAP_IDX: 11, MID_TAP_IDX: 12,
+  cursorIdx: 12,                  // crosshair on MID-TAP candle (= 09:30 AM bar)
+  bodyRatio: 0.62,
+  pillW: 158, pillH: 44, pillSmallH: 38,
+  timePillW: 340, timePillH: 44,
+  tvBox: 44,
+  symOffsetX: 64,
+  fontClass: "bd-mobile",
+  fitMode: "meet",                // FIT entire chart on mobile (no crop)
+};
+
+// Price domain — chart "window" (candles extend above this and exit frame)
+const P_MIN = 29380;
+const P_MAX = 29640;
+
+// Demand zone — pinned to wick low of the tap candle
+const DEMAND_LOW  = 29453;
+const DEMAND_HIGH = 29481;
+const DEMAND_MID  = 29465;
+
+function Backdrop() {
+  const isMobile = _useIsMobileBD();
+  const L = isMobile ? MOBILE_BD : DESKTOP_BD;
+
+  const chartW = L.W - L.PAD_L - L.PAD_R;
+  const chartH = L.H - L.PAD_T - L.PAD_B;
+
+  const yFor = (p) => L.PAD_T + (1 - (p - P_MIN) / (P_MAX - P_MIN)) * chartH;
+  const step = chartW / L.N;
+  const bodyW = step * L.bodyRatio;
+  const xFor = (i) => L.PAD_L + (i + 0.5) * step;
+
+  const idRef = _b_R.useRef(0);
+  const nextId = () => ++idRef.current;
+
+  // Candle sequence:
+  //   chop → TAP (wick low @ DEMAND_LOW) → MID-TAP (wick low @ DEMAND_MID,
+  //   closes back above zone top) → continuous breakout up and OFF the frame.
+  const initial = _b_R.useMemo(() => {
+    let s = (0xA17C + seed * 7919) >>> 0;
+    const r = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+    const arr = [];
+    let p = 29500;
+    for (let i = 0; i < L.N; i++) {
+      let open = p, close, high, low;
+      if (i < L.TAP_IDX) {
+        // Accumulation: descend from ~29500 down into the supply, with wider
+        // intra-bar swings than before. We never break into the demand zone
+        // (close stays >= zone top).
+        const progress = i / L.TAP_IDX;
+        const target = 29500 - progress * 22;       // linear descent 29,500 → 29,478
+        const noise = (r() - 0.5) * 14;
+        close = Math.max(DEMAND_HIGH + 1, Math.min(29512, target + noise));
+        high = Math.max(open, close) + r() * 7 + 1.8;
+        low  = Math.min(open, close) - r() * 7 - 1.8;
+      } else if (i === L.TAP_IDX) {
+        // TAP: opens just above zone top, wick low == DEMAND_LOW
+        open  = 29478;
+        close = 29470 + r() * 3;
+        high  = Math.max(open, close) + r() * 3 + 1;
+        low   = DEMAND_LOW;
+      } else if (i === L.MID_TAP_IDX) {
+        // MID-TAP: wick to the dashed midline, closes just above zone top
+        open  = p;
+        close = DEMAND_HIGH + 1 + r() * 2;
+        high  = Math.max(open, close) + r() * 2 + 1;
+        low   = DEMAND_MID;
+      } else {
+        // Continuous breakout — each candle ~35-65 pts higher than the last.
+        // After a few legs the close exits the top of the viewBox.
+        const drift = 38 + r() * 28;
+        close = open + drift;
+        high  = close + r() * 12 + 2;
+        low   = open - r() * 6 - 1;
+      }
+      arr.push({ id: nextId(), open, close, high, low, isNew: true });
+      p = close;
+    }
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, seed]);
+
+  const [candles, setCandles] = _b_R.useState(initial);
+  const [bar, setBar]         = _b_R.useState(0);
+  const [today, setToday]     = _b_R.useState(() => new Date());
+  const [seed, setSeed]       = _b_R.useState(0); // bumps each cycle for new random walk
+  const [cycling, setCycling] = _b_R.useState(false); // fading out between cycles
+
+  // re-seed candles when layout flips
+  _b_R.useEffect(() => { setCandles(initial); /* eslint-disable-line */ }, [initial]);
+
+  _b_R.useEffect(() => {
+    const id = setInterval(() => setToday(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // -------- Build-up phases --------
+  // 0 .. TAP_IDX-1            chop candles (one per beat)
+  // TAP_IDX                   TAP candle appears (slow)
+  // TAP_IDX+1   (ZONE_BEAT)   no new candle — demand zone fades in
+  // TAP_IDX+2                 MID-TAP candle appears
+  // TAP_IDX+3 .. N            breakout candles march up and off frame
+  // N+1                       overlay (crosshair + pills + date) fades in
+  // N+2 (= FINAL)             live mode (jitter the last on-frame candle)
+  const ZONE_BEAT = L.TAP_IDX + 1;
+  const FINAL = L.N + 2;
+  const [phase, setPhase] = _b_R.useState(0);
+
+  // reset when layout flips so build replays for the new viewport
+  _b_R.useEffect(() => { setPhase(0); }, [isMobile]);
+
+  _b_R.useEffect(() => {
+    if (phase >= FINAL) return;
+    let d;
+    if (phase < L.TAP_IDX)            d = 70;   // chop — fast
+    else if (phase === L.TAP_IDX)     d = 800;  // tap candle — dramatic
+    else if (phase === ZONE_BEAT)     d = 700;  // ZONE fades in (no candle)
+    else if (phase === L.TAP_IDX + 2) d = 700;  // mid-tap — beat
+    else if (phase < L.N)             d = 280;  // breakout candles
+    else                              d = 500;  // overlay reveal
+    const id = setTimeout(() => setPhase((p) => p + 1), d);
+    return () => clearTimeout(id);
+  }, [phase, FINAL, L.TAP_IDX, L.N, ZONE_BEAT]);
+
+  // -------- Cycle / loop --------
+  // After FINAL, hold the live state ~3.5s, then fade out and re-run the whole
+  // build animation with a fresh random walk.
+  _b_R.useEffect(() => {
+    if (phase !== FINAL) return;
+    const id = setTimeout(() => setCycling(true), 3500);
+    return () => clearTimeout(id);
+  }, [phase, FINAL]);
+
+  _b_R.useEffect(() => {
+    if (!cycling) return;
+    const id = setTimeout(() => {
+      setSeed((s) => s + 1);
+      setBar(0);
+      setPhase(0);
+      setCycling(false);
+    }, 900);
+    return () => clearTimeout(id);
+  }, [cycling]);
+
+  // Live-mode: bar clock advances (cursor pill time ticks). Don't shift candles.
+  _b_R.useEffect(() => {
+    if (phase < FINAL || cycling) return;
+    const id = setInterval(() => setBar((b) => b + 1), 6000);
+    return () => clearInterval(id);
+  }, [phase, FINAL, cycling]);
+
+  // Live-mode jitter on the rightmost ON-FRAME candle (so something pulses).
+  _b_R.useEffect(() => {
+    if (phase < FINAL || cycling) return;
+    const id = setInterval(() => {
+      setCandles((cs) => {
+        if (!cs.length) return cs;
+        // find the last candle whose close is still within the visible band
+        let idx = cs.length - 1;
+        for (let i = cs.length - 1; i >= 0; i--) {
+          if (cs[i].close <= P_MAX) { idx = i; break; }
+        }
+        const next = cs.slice();
+        const c = { ...next[idx] };
+        const drift = (Math.random() - 0.5) * 7;
+        c.close = c.close + drift;
+        c.high = Math.max(c.high, c.close + Math.random() * 1.5);
+        c.low  = Math.min(c.low,  c.close - Math.random() * 1.5);
+        next[idx] = c;
+        return next;
+      });
+    }, 800);
+    return () => clearInterval(id);
+  }, [phase, FINAL]);
+
+  // Visible candle count (skips the zone-reveal beat)
+  let visibleCount;
+  if (phase <= L.TAP_IDX)        visibleCount = phase + 1;
+  else if (phase === ZONE_BEAT)  visibleCount = L.TAP_IDX + 1;
+  else                           visibleCount = phase;
+  visibleCount = Math.min(visibleCount, L.N);
+
+  const showDemand  = phase >= ZONE_BEAT;
+  const showOverlay = phase >= L.N + 1;
+
+  // Live pill anchors on the rightmost visible candle and tracks its close
+  // through jitter and bar advances. When the candle has run off the top of
+  // the frame, the pill Y clamps to the chart top so the price stays readable.
+  const liveIdx = Math.max(0, visibleCount - 1);
+  const live = candles[liveIdx] || candles[0];
+  const liveX = xFor(liveIdx);
+  const rawLiveY = yFor(live.close);
+  const liveY = Math.max(
+    L.PAD_T + L.pillH / 2 + 4,
+    Math.min(L.H - L.PAD_B - L.pillH / 2 - 4, rawLiveY)
+  );
+
+  // Cursor pill anchors on the MID-TAP candle (the one AFTER the wick tap)
+  // — that's the 09:30 AM bar. Crosshair runs horizontally at the wick low.
+  const cursorIdx = L.cursorIdx;
+  const cursorX = xFor(cursorIdx);
+  const cursorPrice = DEMAND_MID;        // mid-tap low touches the dashed midline
+  const cursorY = yFor(DEMAND_MID);
+
+  // Live time/date — times are derived directly from candle index (5m per bar),
+  // anchored so the cursor candle == 09:30 AM. They stay aligned regardless of
+  // live-mode jitter.
+  const cursorTimeStr = formatTimeFromMinutes(BASE_MIN);
+  const cursorDateStr = formatCursorDate(today);
+  const dateWatermark = formatWatermarkDate(today);
+  const liveTimeStr = formatTimeFromMinutes(
+    BASE_MIN + (liveIdx - cursorIdx) * 5
+  );
+
+  // ---- Price ladder (evenly spaced every 20pt across visible domain) ----
+  const priceLabels = [];
+  for (let p = Math.ceil(P_MIN / 20) * 20; p <= P_MAX; p += 20) priceLabels.push(p);
+
+  // ---- Time labels (anchored to the cursor candle = 09:30 AM, 5m per bar) ----
+  // Each candle is 5 minutes; the cursor candle (cursorIdx) is exactly 09:30.
+  // Render a label at every candle whose time is on a 30-minute boundary.
+  const BASE_MIN = 9 * 60 + 30;                 // 09:30 AM
+  const minutesAt = (i) => BASE_MIN + (i - cursorIdx) * 5;
+  const timeLabels = [];
+  for (let i = 0; i < L.N; i++) {
+    const t = minutesAt(i);
+    if (t % 30 === 0) timeLabels.push({ i, t });
+  }
+
+  // Demand zone geometry
+  const demandX1 = xFor(L.TAP_IDX) - bodyW / 2 - (isMobile ? 4 : 6);
+  const demandY1 = yFor(DEMAND_HIGH);
+  const demandY2 = yFor(DEMAND_LOW);
+  const demandMid = yFor(DEMAND_MID);
+
+  return (
+    <svg
+      className={`backdrop ${L.fontClass}`}
+      viewBox={`0 0 ${L.W} ${L.H}`}
+      preserveAspectRatio={`xMidYMid ${L.fitMode}`}
+      aria-hidden="true"
+    >
+      {/* Master fade group — fades the whole chart out at the end of a cycle */}
+      <g style={{ opacity: cycling ? 0 : 1, transition: "opacity 0.85s ease" }}>
+      {/* Horizontal grid (one line per priced ladder rung) */}
+      {priceLabels.map((p) => (
+        <line
+          key={`g-${p}`}
+          x1={L.PAD_L} y1={yFor(p)}
+          x2={L.W - L.PAD_R} y2={yFor(p)}
+          className="bd-grid"
+        />
+      ))}
+
+      {/* Demand zone — fades in AFTER the tap wick is drawn */}
+      <g style={{ opacity: showDemand ? 1 : 0, transition: "opacity 0.7s ease" }}>
+        <rect
+          x={demandX1}
+          y={demandY1}
+          width={L.W - L.PAD_R - demandX1}
+          height={demandY2 - demandY1}
+          className="bd-zone-purple"
+        />
+        <line
+          x1={demandX1} y1={demandMid}
+          x2={L.W - L.PAD_R} y2={demandMid}
+          className="bd-zone-purple-dash"
+        />
+      </g>
+
+      {/* Candles */}
+      {candles.slice(0, visibleCount).map((c, i) => {
+        const x = xFor(i);
+        const top = yFor(Math.max(c.open, c.close));
+        const bot = yFor(Math.min(c.open, c.close));
+        const wickTop = yFor(c.high);
+        const wickBot = yFor(c.low);
+        const bull = c.close > c.open;
+        const isLive = i === liveIdx && phase >= FINAL;
+        return (
+          <g
+            key={c.id}
+            className={`cs ${bull ? "cs-bull" : "cs-bear"} ${isLive ? "cs-live" : ""} cs-new`}
+            style={{ transform: `translate(${x - xFor(0)}px, 0)` }}
+          >
+            <line
+              x1={xFor(0)} x2={xFor(0)}
+              y1={wickTop} y2={wickBot}
+              className="cs-wick"
+            />
+            <rect
+              x={xFor(0) - bodyW / 2}
+              y={top}
+              width={bodyW}
+              height={Math.max(1.4, bot - top)}
+              className="cs-body"
+            />
+          </g>
+        );
+      })}
+
+      {/* Crosshair + price/time pills + watermark date — fade in at the end */}
+      <g style={{ opacity: showOverlay ? 1 : 0, transition: "opacity 0.7s ease" }}>
+        <line
+          x1={L.PAD_L} y1={cursorY}
+          x2={L.W - L.PAD_R} y2={cursorY}
+          className="bd-crosshair-h"
+        />
+        <line
+          x1={cursorX} y1={L.PAD_T}
+          x2={cursorX} y2={L.H - L.PAD_B}
+          className="bd-crosshair"
+        />
+
+        <text
+          x={cursorX}
+          y={L.H - L.PAD_B - (isMobile ? 22 : 14)}
+          className="bd-date"
+          textAnchor="middle"
+        >{dateWatermark}</text>
+
+        {/* Live price pill (anchored to the last on-frame candle) */}
+        <g transform={`translate(${L.W - L.PAD_R + 6}, ${liveY - L.pillH / 2})`}>
+          <rect x="0" y="0" width={L.pillW} height={L.pillH} rx="3" className="bd-pill" />
+          <text x={L.pillW / 2} y={L.pillH * 0.45} className="bd-pill-text" textAnchor="middle">{fmt(live.close, 2)}</text>
+          <text x={L.pillW / 2} y={L.pillH * 0.85} className="bd-pill-sub"  textAnchor="middle">{liveTimeStr}</text>
+        </g>
+
+        {/* Cursor price pill */}
+        <g transform={`translate(${L.W - L.PAD_R + 6}, ${cursorY - L.pillSmallH / 2})`}>
+          <rect x="0" y="0" width={L.pillW} height={L.pillSmallH} rx="3" className="bd-pill" />
+          <text x={L.pillW / 2} y={L.pillSmallH * 0.68} className="bd-pill-text" textAnchor="middle">{fmt(cursorPrice, 2)}</text>
+        </g>
+
+        {/* Time pill under crosshair */}
+        <g transform={`translate(${cursorX - L.timePillW / 2}, ${L.H - L.PAD_B + 8})`}>
+          <rect x="0" y="0" width={L.timePillW} height={L.timePillH} rx="3" className="bd-pill" />
+          <text x={L.timePillW / 2} y={L.timePillH * 0.66} className="bd-pill-text" textAnchor="middle">{`${cursorDateStr}   ${cursorTimeStr}`}</text>
+        </g>
+
+        {/* Buy execution mark — entry at the MID-TAP candle (09:30 AM) @ 29,466 */}
+        <g
+          transform={`translate(${xFor(L.MID_TAP_IDX)}, ${yFor(29466)})`}
+          className="bd-buy"
+        >
+          {/* dashed entry line across the chart */}
+          <line
+            x1={xFor(L.MID_TAP_IDX) * 0 + (L.PAD_L - xFor(L.MID_TAP_IDX))}
+            x2={(L.W - L.PAD_R) - xFor(L.MID_TAP_IDX)}
+            y1="0" y2="0"
+            className="bd-buy-line"
+          />
+          {/* badge */}
+          <g>
+            <rect x={isMobile ? -22 : -16} y={isMobile ? -12 : -9} width={isMobile ? 44 : 32} height={isMobile ? 24 : 18} rx="3" fill="#ffffff" stroke="#000000" strokeWidth="1.5" />
+            <text x="0" y={isMobile ? 5 : 3.5} textAnchor="middle" className="bd-buy-badge">BUY</text>
+          </g>
+          {/* price tag to the left of the badge */}
+          <text x={isMobile ? -30 : -22} y={isMobile ? 5 : 3.5} textAnchor="end" className="bd-buy-price">29,466.00</text>
+          {/* time tag to the right */}
+          <text x={isMobile ? 30 : 22} y={isMobile ? 5 : 3.5} className="bd-buy-time">09:30 AM</text>
+        </g>
+      </g>
+
+      {/* Price labels on the right edge — every 20pt */}
+      {priceLabels.map((p) => (
+        <text
+          key={`pl-${p}`}
+          x={L.W - L.PAD_R + 14}
+          y={yFor(p) + 5}
+          className="bd-price-label"
+        >{fmt(p, 2)}</text>
+      ))}
+
+      {/* Time labels along the bottom — every 30 min, aligned to candle x */}
+      {timeLabels.map(({ i, t }) => (
+        <text
+          key={`tl-${t}`}
+          x={xFor(i)}
+          y={L.H - (isMobile ? 50 : 22)}
+          className="bd-time-label"
+          textAnchor="middle"
+        >{formatTimeFromMinutes(t)}</text>
+      ))}
+
+      {/* TV mark + symbol tag (bottom-left) */}
+      <g>
+        <rect
+          x={L.PAD_L + 4}
+          y={L.H - L.tvBox - 8}
+          width={L.tvBox} height={L.tvBox}
+          rx="4"
+          fill="rgba(122,47,208,0.10)"
+        />
+        <text
+          x={L.PAD_L + 4 + L.tvBox / 2}
+          y={L.H - L.tvBox / 2}
+          className="bd-tv"
+          textAnchor="middle"
+        >TV</text>
+        <text
+          x={L.PAD_L + L.tvBox + L.symOffsetX - 30}
+          y={L.H - L.tvBox / 2}
+          className="bd-symbol-tag"
+        >NQ1!  |  5M</text>
+      </g>
+      </g>
+    </svg>
+  );
+}
+
+function formatTimeFromMinutes(totalMins) {
+  const m = ((totalMins % (24 * 60)) + 24 * 60) % (24 * 60);
+  let h = Math.floor(m / 60);
+  const mm = m % 60;
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12; if (h === 0) h = 12;
+  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${ampm}`;
+}
+
+const _DAYS   = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const _MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function formatCursorDate(d) {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const yy = String(d.getFullYear() % 100).padStart(2, "0");
+  return `${_DAYS[d.getDay()]} ${dd} ${_MONTHS[d.getMonth()]} '${yy}`;
+}
+
+function formatWatermarkDate(d) {
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+}
+
+// Expose to other Babel scripts
+window.Backdrop = Backdrop;
+</script>
+<script type="text/babel" data-module="site.jsx">
+/* ===== site.jsx ===== */
+// ---------- Sections + per-section animated backdrops ----------
+// All exported on `window` for app.jsx to pick up (Babel scripts don't share
+// scope when loaded separately).
+
+const _s_R = React;
+
+// -------- useActiveSection: which section the user is scrolled to --------
+function useActiveSection(ids) {
+  const [active, setActive] = _s_R.useState(ids[0]);
+  _s_R.useEffect(() => {
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean);
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        // pick the section whose midpoint is closest to viewport center
+        const vh = window.innerHeight;
+        let best = null;
+        let bestDist = Infinity;
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const r = e.target.getBoundingClientRect();
+          const mid = r.top + r.height / 2;
+          const d = Math.abs(mid - vh / 2);
+          if (d < bestDist) { bestDist = d; best = e.target.id; }
+        }
+        if (best) setActive(best);
+      },
+      { threshold: [0.25, 0.5, 0.75], rootMargin: "-10% 0px -10% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [ids.join(",")]);
+  return active;
+}
+
+// -------- Nav links (rendered inside the chrome bar) --------
+const NAV_LINKS = [
+  { id: "home",      label: "HOME" },
+  { id: "about",     label: "ABOUT" },
+  { id: "portfolio", label: "PORTFOLIO" },
+  { id: "contact",   label: "CONTACT" },
+];
+
+function NavBar({ active }) {
+  const onClick = (e, id) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  return (
+    <nav className="navbar" aria-label="Sections">
+      {NAV_LINKS.map((l) => (
+        <a
+          key={l.id}
+          href={`#${l.id}`}
+          className={`nav-link ${active === l.id ? "is-active" : ""}`}
+          onClick={(e) => onClick(e, l.id)}
+        >{l.label}</a>
+      ))}
+    </nav>
+  );
+}
+
+// ========================================================================
+// SECTION CONTENT
+// ========================================================================
+
+function AboutSection() {
+  return (
+    <section id="about" className="section section-about">
+      <div className="section-inner">
+        <div className="section-eyebrow">
+          <span className="eyebrow-line" />
+          <span>02 — PHILOSOPHY</span>
+        </div>
+        <h2 className="section-title">Built to last.<br />Built one of none.</h2>
+        <p className="section-lede">
+          Eulcorp is a diversified holding company building across markets,
+          real estate, construction, and technology. We move with discipline.
+          We're early — and we believe early is the best place to be.
+        </p>
+        <ul className="principles">
+          <li><span className="p-num">01</span><span className="p-text">Patience compounds. Conviction is built, not bought.</span></li>
+          <li><span className="p-num">02</span><span className="p-text">Disciplined entries. Risk first, return follows.</span></li>
+          <li><span className="p-num">03</span><span className="p-text">Long horizons. Decades, not quarters.</span></li>
+          <li><span className="p-num">04</span><span className="p-text">One of none. We build what doesn't exist yet.</span></li>
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const VERTICALS = [
+  {
+    id: "capital",
+    name: "Eulcorp Capital",
+    sub: "Investments & Trading",
+    tag: "01",
+    blurb: "Discretionary positions across futures, equities, and rates. Disciplined sizing, defined risk, asymmetric setups.",
+    stats: [
+      { k: "FOCUS",   v: "INDICES · COMMODITIES" },
+      { k: "HORIZON", v: "INTRADAY → SWING" },
+    ],
+  },
+  {
+    id: "build",
+    name: "Eulcorp Build",
+    sub: "General Contracting",
+    tag: "02",
+    blurb: "Ground-up construction and remodeling. Residential and light-commercial. Built to specification, finished to last.",
+    stats: [
+      { k: "SCOPE",   v: "RESIDENTIAL · COMMERCIAL" },
+      { k: "MARKET",  v: "TX · USA" },
+    ],
+  },
+  {
+    id: "estate",
+    name: "Eulcorp Estate",
+    sub: "Real Estate",
+    tag: "03",
+    blurb: "Acquisition and development of residential and mixed-use properties. Long-hold thesis, cash-flow first, appreciation second.",
+    stats: [
+      { k: "STRATEGY", v: "BUY · HOLD · COMPOUND" },
+      { k: "ASSET",    v: "SFR · MULTIFAMILY" },
+    ],
+  },
+];
+
+function PortfolioSection() {
+  return (
+    <section id="portfolio" className="section section-portfolio">
+      <div className="section-inner">
+        <div className="section-eyebrow">
+          <span className="eyebrow-line" />
+          <span>03 — VERTICALS</span>
+        </div>
+        <h2 className="section-title">What we build.</h2>
+        <div className="cards">
+          {VERTICALS.map((v) => (
+            <article key={v.id} className="card" data-tag={v.tag}>
+              <header className="card-head">
+                <span className="card-tag">{v.tag}</span>
+                <div>
+                  <h3 className="card-name">{v.name}</h3>
+                  <p className="card-sub">{v.sub}</p>
+                </div>
+              </header>
+              <p className="card-blurb">{v.blurb}</p>
+              <dl className="card-stats">
+                {v.stats.map((s) => (
+                  <div key={s.k} className="card-stat">
+                    <dt>{s.k}</dt>
+                    <dd>{s.v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="card-corner card-corner-tl" />
+              <div className="card-corner card-corner-tr" />
+              <div className="card-corner card-corner-bl" />
+              <div className="card-corner card-corner-br" />
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ContactSection() {
+  return (
+    <section id="contact" className="section section-contact">
+      <div className="section-inner">
+        <div className="section-eyebrow">
+          <span className="eyebrow-line" />
+          <span>04 — CONTACT</span>
+        </div>
+        <h2 className="section-title">For partnership,<br />press, or position.</h2>
+        <p className="section-lede">
+          Reach us through the channels below. We respond to every signal.
+        </p>
+        <div className="contact-grid">
+          <a className="contact-row" href="https://x.com/eulcorp" target="_blank" rel="noopener noreferrer">
+            <span className="contact-label">X</span>
+            <span className="contact-value">@eulcorp</span>
+            <span className="contact-arrow">↗</span>
+          </a>
+          <a className="contact-row" href="https://instagram.com/eulcorp" target="_blank" rel="noopener noreferrer">
+            <span className="contact-label">INSTAGRAM</span>
+            <span className="contact-value">@eulcorp</span>
+            <span className="contact-arrow">↗</span>
+          </a>
+          <a className="contact-row" href="https://tiktok.com/@3ulcorp" target="_blank" rel="noopener noreferrer">
+            <span className="contact-label">TIKTOK</span>
+            <span className="contact-value">@3ulcorp</span>
+            <span className="contact-arrow">↗</span>
+          </a>
+        </div>
+        <div className="contact-meta">
+          <span>NY · LDN · JPN</span>
+          <span>© EULCORP MMV</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ========================================================================
+// PER-SECTION BACKDROPS (all B&W, all subtle, all animated)
+// ========================================================================
+
+// -------- About: drifting block words --------
+const ABOUT_WORDS = [
+  { t: "EULCORP",       size: 380, x: -8,  y: 12,  dur: 78, dir:  1 },
+  { t: "VISION",        size: 220, x: 62,  y: 8,   dur: 92, dir: -1 },
+  { t: "DISCIPLINE",    size: 180, x: 18,  y: 58,  dur: 110, dir: 1 },
+  { t: "PATIENCE",      size: 200, x: 56,  y: 68,  dur: 86, dir: -1 },
+  { t: "BUILT TO LAST", size: 130, x: -4,  y: 88,  dur: 120, dir: 1 },
+  { t: "ONE OF NONE",   size: 150, x: 36,  y: 32,  dur: 100, dir: -1 },
+];
+
+function AboutBg() {
+  return (
+    <svg
+      className="bg-svg bg-about"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      {ABOUT_WORDS.map((w, i) => (
+        <text
+          key={i}
+          x={`${w.x}%`}
+          y={`${w.y}%`}
+          className="bg-word"
+          style={{
+            fontSize: w.size,
+            animation: `about-drift-${w.dir > 0 ? "r" : "l"} ${w.dur}s linear infinite`,
+            animationDelay: `${-i * 6}s`,
+          }}
+        >{w.t}</text>
+      ))}
+      {/* faint grid */}
+      {[0.2, 0.4, 0.6, 0.8].map((g) => (
+        <line key={g} x1="0" y1={g * 900} x2="1600" y2={g * 900} className="bg-line" />
+      ))}
+    </svg>
+  );
+}
+
+// -------- Portfolio: isometric blueprint grid + three light tiles --------
+function PortfolioBg() {
+  // isometric grid lines (two sets at +30°/-30°)
+  const lines = [];
+  const SP = 60;
+  for (let i = -30; i < 50; i++) {
+    // right-leaning
+    const y = i * SP;
+    lines.push(<line key={`r${i}`} x1="-200" y1={y + 0} x2="2200" y2={y + 1300} className="bg-iso-line" />);
+    lines.push(<line key={`l${i}`} x1="-200" y1={y + 1300} x2="2200" y2={y + 0} className="bg-iso-line" />);
+  }
+  // three large translucent "buildings" (isometric box outlines), pulsing
+  return (
+    <svg
+      className="bg-svg bg-portfolio"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      {lines}
+      {/* Buildings — each a stacked diamond + sides */}
+      <g className="bg-bldg" style={{ animationDelay: "0s" }}>
+        <polygon points="320,520 480,440 640,520 480,600" />
+        <polygon points="320,520 320,640 480,720 480,600" />
+        <polygon points="640,520 640,640 480,720 480,600" />
+      </g>
+      <g className="bg-bldg" style={{ animationDelay: "2.4s" }}>
+        <polygon points="780,400 980,300 1180,400 980,500" />
+        <polygon points="780,400 780,560 980,660 980,500" />
+        <polygon points="1180,400 1180,560 980,660 980,500" />
+      </g>
+      <g className="bg-bldg" style={{ animationDelay: "4.8s" }}>
+        <polygon points="1240,580 1380,510 1520,580 1380,650" />
+        <polygon points="1240,580 1240,700 1380,770 1380,650" />
+        <polygon points="1520,580 1520,700 1380,770 1380,650" />
+      </g>
+    </svg>
+  );
+}
+
+// -------- Contact: radar sweep + city dots --------
+const CITIES = [
+  { name: "NY",  x: 460, y: 380 },
+  { name: "LDN", x: 800, y: 360 },
+  { name: "JPN", x: 1180, y: 430 },
+];
+
+function ContactBg() {
+  return (
+    <svg
+      className="bg-svg bg-contact"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="radar-sweep" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.18" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="sweep-arm" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.7" stopColor="#fff" stopOpacity="0.08" />
+          <stop offset="1"   stopColor="#fff" stopOpacity="0.32" />
+        </linearGradient>
+      </defs>
+
+      {/* coordinate grid */}
+      {[200, 350, 500, 650, 800].map((r) => (
+        <circle key={r} cx="800" cy="450" r={r} className="bg-coord-ring" />
+      ))}
+      {[0, 45, 90, 135].map((a) => {
+        const rad = (a * Math.PI) / 180;
+        const x = 800 + Math.cos(rad) * 800;
+        const y = 450 + Math.sin(rad) * 800;
+        return <line key={a} x1={1600 - x} y1={900 - y} x2={x} y2={y} className="bg-coord-ring" />;
+      })}
+
+      {/* sweep arm — rotates */}
+      <g style={{ transformOrigin: "800px 450px", animation: "radar-sweep 8s linear infinite" }}>
+        <path d="M800 450 L1600 450 A 800 800 0 0 0 1530 184 Z" fill="url(#sweep-arm)" />
+      </g>
+
+      {/* city dots */}
+      {CITIES.map((c, i) => (
+        <g key={c.name} style={{ animation: `city-pulse 3.5s ease-in-out ${i * 0.9}s infinite` }}>
+          <circle cx={c.x} cy={c.y} r="20" className="bg-city-ring" />
+          <circle cx={c.x} cy={c.y} r="10" className="bg-city-ring" />
+          <circle cx={c.x} cy={c.y} r="4"  className="bg-city-dot" />
+          <text x={c.x + 16} y={c.y + 4} className="bg-city-label">{c.name}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// -------- Background stack: crossfades between sections --------
+function BackgroundStack({ active }) {
+  // `Backdrop` (the trading chart) lives on window — re-use it for #home
+  const Trading = window.Backdrop;
+  return (
+    <div className="bg-stack" aria-hidden="true">
+      <div className={`bg-layer ${active === "home" ? "is-active" : ""}`}>
+        {Trading ? <Trading /> : null}
+      </div>
+      <div className={`bg-layer ${active === "about" ? "is-active" : ""}`}><AboutBg /></div>
+      <div className={`bg-layer ${active === "portfolio" ? "is-active" : ""}`}><PortfolioBg /></div>
+      <div className={`bg-layer ${active === "contact" ? "is-active" : ""}`}><ContactBg /></div>
+    </div>
+  );
+}
+
+// Expose to other Babel scripts (app.jsx)
+Object.assign(window, {
+  useActiveSection,
+  NavBar,
+  AboutSection,
+  PortfolioSection,
+  ContactSection,
+  BackgroundStack,
+});
+</script>
+<script type="text/babel" data-module="app.jsx">
+/* ===== app.jsx ===== */
+const { useState, useEffect, useRef, useMemo } = React;
+
+// ---------- Tweak defaults ----------
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "purple": "#ffffff",
+  "wordmarkStyle": "serif-italic",
+  "showTicker": true,
+  "showGlow": true,
+  "bgVariant": "deep-black"
+} /*EDITMODE-END*/;
+
+// ---------- Ticker data ----------
+// Real price levels (mid-May 2026).
+const SEED = [
+{ sym: "ES", name: "S&P 500", px: 7432.25, tick: 0.25, dec: 2 },
+{ sym: "NQ", name: "NASDAQ 100", px: 24856.50, tick: 0.25, dec: 2 },
+{ sym: "YM", name: "DOW", px: 49526, tick: 1, dec: 0 },
+{ sym: "RTY", name: "RUSSELL", px: 2793.30, tick: 0.10, dec: 2 },
+{ sym: "GC", name: "GOLD", px: 4561.90, tick: 0.10, dec: 2 },
+{ sym: "MGC", name: "MICRO GOLD", px: 4561.90, tick: 0.10, dec: 2 },
+{ sym: "CL", name: "CRUDE", px: 99.18, tick: 0.01, dec: 2 },
+{ sym: "SI", name: "SILVER", px: 76.42, tick: 0.005, dec: 3 },
+{ sym: "VX", name: "VIX", px: 18.43, tick: 0.05, dec: 2 }];
+
+
+function useLiveTicker() {
+  const [rows, setRows] = useState(() =>
+  SEED.map((s) => ({ ...s, last: s.px, change: 0, pct: 0, flash: 0 }))
+  );
+  useEffect(() => {
+    const id = setInterval(() => {
+      setRows((prev) => prev.map((r) => {
+        // small random walk
+        const drift = (Math.random() - 0.5) * r.tick * (r.sym === "VX" ? 4 : 8);
+        const newPx = r.px + drift;
+        const delta = newPx - r.last;
+        const pct = delta / r.last * 100;
+        return { ...r, px: newPx, change: delta, pct, flash: Math.sign(drift) };
+      }));
+    }, 1400);
+    return () => clearInterval(id);
+  }, []);
+  return rows;
+}
+
+function fmt(n, dec) {
+  return n.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+// ---------- EOD prices (looked up via Claude on mount) ----------
+function useEodPrices() {
+  const [data, setData] = useState(null); // { ES: number, NQ: number, ... }
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (!window.claude || !window.claude.complete) throw new Error("no claude");
+        const symList = SEED.map((s) => `${s.sym} (${s.name})`).join(", ");
+        const prompt =
+        `Return the most recent end-of-day (EOD) closing prices for these CME ` +
+        `front-month futures contracts as a strict JSON object keyed by symbol. ` +
+        `Symbols: ${symList}. ` +
+        `Respond with ONLY the JSON object, no prose, no markdown fences. ` +
+        `Example shape: {"ES": 6123.50, "NQ": 22456.75, "YM": 44210, ...}`;
+        const text = await window.claude.complete(prompt);
+        const m = text.match(/\{[\s\S]*\}/);
+        if (!m) throw new Error("no JSON in response");
+        const parsed = JSON.parse(m[0]);
+        if (!cancelled) setData(parsed);
+      } catch (e) {
+        console.warn("EOD lookup failed", e);
+        if (!cancelled) setError(true);
+      }
+    })();
+    return () => {cancelled = true;};
+  }, []);
+  return { data, error };
+}
+
+function EodStrip() {
+  const { data, error } = useEodPrices();
+  const loading = !data && !error;
+  return (
+    <div className="eod-strip" aria-label="End of day closing prices">
+      <span className="eod-label">EOD CLOSE</span>
+      {SEED.map((s) => {
+        const px = data && data[s.sym];
+        return (
+          <span key={s.sym} className="eod-cell">
+            <span className="eod-sym">{s.sym}</span>
+            <span className="eod-px">
+              {px != null ? fmt(Number(px), s.dec) : loading ? "—" : fmt(s.px, s.dec)}
+            </span>
+          </span>);
+
+      })}
+      <span className={`eod-status ${loading ? "is-loading" : error ? "is-error" : "is-ok"}`}>
+        {loading ? "FETCHING" : error ? "OFFLINE" : "LIVE"}
+      </span>
+    </div>);
+
+}
+
+// ---------- Clock / market status ----------
+function useMarketClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  // ET time via Intl
+  const etParts = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false, weekday: "short"
+    });
+    const parts = Object.fromEntries(fmt.formatToParts(now).map((p) => [p.type, p.value]));
+    return parts;
+  }, [now]);
+  // Globex: closed Fri 5pm ET -> Sun 6pm ET, and daily maintenance 5-6pm ET.
+  const status = useMemo(() => {
+    const hour = parseInt(etParts.hour || "0", 10);
+    const wd = etParts.weekday;
+    if (wd === "Sat") return "WEEKEND";
+    if (wd === "Fri" && hour >= 17) return "WEEKEND";
+    if (wd === "Sun" && hour < 18) return "WEEKEND";
+    if (hour === 17) return "MAINT";
+    return "GLOBEX LIVE";
+  }, [etParts]);
+  return { time: `${etParts.hour}:${etParts.minute}:${etParts.second} ET`, status };
+}
+
+// ---------- Icons ----------
+const Icon = {
+  x: () =>
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2H21l-6.55 7.49L22 22h-6.79l-4.74-6.18L4.96 22H2.2l7.02-8.03L2 2h6.91l4.28 5.66L18.24 2Zm-1.19 18h1.69L7.04 4H5.25l11.8 16Z" />
+    </svg>,
+
+  ig: () =>
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>,
+
+  yt: () =>
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M23 12s0-3.6-.46-5.32a2.78 2.78 0 0 0-1.96-1.96C18.86 4.27 12 4.27 12 4.27s-6.86 0-8.58.45A2.78 2.78 0 0 0 1.46 6.68C1 8.4 1 12 1 12s0 3.6.46 5.32a2.78 2.78 0 0 0 1.96 1.96c1.72.45 8.58.45 8.58.45s6.86 0 8.58-.45a2.78 2.78 0 0 0 1.96-1.96C23 15.6 23 12 23 12ZM9.75 15.27V8.73L15.5 12l-5.75 3.27Z" />
+    </svg>,
+
+  tt: () =>
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.34 6.34 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.86a8.16 8.16 0 0 0 4.77 1.52V6.93a4.85 4.85 0 0 1-1.84-.24Z" />
+    </svg>
+
+};
+
+const SOCIALS = [
+{ id: "x", label: "X", handle: "eulcorp", href: "https://x.com/eulcorp", Icon: Icon.x },
+{ id: "ig", label: "Instagram", handle: "eulcorp", href: "https://instagram.com/eulcorp", Icon: Icon.ig },
+{ id: "tt", label: "TikTok", handle: "3ulcorp", href: "https://tiktok.com/@3ulcorp", Icon: Icon.tt }];
+
+
+// ---------- Wordmark variants ----------
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/$";
+
+function useScramble(target, opts = {}) {
+  const { duration = 1500, settle = 80 } = opts;
+  const [display, setDisplay] = React.useState(target);
+  const [token, setToken] = React.useState(0);
+  const trigger = React.useCallback(() => setToken((t) => t + 1), []);
+
+  React.useEffect(() => {
+    const len = target.length;
+    // Each letter locks in at a staggered point inside `duration`.
+    const lock = Array.from({ length: len }, (_, i) =>
+    (i + 1) / len * (duration - settle) + Math.random() * settle
+    );
+    const start = performance.now();
+    let raf;
+    const tick = (now) => {
+      const t = now - start;
+      const next = target.split("").map((ch, i) => {
+        if (ch === " ") return " ";
         if (t >= lock[i]) return ch;
         return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
       });
-      wm.textContent = next.join('');
-      if (t < duration) raf = requestAnimationFrame(step);
-      else wm.textContent = TARGET;
-    }
-    raf = requestAnimationFrame(step);
-  }
-  scramble();
-  wm.addEventListener('click', function () { scramble(); });
-  // hover-only re-trigger; on touch, mouseenter+click would fire twice per tap
-  if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
-    wm.addEventListener('mouseenter', function () { scramble(); });
-  }
+      setDisplay(next.join(""));
+      if (t < duration) raf = requestAnimationFrame(tick);else
+      setDisplay(target);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, token, duration, settle]);
 
-  // ---------- Backdrop: scripted price action that plays out over time ----------
-  // OHLC story mirroring the chart: distribution → downtrend → liquidity sweep
-  // → sharp bullish reversal → continuation. y is 0 (top) .. 1 (bottom).
-  // [open, close, wickHi, wickLo]
-  var STORY = [
-    // small bear distribution at top-left
-    [0.40, 0.42, 0.38, 0.44],
-    [0.42, 0.40, 0.39, 0.44],
-    [0.40, 0.44, 0.39, 0.46],
-    [0.44, 0.42, 0.41, 0.46],
-    [0.42, 0.46, 0.41, 0.48],
-    // breakdown
-    [0.46, 0.51, 0.45, 0.53],
-    [0.51, 0.55, 0.50, 0.57],
-    [0.55, 0.53, 0.52, 0.58],
-    [0.53, 0.59, 0.52, 0.61],
-    [0.59, 0.63, 0.58, 0.65],
-    [0.63, 0.67, 0.62, 0.69],
-    [0.67, 0.71, 0.66, 0.73],
-    // accumulation wobble before the sweep
-    [0.71, 0.74, 0.70, 0.76],
-    [0.74, 0.72, 0.71, 0.76],
-    [0.72, 0.78, 0.71, 0.80],
-    [0.78, 0.76, 0.75, 0.80],
-    // liquidity sweep — long lower wick
-    [0.76, 0.74, 0.73, 0.93],
-    // sharp bull reversal — big purple body
-    [0.74, 0.50, 0.73, 0.75],
-    // continuation up
-    [0.50, 0.44, 0.49, 0.52],
-    [0.44, 0.38, 0.43, 0.46],
-    [0.38, 0.33, 0.37, 0.40],
-    [0.33, 0.29, 0.32, 0.35],
-    [0.29, 0.26, 0.26, 0.31],
-    [0.26, 0.22, 0.22, 0.28]
-  ];
-  // x-axis session times — like the screenshot (8AM, 9:30 RTH open, 10, 11)
-  var TIMES = [
-    { i: 1,  label: '08:00' },
-    { i: 8,  label: '09:30' },
-    { i: 14, label: '10:00' },
-    { i: 19, label: '10:30' },
-    { i: 23, label: '11:00' }
-  ];
+  return [display, trigger];
+}
 
-  var svg = document.getElementById('backdrop');
-  var prefersReduce = window.matchMedia &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function isMobile() {
-    return window.matchMedia && window.matchMedia('(max-width: 800px)').matches;
-  }
-  // Portrait phones are far narrower than the 16:9 chart; `slice` would crop
-  // the sides off. Use `meet` on mobile so the whole pattern stays visible.
-  function setBackdropAspect() {
-    svg.setAttribute(
-      'preserveAspectRatio',
-      isMobile() ? 'xMidYMid meet' : 'xMidYMid slice'
-    );
-  }
-  setBackdropAspect();
-  var loopTimers = [];
+function Wordmark({ style }) {
+  const [text, scramble] = useScramble("EULCORP", { duration: 1500 });
+  const cls =
+  style === "stencil" ? "wm-stencil" :
+  style === "sans-bold" ? "wm-sans" : "wm-serif";
+  const inlineStyle = style === "serif-italic" ? { fontFamily: "Palatino" } : undefined;
+  return (
+    <h1
+      className={`wordmark ${cls}`}
+      style={inlineStyle}
+      onClick={scramble}
+      onMouseEnter={scramble}
+      title="click to re-decode">
+      {text}</h1>);
+}
 
-  function clearTimers() {
-    loopTimers.forEach(clearTimeout);
-    loopTimers = [];
-  }
+// Backdrop component now lives in backdrop.jsx (loaded as a separate Babel script).
+// We pick it up off `window` so this file stays small.
+const Backdrop = window.Backdrop;
 
-  // y=0 is top of chart, y=H is bottom. Price-space mapping for right-rail labels.
-  // We pin two anchor candles in normalized y to real prices so all labels stay in sync.
-  var PRICE_AT_TOP    = { y: 0.18, px: 29680 };
-  var PRICE_AT_BOTTOM = { y: 0.94, px: 29445 };
-  function yToPrice(y) {
-    var t = (y - PRICE_AT_TOP.y) / (PRICE_AT_BOTTOM.y - PRICE_AT_TOP.y);
-    return PRICE_AT_TOP.px + t * (PRICE_AT_BOTTOM.px - PRICE_AT_TOP.px);
-  }
-  function priceToY(px) {
-    var t = (px - PRICE_AT_TOP.px) / (PRICE_AT_BOTTOM.px - PRICE_AT_TOP.px);
-    return PRICE_AT_TOP.y + t * (PRICE_AT_BOTTOM.y - PRICE_AT_TOP.y);
-  }
-  function fmtPx(p) {
-    return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
+// ---------- Ticker strip ----------
+function TickerStrip() {
+  const rows = useLiveTicker();
+  const loop = [...rows, ...rows];
+  return (
+    <div className="ticker-wrap">
+      <div className="ticker">
+        {loop.map((r, i) => {
+          const up = r.change > 0;
+          const dn = r.change < 0;
+          return (
+            <div key={i} className={`tick ${up ? "is-up" : dn ? "is-dn" : ""}`}>
+              <span className="sym">{r.sym}</span>
+              <span className="px">{fmt(r.px, r.dec)}</span>
+              <span className={`ch ${up ? "up" : dn ? "dn" : ""}`}>
+                {up ? "\u25B2" : dn ? "\u25BC" : "\u00B7"} {Math.abs(r.pct).toFixed(2)}%
+              </span>
+              <span className="sep">/</span>
+            </div>);
+        })}
+      </div>
+    </div>);
+}
 
-  function buildBackdrop() {
-    clearTimers();
-    setBackdropAspect();
-    var W = 1600, H = 900;
-    var N = STORY.length;
-    var step = W / N;
-    var bodyW = step * 0.55;
-    var axisY = 0.96 * H;
-    var rightRailX = W - 96;
+// ---------- Chrome (with nav) ----------
+function Chrome({ active }) {
+  const { time, status } = useMarketClock();
+  const Nav = window.NavBar;
+  return (
+    <header className="chrome">
+      <div className="brand">
+        <span className="dot" />
+        <span>EULCORP</span>
+      </div>
+      {Nav ? <Nav active={active} /> : null}
+      <div className="right">
+        <span className="status">{status}</span>
+        <span className="time">{time}</span>
+      </div>
+    </header>);
 
-    var parts = [];
-    [0.22, 0.42, 0.62, 0.82].forEach(function (g) {
-      parts.push('<line x1="0" y1="' + (g * H) + '" x2="' + rightRailX + '" y2="' + (g * H) + '" class="bd-grid"/>');
-    });
+}
 
-    var sweepIdx = 16;
-    var reversalIdx = 17;
+// ---------- Footer / socials ----------
+function Socials() {
+  return (
+    <footer className="socials">
+      <div className="left">© EULCORP MMV</div>
+      <div className="links">
+        {SOCIALS.map((s) =>
+        <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" title={`${s.label} — @${s.handle}`}>
+            <s.Icon />
+            <span><span className="at">@</span>{s.handle}</span>
+          </a>
+        )}
+      </div>
+      <div className="right">NY · LDN · JPN</div>
+    </footer>);
 
-    // --- vertical "trade setup" green zone (covers the drop + reversal + continuation)
-    var setupX1 = 5 * step;
-    var setupX2 = (N - 1) * step + step;
-    parts.push('<rect class="bd-setup-zone" x="' + setupX1 + '" y="0" width="' +
-      (setupX2 - setupX1) + '" height="' + H + '"/>');
+}
 
-    // --- darker vertical "entry" zone over the reversal candles
-    var entryX1 = sweepIdx * step - step * 0.1;
-    var entryX2 = (reversalIdx + 2) * step;
-    parts.push('<rect class="bd-entry-zone" x="' + entryX1 + '" y="0" width="' +
-      (entryX2 - entryX1) + '" height="' + H + '"/>');
+function useToday() {
+  const [d, setD] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setD(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return d;
+}
 
-    // --- red supply zone at top-left (distribution)
-    parts.push('<rect class="bd-supply" x="0" y="' + (0.38 * H) +
-      '" width="' + (5 * step) + '" height="' + (0.10 * H) + '" rx="2"/>');
+const _MONTHS_UC = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+function fmtHeroDate(d) {
+  return `${String(d.getDate()).padStart(2, "0")} ${_MONTHS_UC[d.getMonth()]} ${d.getFullYear()}`;
+}
 
-    // --- horizontal target line (above the distribution)
-    var targetY = priceToY(29593.50) * H;
-    parts.push('<line class="bd-target-line" x1="0" x2="' + rightRailX + '" y1="' + targetY + '" y2="' + targetY + '"/>');
+// ---------- Hero ----------
+function Hero({ wordmarkStyle }) {
+  const today = useToday();
+  return (
+    <section className="hero">
+      <div className="wordmark-frame">
+        <span className="wf-corner wf-tl">ONE OF NONE</span>
+        <span className="wf-corner wf-tr">INDICES · COMMODITIES</span>
+        <Wordmark style={wordmarkStyle} />
+        <span className="wf-corner wf-bl">{fmtHeroDate(today)}</span>
+        <span className="wf-corner wf-br">NY · LDN · JPN</span>
+      </div>
+    </section>);
 
-    // --- horizontal stop-loss box around the sweep low
-    var stopTop = priceToY(29465.50) * H;
-    var stopBot = priceToY(29445.50) * H;
-    parts.push('<rect class="bd-stop-box" x="' + (sweepIdx * step + step * 0.3) +
-      '" y="' + stopTop + '" width="' + (rightRailX - (sweepIdx * step + step * 0.3)) +
-      '" height="' + (stopBot - stopTop) + '"/>');
+}
 
-    // demand zone box — extends right from the sweep
-    var zoneX = sweepIdx * step + step * 0.2;
-    var zoneY = 0.74 * H;
-    var zoneH = 0.12 * H;
-    parts.push('<rect class="bd-zone" x="' + zoneX + '" y="' + zoneY +
-      '" width="' + (rightRailX - zoneX) + '" height="' + zoneH + '" rx="2"/>');
+// ---------- Tweaks panel ----------
+function EulcorpTweaks({ t, setTweak }) {
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection title="Color">
+        <TweakColor
+          label="Accent"
+          value={t.purple}
+          onChange={(v) => setTweak("purple", v)}
+          options={["#ffffff", "#cfcfcf", "#7a7a7a", "#2b2b2b", "#000000"]} />
+        
+        <TweakRadio
+          label="Background"
+          value={t.bgVariant}
+          onChange={(v) => setTweak("bgVariant", v)}
+          options={[
+          { label: "Deep", value: "deep-black" },
+          { label: "Pure", value: "pure-black" }]
+          } />
+        
+        <TweakToggle
+          label="Purple glow"
+          value={t.showGlow}
+          onChange={(v) => setTweak("showGlow", v)} />
+        
+      </TweakSection>
 
-    // candles
-    STORY.forEach(function (c, idx) {
-      var x = idx * step + step / 2;
-      var top = Math.min(c[0], c[1]) * H;
-      var bot = Math.max(c[0], c[1]) * H;
-      var h = Math.max(1.2, bot - top);
-      var wickTop = c[2] * H;
-      var wickBot = c[3] * H;
-      var bull = c[1] < c[0];
-      parts.push(
-        '<g class="cs ' + (bull ? 'cs-bull' : 'cs-bear') + '" data-i="' + idx + '">' +
-          '<line x1="' + x + '" x2="' + x + '" y1="' + wickTop + '" y2="' + top + '" class="cs-wick"/>' +
-          '<line x1="' + x + '" x2="' + x + '" y1="' + bot + '" y2="' + wickBot + '" class="cs-wick"/>' +
-          '<rect x="' + (x - bodyW / 2) + '" y="' + top + '" width="' + bodyW + '" height="' + h + '" class="cs-body" rx="0.5"/>' +
-        '</g>'
-      );
-    });
+      <TweakSection title="Wordmark">
+        <TweakSelect
+          label="Style"
+          value={t.wordmarkStyle}
+          onChange={(v) => setTweak("wordmarkStyle", v)}
+          options={[
+          { label: "Serif italic", value: "serif-italic" },
+          { label: "Sans bold (lowercase)", value: "sans-bold" },
+          { label: "Stencil (uppercase)", value: "stencil" }]
+          } />
+        
+      </TweakSection>
 
-    // current price marker — horizontal dashed line + glowing dot at last close
-    var last = STORY[N - 1];
-    var lx = (N - 1) * step + step / 2;
-    var ly = last[1] * H;
-    parts.push('<line class="bd-price-line" x1="0" x2="' + rightRailX + '" y1="' + ly + '" y2="' + ly + '"/>');
-    parts.push('<circle class="bd-dot bd-dot-bright" cx="' + lx + '" cy="' + ly + '" r="4" style="opacity:0"/>');
+      <TweakSection title="Layout">
+        <TweakToggle
+          label="Live ticker"
+          value={t.showTicker}
+          onChange={(v) => setTweak("showTicker", v)} />
+        
+      </TweakSection>
+    </TweaksPanel>);
 
-    // --- right-rail price scale (ghost numbers like the screenshot)
-    var rail = [29680, 29640, 29600, 29560, 29520, 29480, 29440, 29400];
-    rail.forEach(function (p) {
-      var py = priceToY(p) * H;
-      if (py < 4 || py > H - 4) return;
-      parts.push('<text class="bd-price-label" x="' + (rightRailX + 12) + '" y="' + (py + 4) +
-        '">' + fmtPx(p) + '</text>');
-    });
+}
 
-    // highlighted price tags: current (purple) + target (green band) + stop (purple band)
-    function priceTag(y, label, color) {
-      var ty = y * H;
-      return '<rect class="bd-price-tag-bg" x="' + (rightRailX + 4) + '" y="' + (ty - 9) +
-             '" width="86" height="18" rx="2" style="fill:' + color + '"/>' +
-             '<text class="bd-price-label tag" x="' + (rightRailX + 12) + '" y="' + (ty + 4) +
-             '">' + label + '</text>';
-    }
-    parts.push(priceTag(priceToY(yToPrice(ly / H)), fmtPx(yToPrice(ly / H)), 'rgba(122,47,208,0.85)'));
-    parts.push(priceTag(priceToY(29593.50), '29,593.50', 'rgba(80,180,120,0.70)'));
-    parts.push(priceTag(priceToY(29465.50), '29,465.50', 'rgba(60,60,72,0.85)'));
-    parts.push(priceTag(priceToY(29445.50), '29,445.50', 'rgba(60,60,72,0.85)'));
+// ---------- App ----------
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
 
-    // x-axis time labels
-    TIMES.forEach(function (t) {
-      var tx = t.i * step + step / 2;
-      parts.push('<line class="bd-time-tick" x1="' + tx + '" x2="' + tx + '" y1="' + (axisY - 8) + '" y2="' + (axisY - 2) + '"/>');
-      parts.push('<text class="bd-time" x="' + tx + '" y="' + (axisY + 16) + '" text-anchor="middle">' + t.label + '</text>');
-    });
+  // which section is in view (drives bg crossfade + active nav state)
+  const SECTION_IDS = ["home", "about", "portfolio", "contact"];
+  const active = (window.useActiveSection || (() => "home"))(SECTION_IDS);
 
-    svg.innerHTML = parts.join('');
+  // Apply CSS vars
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--purple", t.purple);
+    root.style.setProperty("--purple-bright", t.purple);
+    root.style.setProperty("--purple-soft", hexA(t.purple, 0.22));
+    root.style.setProperty("--purple-faint", hexA(t.purple, 0.12));
+    root.dataset.bg = t.bgVariant;
+    root.dataset.glow = t.showGlow ? "on" : "off";
+    root.dataset.active = active;
+  }, [t.purple, t.bgVariant, t.showGlow, active]);
 
-    if (prefersReduce) {
-      // skip the animation — show the finished frame
-      svg.querySelectorAll('.cs').forEach(function (g) { g.classList.add('in'); });
-      svg.querySelector('.bd-zone').classList.add('show');
-      svg.querySelector('.bd-supply').classList.add('show');
-      svg.querySelector('.bd-setup-zone').classList.add('show');
-      svg.querySelector('.bd-entry-zone').classList.add('show');
-      svg.querySelector('.bd-target-line').classList.add('show');
-      svg.querySelector('.bd-stop-box').classList.add('show');
-      svg.querySelector('.bd-price-line').classList.add('show');
-      svg.querySelectorAll('.bd-time, .bd-time-tick, .bd-price-label, .bd-price-tag-bg').forEach(function (n) { n.classList.add('show'); });
-      svg.querySelector('.bd-dot').style.opacity = '1';
-      return;
-    }
+  const BgStack         = window.BackgroundStack;
+  const AboutSection    = window.AboutSection;
+  const PortfolioSection= window.PortfolioSection;
+  const ContactSection  = window.ContactSection;
 
-    play();
-  }
+  return (
+    <div className="page">
+      {BgStack ? <BgStack active={active} /> : null}
+      <Chrome active={active} />
+      <EodStrip />
+      <main className="sections">
+        <section id="home" className="section section-home">
+          <Hero wordmarkStyle={t.wordmarkStyle} />
+        </section>
+        {AboutSection ? <AboutSection /> : null}
+        {PortfolioSection ? <PortfolioSection /> : null}
+        {ContactSection ? <ContactSection /> : null}
+      </main>
+      <Socials />
+      <EulcorpTweaks t={t} setTweak={setTweak} />
+    </div>);
 
-  function play() {
-    var groups = svg.querySelectorAll('.cs');
-    var zone = svg.querySelector('.bd-zone');
-    var supply = svg.querySelector('.bd-supply');
-    var setupZone = svg.querySelector('.bd-setup-zone');
-    var entryZone = svg.querySelector('.bd-entry-zone');
-    var targetLine = svg.querySelector('.bd-target-line');
-    var stopBox = svg.querySelector('.bd-stop-box');
-    var priceLine = svg.querySelector('.bd-price-line');
-    var dot = svg.querySelector('.bd-dot');
-    var timeNodes = svg.querySelectorAll('.bd-time, .bd-time-tick');
-    var priceLabels = svg.querySelectorAll('.bd-price-label, .bd-price-tag-bg');
+}
 
-    // reveal time axis + right-rail price ladder up-front (chart frame)
-    loopTimers.push(setTimeout(function () {
-      timeNodes.forEach(function (n) { n.classList.add('show'); });
-      priceLabels.forEach(function (n) { n.classList.add('show'); });
-    }, 120));
+// hex + alpha → rgba string
+function hexA(hex, a) {
+  const m = hex.replace("#", "");
+  const r = parseInt(m.slice(0, 2), 16);
+  const g = parseInt(m.slice(2, 4), 16);
+  const b = parseInt(m.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
 
-    var sweepIdx = 16;
-    var reversalIdx = 17;
-    // candle interval — quicker on the reversal so it feels like a real impulse
-    function intervalFor(i) {
-      if (i < 5) return 230;          // distribution
-      if (i < sweepIdx) return 200;   // downtrend
-      if (i === sweepIdx) return 480; // pause on the sweep wick
-      if (i === sweepIdx + 1) return 140; // reversal candle pops fast
-      return 180;                     // continuation
-    }
-
-    var t = 0;
-    groups.forEach(function (g, i) {
-      loopTimers.push(setTimeout(function () { g.classList.add('in'); }, t));
-      // supply zone draws in once the distribution is established
-      if (i === 4) {
-        loopTimers.push(setTimeout(function () { supply.classList.add('show'); }, t + 60));
-      }
-      // setup zone reveals as the breakdown starts
-      if (i === 5) {
-        loopTimers.push(setTimeout(function () { setupZone.classList.add('show'); }, t + 80));
-      }
-      // entry zone + demand zone + stop box align with the sweep wick
-      if (i === sweepIdx) {
-        loopTimers.push(setTimeout(function () {
-          zone.classList.add('show');
-          entryZone.classList.add('show');
-          stopBox.classList.add('show');
-        }, t + 80));
-      }
-      // target line resolves once continuation is underway
-      if (i === reversalIdx + 2) {
-        loopTimers.push(setTimeout(function () { targetLine.classList.add('show'); }, t + 60));
-      }
-      t += intervalFor(i);
-    });
-
-    // settle: dashed price line + glowing dot
-    loopTimers.push(setTimeout(function () {
-      priceLine.classList.add('show');
-      dot.style.transition = 'opacity 0.5s ease';
-      dot.style.opacity = '1';
-    }, t + 60));
-
-    // hold, then fade out and replay — desktop only; mobile holds the settled frame
-    if (!isMobile()) {
-      loopTimers.push(setTimeout(restart, t + 4200));
-    }
-  }
-
-  function restart() {
-    var nodes = svg.querySelectorAll(
-      '.cs, .bd-zone, .bd-supply, .bd-setup-zone, .bd-entry-zone, .bd-target-line, ' +
-      '.bd-stop-box, .bd-price-line, .bd-time, .bd-time-tick, .bd-dot, ' +
-      '.bd-price-label, .bd-price-tag-bg'
-    );
-    nodes.forEach(function (n) {
-      n.classList.remove('in', 'show');
-      n.classList.add('out');
-    });
-    loopTimers.push(setTimeout(buildBackdrop, 900));
-  }
-
-  buildBackdrop();
-  // rebuild on resize so the SVG re-fits cleanly. Ignore height-only changes —
-  // mobile browsers fire `resize` every time the URL/toolbar shows or hides,
-  // which would otherwise reset the whole animation mid-scroll.
-  var rebuildTimer = 0;
-  var lastW = window.innerWidth;
-  window.addEventListener('resize', function () {
-    var w = window.innerWidth;
-    if (w === lastW) return;
-    lastW = w;
-    clearTimeout(rebuildTimer);
-    rebuildTimer = setTimeout(buildBackdrop, 180);
-  });
-
-  // Pause clock, ticker, and chart animation when the tab is hidden.
-  // Background-tab throttling already slows timers, but on mobile we want
-  // zero work so the OS can suspend the page cleanly.
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) {
-      clearInterval(clockInterval);
-      clearInterval(priceInterval);
-      clockInterval = priceInterval = 0;
-      clearTimers();
-    } else {
-      if (!clockInterval) {
-        updateClock();
-        clockInterval = setInterval(updateClock, 1000);
-      }
-      if (!priceInterval) {
-        priceInterval = setInterval(tickPrices, 1400);
-      }
-      buildBackdrop();
-    }
-  });
-})();
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>
