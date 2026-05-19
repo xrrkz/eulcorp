@@ -211,7 +211,7 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
 .hero {
   min-height: 100vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 180px 24px 300px;     /* extra bottom space so wordmark corners stay clear of socials */
+  padding: 140px 24px 180px;     /* leaves room for tagline + ops desk above socials */
   text-align: center;
   position: relative;
   z-index: 2;
@@ -277,6 +277,248 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
 .wordmark:hover {
   animation-duration: 2.4s;
 }
+
+/* hero sub-tagline (under wordmark) */
+.hero-tagline {
+  margin-top: 26px;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(15px, 1.6vw, 22px);
+  letter-spacing: 0.01em;
+  color: var(--text);
+  text-shadow: 0 0 14px rgba(0,0,0,0.85);
+  opacity: 0;
+  animation: ht-fade 1.2s ease-out 0.6s forwards;
+}
+.hero-tagline .ht-sep {
+  display: inline-block;
+  width: 22px; height: 1px;
+  background: var(--text);
+  vertical-align: middle;
+  margin: 0 14px;
+  opacity: 0.55;
+}
+@keyframes ht-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* hero ops desk — dual panel: TRADING ↔ ESTATE */
+.hero-ops {
+  margin-top: 56px;
+  width: min(960px, 92vw);
+  font-family: 'JetBrains Mono', monospace;
+  position: relative;
+  z-index: 3;
+  opacity: 0;
+  animation: ht-fade 1.4s ease-out 0.9s forwards;
+}
+.hero-ops-rail {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 10px; letter-spacing: 0.32em; color: var(--muted);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.hero-ops-rail .hor-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line) 8%, var(--line) 92%, transparent);
+}
+.hero-ops-grid {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+.hc-panel {
+  position: relative;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.48);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  text-align: left;
+}
+.hc-panel + .hc-panel { border-left: none; }
+.hc-panel::before {
+  content: "";
+  position: absolute; left: -30%; top: 0;
+  width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--text), transparent);
+  opacity: 0.55;
+  animation: hc-scan 5.5s linear infinite;
+}
+.hc-panel--estate::before { animation-delay: -2.75s; }
+@keyframes hc-scan {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(360%); }
+}
+/* corner ticks (brutalist) */
+.hc-panel .hc-tick {
+  position: absolute;
+  width: 8px; height: 8px;
+  border: 1px solid var(--text);
+  opacity: 0.6;
+}
+.hc-tick.tl { top: -1px;    left: -1px;    border-right: none; border-bottom: none; }
+.hc-tick.tr { top: -1px;    right: -1px;   border-left:  none; border-bottom: none; }
+.hc-tick.bl { bottom: -1px; left: -1px;    border-right: none; border-top:    none; }
+.hc-tick.br { bottom: -1px; right: -1px;   border-left:  none; border-top:    none; }
+
+.hc-head {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.hc-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text);
+  flex-shrink: 0;
+}
+.hc-dot-live {
+  box-shadow: 0 0 8px var(--text), 0 0 16px var(--text);
+  animation: hc-live 1.6s ease-in-out infinite;
+}
+.hc-dot-hold {
+  background: transparent;
+  border: 1px solid var(--text);
+  box-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+@keyframes hc-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+.hc-head-label { color: var(--text); font-weight: 600; }
+.hc-head-meta  { margin-left: auto; color: var(--faint); font-size: 9px; letter-spacing: 0.2em; }
+
+.hc-figure {
+  height: 56px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.hc-spark {
+  width: 100%; height: 100%;
+  display: block;
+}
+.hc-spark-line {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.45));
+}
+.hc-spark-fill {
+  fill: url(#hc-spark-grad);
+  opacity: 0.55;
+}
+.hc-spark-dot {
+  fill: var(--text);
+  filter: drop-shadow(0 0 6px var(--text));
+}
+
+/* estate "skyline" mini-graphic */
+.hc-skyline-bar {
+  fill: var(--text);
+  opacity: 0.85;
+}
+.hc-skyline-window {
+  fill: #000;
+}
+.hc-skyline-window.lit {
+  fill: var(--text);
+  opacity: 0.9;
+  animation: hc-blink 2.2s steps(2, end) infinite;
+}
+@keyframes hc-blink {
+  0%, 60%  { opacity: 0.95; }
+  70%, 90% { opacity: 0.25; }
+}
+.hc-skyline-ground {
+  stroke: var(--text);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.hc-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.hc-stat { display: flex; flex-direction: column; gap: 4px; }
+.hc-stat-k {
+  font-size: 9px; letter-spacing: 0.22em; color: var(--faint);
+  text-transform: uppercase;
+}
+.hc-stat-v {
+  font-size: 17px;
+  color: var(--text);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-family: 'JetBrains Mono', monospace;
+}
+.hc-stat-v.up { color: var(--text); }
+.hc-stat-v .arrow {
+  font-size: 11px;
+  margin-right: 4px;
+  opacity: 0.75;
+}
+
+/* center capital flow connector */
+.hc-connector {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(0,0,0,0.32);
+}
+.hc-connector::before,
+.hc-connector::after {
+  content: "";
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  width: 1px; height: 14px;
+  background: var(--text);
+  opacity: 0.4;
+}
+.hc-connector::before { top: -1px; }
+.hc-connector::after  { bottom: -1px; }
+.hc-flow {
+  font-size: 14px; line-height: 1;
+  letter-spacing: 0.2em;
+  color: var(--text);
+  animation: hc-flow 2.6s ease-in-out infinite;
+}
+@keyframes hc-flow {
+  0%, 100% { transform: translateX(-4px); opacity: 0.55; }
+  50%      { transform: translateX(4px);  opacity: 1; }
+}
+.hc-connector-label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%; transform: translateX(-50%);
+  font-size: 8px; letter-spacing: 0.28em;
+  color: var(--faint);
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* footer rail under ops desk */
+.hero-ops-foot {
+  margin-top: 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  font-size: 9.5px; letter-spacing: 0.32em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+.hero-ops-foot strong { color: var(--text); font-weight: 600; letter-spacing: 0.32em; }
+.hero-ops-foot .blink { animation: hc-live 1.6s ease-in-out infinite; }
 
 /* ---------- backdrop chart + ghost numbers ---------- */
 .backdrop {
@@ -731,6 +973,42 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   }
   .socials a { font-size: 11px; gap: 6px; }
   .socials a svg { width: 13px; height: 13px; }
+
+  .hero-tagline {
+    margin-top: 18px;
+    font-size: 14px;
+  }
+  .hero-tagline .ht-sep { width: 16px; margin: 0 10px; }
+
+  .hero-ops {
+    margin-top: 28px;
+    width: min(420px, 96vw);
+  }
+  .hero-ops-grid {
+    grid-template-columns: 1fr;
+  }
+  .hc-panel + .hc-panel { border-left: 1px solid var(--line); border-top: none; }
+  .hc-connector {
+    flex-direction: row;
+    border-top: none; border-bottom: none;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    padding: 6px 0;
+  }
+  .hc-connector::before, .hc-connector::after { display: none; }
+  .hc-flow { transform: rotate(90deg); animation: hc-flow-v 2.6s ease-in-out infinite; }
+  @keyframes hc-flow-v {
+    0%, 100% { transform: rotate(90deg) translateX(-4px); opacity: 0.55; }
+    50%      { transform: rotate(90deg) translateX(4px);  opacity: 1; }
+  }
+  .hc-connector-label { position: static; transform: none; margin-left: 10px; }
+  .hero-ops-foot {
+    font-size: 8.5px; letter-spacing: 0.22em;
+    flex-direction: column; gap: 8px;
+    text-align: center;
+  }
+  .hc-stat-v { font-size: 15px; }
+  .hc-head-meta { display: none; }
 }
 
 @media (max-width: 440px) {
@@ -3487,6 +3765,203 @@ function fmtHeroDate(d) {
   return `${String(d.getDate()).padStart(2, "0")} ${_MONTHS_UC[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// ---------- Hero Ops Desk: live TRADING ↔ ESTATE terminal ----------
+function useOpsTick(intervalMs = 1500) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return tick;
+}
+
+// deterministic "random walk" so server/client render the same
+function _walk(seed, tick, amp, drift) {
+  let v = seed;
+  for (let i = 0; i < tick; i++) {
+    v += Math.sin((i + 1) * 1.7 + seed * 0.0001) * amp
+       + Math.cos((i + 1) * 0.9) * amp * 0.5
+       + drift;
+  }
+  return v;
+}
+
+function TradingPanel({ tick }) {
+  // sparkline (24 pts, rolling window)
+  const W = 200, H = 56;
+  const pts = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < 24; i++) {
+      const k = tick + i;
+      const y = H * 0.5
+        + Math.sin(k * 0.55) * 12
+        + Math.cos(k * 0.23) * 8
+        + Math.sin(k * 1.1) * 4;
+      arr.push([(i / 23) * W, H - y]);
+    }
+    return arr;
+  }, [tick]);
+
+  const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const fill = `${line} L${W} ${H} L0 ${H} Z`;
+  const last = pts[pts.length - 1];
+
+  const pnl  = _walk(12480, tick, 28, 4.2);
+  const pct  = (_walk(0.42, tick % 60, 0.012, 0.0006) % 2.4).toFixed(2);
+  const pos  = ["LONG /ES", "LONG /NQ", "FLAT", "LONG /CL", "SHORT /VX"][tick % 5];
+
+  return (
+    <div className="hc-panel hc-panel--trade">
+      <span className="hc-tick tl" /><span className="hc-tick tr" />
+      <span className="hc-tick bl" /><span className="hc-tick br" />
+      <div className="hc-head">
+        <span className="hc-dot hc-dot-live" />
+        <span className="hc-head-label">Trading Desk</span>
+        <span className="hc-head-meta">/ES · /NQ · /CL</span>
+      </div>
+      <div className="hc-figure">
+        <svg className="hc-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="hc-spark-grad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0"  stopColor="#ffffff" stopOpacity="0.35" />
+              <stop offset="1"  stopColor="#ffffff" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path className="hc-spark-fill" d={fill} />
+          <path className="hc-spark-line" d={line} />
+          <circle className="hc-spark-dot" cx={last[0]} cy={last[1]} r="2.4" />
+        </svg>
+      </div>
+      <div className="hc-stats">
+        <div className="hc-stat">
+          <span className="hc-stat-k">SESSION P&L</span>
+          <span className="hc-stat-v up"><span className="arrow">▲</span>${pnl.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">POSITION</span>
+          <span className="hc-stat-v">{pos}</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">DAILY %</span>
+          <span className="hc-stat-v up"><span className="arrow">▲</span>{pct}%</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">VOL</span>
+          <span className="hc-stat-v">{(2400 + (tick * 17) % 880).toLocaleString()}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EstatePanel({ tick }) {
+  // mini skyline — five buildings of varied heights, lit windows
+  const W = 200, H = 56;
+  const buildings = useMemo(() => ([
+    { x: 6,   w: 26, h: 30 },
+    { x: 38,  w: 22, h: 44 },
+    { x: 66,  w: 30, h: 36 },
+    { x: 102, w: 24, h: 50 },
+    { x: 132, w: 28, h: 28 },
+    { x: 166, w: 26, h: 40 },
+  ]), []);
+
+  // window grid — deterministic "lit" set that rotates with tick
+  const windows = useMemo(() => {
+    const out = [];
+    buildings.forEach((b, bi) => {
+      const cols = Math.max(2, Math.floor(b.w / 6));
+      const rows = Math.max(2, Math.floor(b.h / 6));
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const wx = b.x + 2 + c * (b.w - 4) / cols;
+          const wy = (H - b.h) + 3 + r * (b.h - 4) / rows;
+          const ww = (b.w - 4) / cols - 1.2;
+          const wh = (b.h - 4) / rows - 1.2;
+          const key = bi * 100 + r * 10 + c;
+          const lit = ((key * 31 + tick * 7) % 11) < 3;
+          out.push({ wx, wy, ww, wh, lit, key });
+        }
+      }
+    });
+    return out;
+  }, [buildings, tick]);
+
+  const doors  = 142 + (tick % 3);
+  const sqft   = (218400 + (tick * 24) % 800).toLocaleString();
+  const occ    = (96.2 + ((tick * 0.13) % 1.8)).toFixed(1);
+  const irr    = (17.4 + (Math.sin(tick * 0.7) * 0.6)).toFixed(1);
+
+  return (
+    <div className="hc-panel hc-panel--estate">
+      <span className="hc-tick tl" /><span className="hc-tick tr" />
+      <span className="hc-tick bl" /><span className="hc-tick br" />
+      <div className="hc-head">
+        <span className="hc-dot hc-dot-hold" />
+        <span className="hc-head-label">Estate Book</span>
+        <span className="hc-head-meta">SFR · MFR · LAND</span>
+      </div>
+      <div className="hc-figure">
+        <svg className="hc-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+          <line className="hc-skyline-ground" x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} />
+          {buildings.map((b, i) => (
+            <rect key={i} className="hc-skyline-bar"
+                  x={b.x} y={H - b.h} width={b.w} height={b.h} />
+          ))}
+          {windows.map((w) => (
+            <rect key={w.key}
+                  className={`hc-skyline-window ${w.lit ? "lit" : ""}`}
+                  x={w.wx} y={w.wy} width={w.ww} height={w.wh} />
+          ))}
+        </svg>
+      </div>
+      <div className="hc-stats">
+        <div className="hc-stat">
+          <span className="hc-stat-k">DOORS HELD</span>
+          <span className="hc-stat-v">{doors}</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">SQ. FT.</span>
+          <span className="hc-stat-v">{sqft}</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">OCCUPANCY</span>
+          <span className="hc-stat-v up"><span className="arrow">●</span>{occ}%</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">TRAILING IRR</span>
+          <span className="hc-stat-v up"><span className="arrow">▲</span>{irr}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroOpsDesk() {
+  const tick = useOpsTick(1500);
+  return (
+    <div className="hero-ops" role="group" aria-label="Live operations desk">
+      <div className="hero-ops-rail">
+        <span>● Live Ops Desk</span>
+        <span className="hor-line" />
+        <span>Capital ↔ Concrete</span>
+      </div>
+      <div className="hero-ops-grid">
+        <TradingPanel tick={tick} />
+        <div className="hc-connector" aria-hidden="true">
+          <span className="hc-flow">⇌</span>
+          <span className="hc-connector-label">Capital Flow</span>
+        </div>
+        <EstatePanel tick={tick} />
+      </div>
+      <div className="hero-ops-foot">
+        <span><strong>EULCORP</strong> · One book, two hands</span>
+        <span><span className="blink">●</span> Tape open · Title clear</span>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Hero ----------
 function Hero({ wordmarkStyle }) {
   const today = useToday();
@@ -3494,11 +3969,15 @@ function Hero({ wordmarkStyle }) {
     <section className="hero">
       <div className="wordmark-frame">
         <span className="wf-corner wf-tl">ONE OF NONE</span>
-        <span className="wf-corner wf-tr">INDICES · COMMODITIES</span>
+        <span className="wf-corner wf-tr">MARKETS · MORTAR</span>
         <Wordmark style={wordmarkStyle} />
         <span className="wf-corner wf-bl">{fmtHeroDate(today)}</span>
         <span className="wf-corner wf-br">NY · LDN · JPN</span>
       </div>
+      <p className="hero-tagline">
+        Trade the tape <span className="ht-sep" /> hold the title.
+      </p>
+      <HeroOpsDesk />
     </section>);
 
 }
