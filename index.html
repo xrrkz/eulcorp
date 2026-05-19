@@ -1471,34 +1471,68 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   100% { transform: translate(560px,260px); opacity: 0; }
 }
 
-/* -------- Contact bg: radar -------- */
-.bg-coord-ring {
+/* -------- Contact bg: global network -------- */
+.cbg-grid {
+  stroke: rgba(255,255,255,0.05);
+  stroke-width: 1;
+  stroke-dasharray: 1 8;
+}
+.cbg-equator {
+  stroke: rgba(255,255,255,0.10);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+}
+.cbg-land circle { fill: rgba(255,255,255,0.55); }
+.cbg-arcs path {
   fill: none;
-  stroke: rgba(255,255,255,0.08);
+  stroke: rgba(255,255,255,0.30);
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+  animation: cbg-flow 18s linear infinite;
+}
+.cbg-packet {
+  fill: #fff;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.55));
+}
+.cbg-packet--ghost { opacity: 0.45; }
+.cbg-city-ring {
+  fill: none;
+  stroke: rgba(255,255,255,0.55);
   stroke-width: 1;
 }
-.bg-city-ring {
-  fill: none;
-  stroke: rgba(255,255,255,0.45);
-  stroke-width: 1;
-}
-.bg-city-dot {
-  fill: var(--text);
-}
-.bg-city-label {
+.cbg-city-dot { fill: var(--text); }
+.cbg-city-label {
   fill: var(--text);
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.22em;
 }
-@keyframes radar-sweep {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+.cbg-city-coord {
+  fill: rgba(255,255,255,0.55);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
 }
-@keyframes city-pulse {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 1; }
+.cbg-pulse {
+  fill: none;
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 1;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: cbg-pulse 3.6s ease-out infinite;
+}
+.cbg-pulse--2 { animation-duration: 5.2s; }
+@keyframes cbg-pulse {
+  0%   { transform: scale(0.18); opacity: 0.85; }
+  100% { transform: scale(1.0);  opacity: 0; }
+}
+@keyframes cbg-flow {
+  to { stroke-dashoffset: -360; }
+}
+@keyframes cbg-scan {
+  0%   { transform: translateY(-900px); }
+  100% { transform: translateY(900px); }
 }
 
 /* ---------- responsive: chrome + nav + sections + cards ---------- */
@@ -3324,14 +3358,62 @@ function PortfolioBg() {
   );
 }
 
-// -------- Contact: radar sweep + city dots --------
+// -------- Contact: dotted world map + great-circle comms --------
 const CITIES = [
-  { name: "NY",  x: 460, y: 380 },
-  { name: "LDN", x: 800, y: 360 },
-  { name: "JPN", x: 1180, y: 430 },
+  { name: "NY",  coord: "40.71°N  074.01°W", x: 360,  y: 410 },
+  { name: "LDN", coord: "51.50°N  000.13°W", x: 770,  y: 340 },
+  { name: "JPN", coord: "35.68°N  139.69°E", x: 1240, y: 430 },
+];
+
+// Rough continent rectangles (Mercator-ish) used to stipple a dotted world map.
+const LAND = [
+  { x: 180,  y: 250, w: 340, h: 220 },  // North America
+  { x: 320,  y: 470, w: 180, h: 280 },  // South America
+  { x: 540,  y: 240, w: 200, h: 200 },  // Europe
+  { x: 580,  y: 440, w: 220, h: 310 },  // Africa
+  { x: 800,  y: 240, w: 420, h: 240 },  // Asia
+  { x: 1260, y: 230, w: 160, h: 150 },  // Japan + far east
+  { x: 1080, y: 540, w: 200, h: 160 },  // Australia
 ];
 
 function ContactBg() {
+  // Deterministic PRNG for a stable stipple pattern across renders.
+  const dots = _s_R.useMemo(() => {
+    const rnd = (n) => {
+      const x = Math.sin(n * 12.9898) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    const STEP = 20;
+    const out = [];
+    let i = 0;
+    for (const L of LAND) {
+      for (let y = L.y; y < L.y + L.h; y += STEP) {
+        for (let x = L.x; x < L.x + L.w; x += STEP) {
+          i++;
+          if (rnd(i + 11) < 0.30) continue;
+          const jx = (rnd(i + 22) - 0.5) * 7;
+          const jy = (rnd(i + 33) - 0.5) * 7;
+          const r  = 0.9 + rnd(i + 44) * 1.0;
+          const op = 0.18 + rnd(i + 55) * 0.32;
+          out.push({ cx: x + jx, cy: y + jy, r, op });
+        }
+      }
+    }
+    return out;
+  }, []);
+
+  // Quadratic-Bezier great-circle-ish arcs between cities.
+  const arcPath = (a, b, lift) => {
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2 - lift;
+    return `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`;
+  };
+  const arcs = [
+    { id: "arc-nyl",  d: arcPath(CITIES[0], CITIES[1], 150), dur: 7.2 },
+    { id: "arc-ljp",  d: arcPath(CITIES[1], CITIES[2], 140), dur: 8.4 },
+    { id: "arc-nyjp", d: arcPath(CITIES[0], CITIES[2], 260), dur: 11.0 },
+  ];
+
   return (
     <svg
       className="bg-svg bg-contact"
@@ -3340,42 +3422,72 @@ function ContactBg() {
       aria-hidden="true"
     >
       <defs>
-        <radialGradient id="radar-sweep" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.18" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        <radialGradient id="cbg-vignette" cx="0.5" cy="0.5" r="0.7">
+          <stop offset="0.55" stopColor="#000" stopOpacity="0" />
+          <stop offset="1"    stopColor="#000" stopOpacity="0.55" />
         </radialGradient>
-        <linearGradient id="sweep-arm" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0"   stopColor="#fff" stopOpacity="0" />
-          <stop offset="0.7" stopColor="#fff" stopOpacity="0.08" />
-          <stop offset="1"   stopColor="#fff" stopOpacity="0.32" />
+        <linearGradient id="cbg-scan" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.5"  stopColor="#fff" stopOpacity="0.06" />
+          <stop offset="1"    stopColor="#fff" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* coordinate grid */}
-      {[200, 350, 500, 650, 800].map((r) => (
-        <circle key={r} cx="800" cy="450" r={r} className="bg-coord-ring" />
+      {/* parallels + meridians */}
+      {[180, 300, 420, 540, 660, 780].map((y) => (
+        <line key={`lat${y}`} x1="0" y1={y} x2="1600" y2={y} className="cbg-grid" />
       ))}
-      {[0, 45, 90, 135].map((a) => {
-        const rad = (a * Math.PI) / 180;
-        const x = 800 + Math.cos(rad) * 800;
-        const y = 450 + Math.sin(rad) * 800;
-        return <line key={a} x1={1600 - x} y1={900 - y} x2={x} y2={y} className="bg-coord-ring" />;
-      })}
+      {[160, 360, 560, 760, 960, 1160, 1360].map((x) => (
+        <line key={`lng${x}`} x1={x} y1="0" x2={x} y2="900" className="cbg-grid" />
+      ))}
 
-      {/* sweep arm — rotates */}
-      <g style={{ transformOrigin: "800px 450px", animation: "radar-sweep 8s linear infinite" }}>
-        <path d="M800 450 L1600 450 A 800 800 0 0 0 1530 184 Z" fill="url(#sweep-arm)" />
+      {/* equator */}
+      <line x1="0" y1="500" x2="1600" y2="500" className="cbg-equator" />
+
+      {/* dotted world map */}
+      <g className="cbg-land">
+        {dots.map((d, i) => (
+          <circle key={i} cx={d.cx} cy={d.cy} r={d.r} style={{ opacity: d.op }} />
+        ))}
       </g>
 
-      {/* city dots */}
-      {CITIES.map((c, i) => (
-        <g key={c.name} style={{ animation: `city-pulse 3.5s ease-in-out ${i * 0.9}s infinite` }}>
-          <circle cx={c.x} cy={c.y} r="20" className="bg-city-ring" />
-          <circle cx={c.x} cy={c.y} r="10" className="bg-city-ring" />
-          <circle cx={c.x} cy={c.y} r="4"  className="bg-city-dot" />
-          <text x={c.x + 16} y={c.y + 4} className="bg-city-label">{c.name}</text>
+      {/* great-circle arcs */}
+      <g className="cbg-arcs">
+        {arcs.map((a) => <path key={a.id} d={a.d} />)}
+      </g>
+
+      {/* data packets travelling along arcs (two per arc, offset by half period) */}
+      {arcs.map((a) => (
+        <g key={`pk-${a.id}`}>
+          <circle r="3.2" className="cbg-packet">
+            <animateMotion dur={`${a.dur}s`} repeatCount="indefinite" path={a.d} rotate="auto" />
+          </circle>
+          <circle r="3.2" className="cbg-packet cbg-packet--ghost">
+            <animateMotion dur={`${a.dur}s`} begin={`-${a.dur / 2}s`} repeatCount="indefinite" path={a.d} rotate="auto" />
+          </circle>
         </g>
       ))}
+
+      {/* city markers: pulse rings + label + coord */}
+      {CITIES.map((c, i) => (
+        <g key={c.name}>
+          <circle cx={c.x} cy={c.y} r="44" className="cbg-pulse"          style={{ animationDelay: `${i * 1.1}s` }} />
+          <circle cx={c.x} cy={c.y} r="44" className="cbg-pulse cbg-pulse--2" style={{ animationDelay: `${i * 1.1 + 1.8}s` }} />
+          <circle cx={c.x} cy={c.y} r="20" className="cbg-city-ring" />
+          <circle cx={c.x} cy={c.y} r="4"  className="cbg-city-dot" />
+          <text x={c.x + 18} y={c.y - 10} className="cbg-city-label">{c.name}</text>
+          <text x={c.x + 18} y={c.y + 8}  className="cbg-city-coord">{c.coord}</text>
+        </g>
+      ))}
+
+      {/* slow horizontal scan ribbon */}
+      <rect
+        x="0" y="0" width="1600" height="900" fill="url(#cbg-scan)"
+        style={{ animation: "cbg-scan 14s linear infinite" }}
+      />
+
+      {/* edge vignette */}
+      <rect x="0" y="0" width="1600" height="900" fill="url(#cbg-vignette)" />
     </svg>
   );
 }
