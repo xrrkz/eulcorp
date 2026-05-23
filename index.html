@@ -63,8 +63,10 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 56px;     /* don't snap behind the fixed chrome */
 }
-html, body {
+html {
   background: var(--bg);
+}
+html, body {
   color: var(--text);
   font-family: 'Inter Tight', sans-serif;
   min-height: 100vh;
@@ -74,6 +76,43 @@ html, body {
 body {
   position: relative;
   min-height: 100vh;
+  background: transparent;
+}
+
+/* deep-tinted gradient backdrop (replaces flat black) — fixed to viewport
+   so it stays put while sections scroll-snap past */
+html::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 1600px 520px at 50% 100%,
+      rgba(28, 50, 92, 0.55), transparent 65%),
+    linear-gradient(180deg,
+      #000000 0%,
+      #02040a 55%,
+      #070d1c 100%);
+}
+
+/* city skyline silhouette — pinned to bottom of viewport, low-contrast
+   so it reads as atmosphere, not foreground */
+html::after {
+  content: "";
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 34vh;
+  min-height: 220px;
+  max-height: 360px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.78;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 240' preserveAspectRatio='xMidYEnd slice'><path fill='%23000000' d='M0 240 L0 188 L36 188 L36 156 L72 156 L72 178 L108 178 L108 134 L150 134 L150 162 L188 162 L188 96 L222 96 L222 124 L260 124 L260 78 L284 78 L284 56 L302 56 L302 78 L324 78 L324 108 L362 108 L362 144 L402 144 L402 116 L444 116 L444 134 L484 134 L484 86 L522 86 L522 110 L562 110 L562 64 L578 64 L578 38 L590 38 L590 64 L624 64 L624 100 L666 100 L666 134 L706 134 L706 104 L744 104 L744 148 L786 148 L786 96 L826 96 L826 118 L866 118 L866 80 L908 80 L908 108 L948 108 L948 54 L962 54 L962 28 L974 28 L974 54 L1008 54 L1008 94 L1048 94 L1048 144 L1090 144 L1090 114 L1130 114 L1130 138 L1170 138 L1170 84 L1208 84 L1208 108 L1248 108 L1248 64 L1268 64 L1268 42 L1286 42 L1286 66 L1326 66 L1326 96 L1366 96 L1366 132 L1406 132 L1406 102 L1446 102 L1446 152 L1486 152 L1486 178 L1526 178 L1526 198 L1568 198 L1568 214 L1600 214 L1600 240 Z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: cover;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 100%);
+          mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 100%);
 }
 /* purple glow layers */
 body::before {
