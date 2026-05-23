@@ -470,15 +470,8 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
   filter: drop-shadow(0 0 4px rgba(255,255,255,0.55));
 }
 
-/* estate "skyline" mini-graphic — windows breathe via inline opacity */
-.hc-skyline-bar {
-  fill: var(--text);
-  opacity: 0.88;
-}
-.hc-skyline-window {
-  fill: var(--text);
-}
-.hc-skyline-ground {
+/* allocation panel — thin baseline rule under the stacked bar */
+.hc-base-rule {
   stroke: var(--text);
   stroke-width: 1;
   opacity: 0.6;
@@ -1393,23 +1386,26 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   to   { transform: translateX(-18%); }
 }
 
-/* -------- Portfolio bg: isometric blueprint -------- */
+/* -------- Portfolio bg: capital grid + allocation rings -------- */
 .bg-iso-line {
   stroke: rgba(255,255,255,0.045);
   stroke-width: 1;
 }
-.bg-bldg polygon {
-  fill: rgba(255,255,255,0.04);
-  stroke: rgba(255,255,255,0.35);
-  stroke-width: 1;
+.bg-aring {
+  animation: aring-breathe 6.5s ease-in-out infinite;
+  transform-box: fill-box;
 }
-.bg-bldg {
-  animation: bldg-pulse 4.2s ease-in-out infinite;
-  transform-origin: center;
-}
-@keyframes bldg-pulse {
-  0%, 100% { opacity: 0.45; }
+.bg-aring:nth-of-type(2) { animation-delay: -2.2s; }
+.bg-aring:nth-of-type(3) { animation-delay: -4.4s; }
+@keyframes aring-breathe {
+  0%, 100% { opacity: 0.55; }
   50%      { opacity: 1; }
+}
+@keyframes bg-aring-spin {
+  to { stroke-dashoffset: -800; }
+}
+@keyframes bg-aring-spin-rev {
+  to { stroke-dashoffset: 800; }
 }
 
 /* -------- Home bg: cosmic horizon + perspective grid -------- */
@@ -1786,7 +1782,7 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
 }
 
 /* ====================================================================== */
-/* TRADING + REAL-ESTATE FLAVOR — sparkline ticks, foundation rise, P&L   */
+/* TRADING + ALLOCATIONS FLAVOR — sparkline ticks, sleeve rise, P&L       */
 /* ====================================================================== */
 
 /* eyebrow: trailing mini-sparkline histogram (5 bars) injected by JS */
@@ -3158,9 +3154,9 @@ function AboutSection() {
         </div>
         <h2 className="section-title">Built to last.<br />Built one of none.</h2>
         <p className="section-lede">
-          Eulcorp is a diversified holding company building across markets,
-          real estate, construction, and technology. We move with discipline.
-          We're early — and we believe early is the best place to be.
+          Eulcorp is a diversified investment firm deploying capital across
+          public markets, private equity, credit, and venture. We move with
+          discipline. We're early — and we believe early is the best place to be.
         </p>
         <ul className="principles">
           <li><span className="p-num">01</span><span className="p-text">Patience compounds. Conviction is built, not bought.</span></li>
@@ -3175,25 +3171,36 @@ function AboutSection() {
 
 const VERTICALS = [
   {
-    id: "capital",
-    name: "Eulcorp Capital",
-    sub: "Investments & Trading",
+    id: "markets",
+    name: "Eulcorp Markets",
+    sub: "Public Markets & Macro",
     tag: "01",
     blurb: "Discretionary positions across futures, equities, and rates. Disciplined sizing, defined risk, asymmetric setups.",
     stats: [
-      { k: "FOCUS",   v: "INDICES · COMMODITIES" },
+      { k: "FOCUS",   v: "INDICES · RATES · FX" },
       { k: "HORIZON", v: "INTRADAY → SWING" },
     ],
   },
   {
-    id: "estate",
-    name: "Eulcorp Estate",
-    sub: "Real Estate",
+    id: "private",
+    name: "Eulcorp Private",
+    sub: "Private Equity & Credit",
     tag: "02",
-    blurb: "Acquisition and development of residential and mixed-use properties. Long-hold thesis, cash-flow first, appreciation second.",
+    blurb: "Control and structured positions in lower-mid-market companies. Underwritten cash flows, patient capital, compounding ownership.",
     stats: [
-      { k: "STRATEGY", v: "BUY · HOLD · COMPOUND" },
-      { k: "ASSET",    v: "SFR · MULTIFAMILY" },
+      { k: "STRATEGY", v: "BUYOUT · STRUCTURED" },
+      { k: "HORIZON",  v: "5–10 YEARS" },
+    ],
+  },
+  {
+    id: "ventures",
+    name: "Eulcorp Ventures",
+    sub: "Venture & Growth",
+    tag: "03",
+    blurb: "Early- and growth-stage bets in founders building the next decade of infrastructure, fintech, and frontier technology.",
+    stats: [
+      { k: "STAGE",  v: "SEED → SERIES B" },
+      { k: "THESIS", v: "EARLY · CONCENTRATED" },
     ],
   },
 ];
@@ -3206,7 +3213,7 @@ function PortfolioSection() {
           <span className="eyebrow-line" />
           <span>03 — VERTICALS</span>
         </div>
-        <h2 className="section-title">What we build.</h2>
+        <h2 className="section-title">What we run.</h2>
         <div className="cards">
           {VERTICALS.map((v) => (
             <article key={v.id} className="card" data-tag={v.tag}>
@@ -3319,18 +3326,25 @@ function AboutBg() {
   );
 }
 
-// -------- Portfolio: isometric blueprint grid + three light tiles --------
+// -------- Portfolio: capital-grid + three diversified allocation rings --------
 function PortfolioBg() {
   // isometric grid lines (two sets at +30°/-30°)
   const lines = [];
   const SP = 60;
   for (let i = -30; i < 50; i++) {
-    // right-leaning
     const y = i * SP;
     lines.push(<line key={`r${i}`} x1="-200" y1={y + 0} x2="2200" y2={y + 1300} className="bg-iso-line" />);
     lines.push(<line key={`l${i}`} x1="-200" y1={y + 1300} x2="2200" y2={y + 0} className="bg-iso-line" />);
   }
-  // three large translucent "buildings" (isometric box outlines), pulsing
+
+  // three "asset allocation" donut rings — each ring's stroke-dasharray
+  // expresses a different sleeve mix, faintly rotating to feel live.
+  const rings = [
+    { cx: 480,  cy: 540, r: 150, label: "MARKETS",  dash: "120 36 80 28 60 22",   dur: 64 },
+    { cx: 980,  cy: 460, r: 200, label: "PRIVATE",  dash: "180 32 110 28 70 24",  dur: 88, rev: true },
+    { cx: 1380, cy: 600, r: 130, label: "VENTURES", dash: "70 22 50 20 40 18 36 16", dur: 56 },
+  ];
+
   return (
     <svg
       className="bg-svg bg-portfolio"
@@ -3339,22 +3353,29 @@ function PortfolioBg() {
       aria-hidden="true"
     >
       {lines}
-      {/* Buildings — each a stacked diamond + sides */}
-      <g className="bg-bldg" style={{ animationDelay: "0s" }}>
-        <polygon points="320,520 480,440 640,520 480,600" />
-        <polygon points="320,520 320,640 480,720 480,600" />
-        <polygon points="640,520 640,640 480,720 480,600" />
-      </g>
-      <g className="bg-bldg" style={{ animationDelay: "2.4s" }}>
-        <polygon points="780,400 980,300 1180,400 980,500" />
-        <polygon points="780,400 780,560 980,660 980,500" />
-        <polygon points="1180,400 1180,560 980,660 980,500" />
-      </g>
-      <g className="bg-bldg" style={{ animationDelay: "4.8s" }}>
-        <polygon points="1240,580 1380,510 1520,580 1380,650" />
-        <polygon points="1240,580 1240,700 1380,770 1380,650" />
-        <polygon points="1520,580 1520,700 1380,770 1380,650" />
-      </g>
+
+      {rings.map((g, i) => (
+        <g key={i} className="bg-aring" style={{ transformOrigin: `${g.cx}px ${g.cy}px` }}>
+          {/* faint background ring */}
+          <circle cx={g.cx} cy={g.cy} r={g.r} fill="none"
+                  stroke="rgba(255,255,255,0.06)" strokeWidth="14" />
+          {/* allocation arcs — rotating dasharray pattern */}
+          <circle cx={g.cx} cy={g.cy} r={g.r} fill="none"
+                  stroke="rgba(255,255,255,0.32)" strokeWidth="14"
+                  strokeDasharray={g.dash}
+                  style={{ animation: `bg-aring-spin${g.rev ? "-rev" : ""} ${g.dur}s linear infinite` }} />
+          {/* core dot */}
+          <circle cx={g.cx} cy={g.cy} r="3" fill="rgba(255,255,255,0.5)" />
+          {/* label */}
+          <text x={g.cx} y={g.cy + g.r + 38}
+                textAnchor="middle"
+                fontFamily="JetBrains Mono, monospace"
+                fontWeight="700"
+                fontSize="18"
+                letterSpacing="0.32em"
+                fill="rgba(255,255,255,0.18)">{g.label}</text>
+        </g>
+      ))}
     </svg>
   );
 }
@@ -4019,7 +4040,7 @@ function fmtHeroDate(d) {
   return `${String(d.getDate()).padStart(2, "0")} ${_MONTHS_UC[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// ---------- Hero Ops Desk: live TRADING ↔ ESTATE terminal ----------
+// ---------- Hero Ops Desk: live TRADING ↔ ALLOCATIONS terminal ----------
 // continuous RAF time, throttled, so every value flows instead of snapping
 function useOpsTime(fps = 24) {
   const [t, setT] = useState(0);
@@ -4150,44 +4171,38 @@ function TradingPanel({ t }) {
   );
 }
 
-function EstatePanel({ t }) {
+function AllocationsPanel({ t }) {
   const W = 200, H = 56;
-  const buildings = useMemo(() => ([
-    { x: 6,   w: 26, h: 30 },
-    { x: 38,  w: 22, h: 44 },
-    { x: 66,  w: 30, h: 36 },
-    { x: 102, w: 24, h: 50 },
-    { x: 132, w: 28, h: 28 },
-    { x: 166, w: 26, h: 40 },
+  // five strategy sleeves — diversified PE/HF style book
+  const sleeves = useMemo(() => ([
+    { k: "EQ", base: 26, op: 0.92 },  // public equities / macro
+    { k: "PE", base: 22, op: 0.78 },  // private equity
+    { k: "CR", base: 18, op: 0.62 },  // credit
+    { k: "MA", base: 16, op: 0.48 },  // macro / rates
+    { k: "VC", base: 14, op: 0.34 },  // venture
   ]), []);
 
-  // each window has a stable phase & period, opacity breathes continuously
-  const windowSlots = useMemo(() => {
-    const out = [];
-    buildings.forEach((b, bi) => {
-      const cols = Math.max(2, Math.floor(b.w / 6));
-      const rows = Math.max(2, Math.floor(b.h / 6));
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const wx = b.x + 2 + c * (b.w - 4) / cols;
-          const wy = (H - b.h) + 3 + r * (b.h - 4) / rows;
-          const ww = (b.w - 4) / cols - 1.2;
-          const wh = (b.h - 4) / rows - 1.2;
-          const key = bi * 100 + r * 10 + c;
-          const phase  = (key * 0.61) % (Math.PI * 2);
-          const period = 2.4 + ((key * 17) % 32) / 10; // 2.4..5.5 s
-          out.push({ wx, wy, ww, wh, key, phase, period });
-        }
-      }
-    });
-    return out;
-  }, [buildings]);
+  // widths breathe slowly — feels like live rebalancing
+  const widths = sleeves.map((s, i) => s.base + Math.sin(t * 0.32 + i * 1.1) * 1.6);
+  const sum    = widths.reduce((a, b) => a + b, 0);
+  const norm   = widths.map((w) => (w / sum) * W);
+  let cx = 0;
+  const segs = norm.map((w, i) => {
+    const seg = { x: cx, w, k: sleeves[i].k, op: sleeves[i].op };
+    cx += w;
+    return seg;
+  });
 
-  // continuous estate stats
-  const doors = 142 + (Math.floor(t / 18) % 4);
-  const sqft  = 218400 + Math.round(Math.sin(t * 0.08) * 420 + t * 0.18);
-  const occ   = 96.4 + Math.sin(t * 0.19) * 1.15 + Math.sin(t * 0.51) * 0.32;
-  const irr   = 17.5 + Math.sin(t * 0.16) * 0.72 + Math.sin(t * 0.43) * 0.18;
+  // marker that drifts across the allocation bar — "live exposure" pointer
+  const markerX = (Math.sin(t * 0.18) * 0.5 + 0.5) * W;
+  const BAR_Y   = H * 0.38;
+  const BAR_H   = 12;
+
+  // continuous PE/HF stats
+  const aum  = 482.4 + Math.sin(t * 0.21) * 4.2 + t * 0.0042;
+  const moic = 2.42  + Math.sin(t * 0.17) * 0.04;
+  const irr  = 21.6  + Math.sin(t * 0.13) * 0.5  + Math.sin(t * 0.41) * 0.18;
+  const dry  = 64.2  + Math.sin(t * 0.09) * 1.6;
 
   return (
     <div className="hc-panel hc-panel--estate">
@@ -4195,45 +4210,55 @@ function EstatePanel({ t }) {
       <span className="hc-tick bl" /><span className="hc-tick br" />
       <div className="hc-head">
         <span className="hc-dot hc-dot-hold" />
-        <span className="hc-head-label">Estate Book</span>
-        <span className="hc-head-meta">SFR · MFR · LAND</span>
+        <span className="hc-head-label">Private Book</span>
+        <span className="hc-head-meta">PE · CREDIT · VC</span>
       </div>
       <div className="hc-figure">
         <svg className="hc-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-          <line className="hc-skyline-ground" x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} />
-          {buildings.map((b, i) => (
-            <rect key={i} className="hc-skyline-bar"
-                  x={b.x} y={H - b.h} width={b.w} height={b.h} />
+          {/* baseline rule under bar */}
+          <line className="hc-base-rule"
+                x1="0" x2={W} y1={BAR_Y + BAR_H + 2} y2={BAR_Y + BAR_H + 2} />
+          {/* stacked allocation bar — each sleeve a segment */}
+          {segs.map((s) => (
+            <rect key={s.k}
+                  x={s.x.toFixed(2)} y={BAR_Y}
+                  width={Math.max(0, s.w - 1).toFixed(2)} height={BAR_H}
+                  fill="#fff" fillOpacity={s.op.toFixed(2)} />
           ))}
-          {windowSlots.map((w) => {
-            const wave = Math.sin(t * (Math.PI * 2) / w.period + w.phase);
-            const lit  = Math.max(0, (wave + 0.25)) / 1.25;       // 0..1
-            const op   = (0.05 + 0.85 * lit * lit).toFixed(2);    // gamma bias
-            return (
-              <rect key={w.key} className="hc-skyline-window"
-                    x={w.wx.toFixed(2)} y={w.wy.toFixed(2)}
-                    width={w.ww.toFixed(2)} height={w.wh.toFixed(2)}
-                    opacity={op} />
-            );
-          })}
+          {/* sleeve labels under each segment */}
+          {segs.map((s) => (
+            <text key={"l" + s.k}
+                  x={(s.x + s.w / 2).toFixed(2)} y={BAR_Y + BAR_H + 9}
+                  textAnchor="middle"
+                  fontFamily="JetBrains Mono, monospace"
+                  fontSize="5.4"
+                  letterSpacing="0.18em"
+                  fill="rgba(255,255,255,0.55)">{s.k}</text>
+          ))}
+          {/* exposure marker — vertical needle drifting across the bar */}
+          <line x1={markerX.toFixed(2)} x2={markerX.toFixed(2)}
+                y1={BAR_Y - 4} y2={BAR_Y + BAR_H + 4}
+                stroke="#fff" strokeWidth="0.8" strokeOpacity="0.85" />
+          <circle cx={markerX.toFixed(2)} cy={BAR_Y - 4}
+                  r="1.6" fill="#fff" />
         </svg>
       </div>
       <div className="hc-stats">
         <div className="hc-stat">
-          <span className="hc-stat-k">DOORS HELD</span>
-          <span className="hc-stat-v">{doors}</span>
+          <span className="hc-stat-k">AUM</span>
+          <span className="hc-stat-v">${aum.toFixed(1)}M</span>
         </div>
         <div className="hc-stat">
-          <span className="hc-stat-k">SQ. FT.</span>
-          <span className="hc-stat-v">{sqft.toLocaleString()}</span>
+          <span className="hc-stat-k">MOIC</span>
+          <span className="hc-stat-v">{moic.toFixed(2)}x</span>
         </div>
         <div className="hc-stat">
-          <span className="hc-stat-k">OCCUPANCY</span>
-          <span className="hc-stat-v up"><span className="arrow">●</span>{occ.toFixed(1)}%</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">TRAILING IRR</span>
+          <span className="hc-stat-k">NET IRR</span>
           <span className="hc-stat-v up"><span className="arrow">▲</span>{irr.toFixed(1)}%</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">DRY POWDER</span>
+          <span className="hc-stat-v"><span className="arrow">●</span>{dry.toFixed(1)}M</span>
         </div>
       </div>
     </div>
@@ -4257,7 +4282,7 @@ function HeroOpsDesk() {
       <div className="hero-ops-rail">
         <span>● Live Ops Desk</span>
         <span className="hor-line" />
-        <span>Capital ↔ Concrete</span>
+        <span>Capital ↔ Conviction</span>
       </div>
       <div className="hero-ops-grid">
         <TradingPanel t={t} />
@@ -4276,11 +4301,11 @@ function HeroOpsDesk() {
           <span className="hc-flow">⇌</span>
           <span className="hc-connector-label">Capital Flow</span>
         </div>
-        <EstatePanel t={t} />
+        <AllocationsPanel t={t} />
       </div>
       <div className="hero-ops-foot">
-        <span><strong>EULCORP</strong> · One book, two hands</span>
-        <span><span className="blink">●</span> Tape open · Title clear</span>
+        <span><strong>EULCORP</strong> · One book. Every cycle.</span>
+        <span><span className="blink">●</span> Tape open · Book live</span>
       </div>
     </div>
   );
@@ -4293,13 +4318,13 @@ function Hero({ wordmarkStyle }) {
     <section className="hero">
       <div className="wordmark-frame">
         <span className="wf-corner wf-tl">ONE OF NONE</span>
-        <span className="wf-corner wf-tr">MARKETS · MORTAR</span>
+        <span className="wf-corner wf-tr">MULTI-STRAT · MULTI-CYCLE</span>
         <Wordmark style={wordmarkStyle} />
         <span className="wf-corner wf-bl">{fmtHeroDate(today)}</span>
         <span className="wf-corner wf-br">NY · LDN · JPN</span>
       </div>
       <p className="hero-tagline">
-        Trade the tape <span className="ht-sep" /> hold the title.
+        Trade the tape <span className="ht-sep" /> compound the cycle.
       </p>
       <HeroOpsDesk />
     </section>);
