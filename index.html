@@ -353,338 +353,6 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* hero ops desk — dual panel: TRADING ↔ ESTATE */
-.hero-ops {
-  --ease-smooth: cubic-bezier(.22,.61,.36,1);
-  --ease-glide:  cubic-bezier(.4,0,.2,1);
-  margin-top: 56px;
-  width: min(960px, 92vw);
-  font-family: 'JetBrains Mono', monospace;
-  position: relative;
-  z-index: 3;
-  opacity: 0;
-  animation: ht-fade 1.4s var(--ease-smooth) 0.9s forwards;
-}
-.hero-ops-rail {
-  display: flex; align-items: center; gap: 14px;
-  font-size: 10px; letter-spacing: 0.32em; color: var(--muted);
-  margin-bottom: 14px;
-  text-transform: uppercase;
-}
-.hero-ops-rail .hor-line {
-  flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line) 8%, var(--line) 92%, transparent);
-}
-.hero-ops-grid {
-  display: grid;
-  grid-template-columns: 1fr 56px 1fr;
-  gap: 0;
-  align-items: stretch;
-}
-.hc-panel {
-  position: relative;
-  padding: 18px 20px 16px;
-  border: 1px solid var(--line);
-  background: rgba(0,0,0,0.48);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  overflow: hidden;
-  text-align: left;
-}
-.hc-panel + .hc-panel { border-left: none; }
-/* faint inner grid for depth */
-.hc-panel::after {
-  content: "";
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 100% 22px,
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px) 0 0 / 32px 100%;
-  pointer-events: none;
-  z-index: 0;
-  -webkit-mask-image: radial-gradient(120% 120% at 50% 50%, #000 35%, transparent 100%);
-          mask-image: radial-gradient(120% 120% at 50% 50%, #000 35%, transparent 100%);
-}
-.hc-panel > * { position: relative; z-index: 1; }
-/* slow scan sweep with edge-fade */
-.hc-panel::before {
-  content: "";
-  position: absolute; left: -40%; top: 0;
-  width: 60%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
-  opacity: 0;
-  filter: blur(0.3px);
-  animation: hc-scan 6.8s linear infinite;
-  z-index: 2;
-}
-.hc-panel--alloc::before { animation-delay: -3.4s; }
-@keyframes hc-scan {
-  0%   { transform: translateX(0);    opacity: 0; }
-  10%  { opacity: 0.65; }
-  88%  { opacity: 0.65; }
-  100% { transform: translateX(360%); opacity: 0; }
-}
-/* corner ticks (brutalist) */
-.hc-panel .hc-tick {
-  position: absolute;
-  width: 8px; height: 8px;
-  border: 1px solid var(--text);
-  opacity: 0.6;
-  z-index: 2;
-}
-.hc-tick.tl { top: -1px;    left: -1px;    border-right: none; border-bottom: none; }
-.hc-tick.tr { top: -1px;    right: -1px;   border-left:  none; border-bottom: none; }
-.hc-tick.bl { bottom: -1px; left: -1px;    border-right: none; border-top:    none; }
-.hc-tick.br { bottom: -1px; right: -1px;   border-left:  none; border-top:    none; }
-
-.hc-head {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 14px;
-}
-.hc-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--text);
-  flex-shrink: 0;
-  position: relative;
-}
-.hc-dot-live {
-  box-shadow: 0 0 6px rgba(255,255,255,0.45);
-  animation: hc-live 2s var(--ease-smooth) infinite;
-}
-.hc-dot-live::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  border: 1px solid var(--text);
-  opacity: 0;
-  animation: hc-live-ring 2s var(--ease-smooth) infinite;
-}
-.hc-dot-hold {
-  background: transparent;
-  border: 1px solid var(--text);
-  animation: hc-hold 3.4s var(--ease-smooth) infinite;
-}
-@keyframes hc-live {
-  0%, 100% { opacity: 1;   transform: scale(1); }
-  50%      { opacity: 0.7; transform: scale(0.85); }
-}
-@keyframes hc-live-ring {
-  0%   { transform: scale(0.6); opacity: 0.55; }
-  100% { transform: scale(2.2); opacity: 0; }
-}
-@keyframes hc-hold {
-  0%, 100% { opacity: 0.75; }
-  50%      { opacity: 1; }
-}
-.hc-head-label { color: var(--text); font-weight: 600; }
-.hc-head-meta  { margin-left: auto; color: var(--faint); font-size: 9px; letter-spacing: 0.2em; }
-
-.hc-figure {
-  height: 56px;
-  margin-bottom: 14px;
-  position: relative;
-}
-.hc-spark {
-  width: 100%; height: 100%;
-  display: block;
-  overflow: visible;
-}
-.hc-spark-grid line {
-  stroke: rgba(255,255,255,0.05);
-  stroke-width: 0.5;
-}
-.hc-spark-line {
-  fill: none;
-  stroke: var(--text);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.hc-spark-fill {
-  fill: url(#hc-spark-grad);
-  opacity: 0.5;
-}
-.hc-spark-trail {
-  fill: var(--text);
-}
-.hc-spark-pulse {
-  fill: none;
-  stroke: var(--text);
-  stroke-width: 0.7;
-}
-.hc-spark-dot {
-  fill: var(--text);
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.55));
-}
-
-/* shared baseline rule under panel figures */
-.hc-base-rule {
-  stroke: var(--text);
-  stroke-width: 1;
-  opacity: 0.45;
-}
-
-/* allocations stacked bar — luxe minimal: hairline divs + drifting marker */
-.hc-alloc-seg {
-  fill: var(--text);
-  transition: opacity 0.6s var(--ease-smooth);
-}
-.hc-alloc-div {
-  stroke: #000;
-  stroke-width: 1;
-  opacity: 0.85;
-}
-.hc-alloc-lbl {
-  fill: #000;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 7.5px;
-  letter-spacing: 0.14em;
-  font-weight: 600;
-  pointer-events: none;
-  mix-blend-mode: difference;
-}
-.hc-alloc-mark line {
-  stroke: var(--text);
-  stroke-width: 1;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.55));
-}
-.hc-alloc-mark polygon {
-  fill: var(--text);
-}
-.hc-alloc-cap {
-  fill: var(--faint);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 6.4px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-}
-
-.hc-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.hc-stat { display: flex; flex-direction: column; gap: 4px; }
-.hc-stat-k {
-  font-size: 9px; letter-spacing: 0.22em; color: var(--faint);
-  text-transform: uppercase;
-}
-.hc-stat-v {
-  font-size: 17px;
-  color: var(--text);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  font-family: 'JetBrains Mono', monospace;
-  text-shadow: 0 0 10px rgba(255,255,255,0.14);
-  transition: color 0.4s var(--ease-smooth);
-}
-.hc-stat-v.up { color: var(--text); }
-.hc-stat-v .arrow {
-  font-size: 11px;
-  margin-right: 4px;
-  opacity: 0.75;
-}
-
-/* center capital flow connector */
-.hc-connector {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  position: relative;
-  color: var(--muted);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: rgba(0,0,0,0.32);
-  overflow: hidden;
-}
-.hc-connector::before,
-.hc-connector::after {
-  content: "";
-  position: absolute;
-  left: 50%; transform: translateX(-50%);
-  width: 1px; height: 14px;
-  background: var(--text);
-  opacity: 0.4;
-  z-index: 2;
-}
-.hc-connector::before { top: -1px; }
-.hc-connector::after  { bottom: -1px; }
-.hc-flow {
-  font-size: 13px; line-height: 1;
-  letter-spacing: 0.2em;
-  color: var(--text);
-  opacity: 0.5;
-  animation: hc-flow 3.6s var(--ease-smooth) infinite;
-  z-index: 2;
-}
-@keyframes hc-flow {
-  0%, 100% { transform: translateX(-3px); opacity: 0.4; }
-  50%      { transform: translateX(3px);  opacity: 0.8; }
-}
-.hc-connector-label {
-  position: absolute;
-  bottom: -18px;
-  left: 50%; transform: translateX(-50%);
-  font-size: 8px; letter-spacing: 0.28em;
-  color: var(--faint);
-  white-space: nowrap;
-  text-transform: uppercase;
-  z-index: 2;
-}
-
-/* capital flow particles */
-.hc-flow-stream {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 1;
-}
-.hc-flow-stream .p {
-  position: absolute;
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: var(--text);
-  box-shadow: 0 0 5px var(--text), 0 0 11px rgba(255,255,255,0.45);
-  margin-left: -1.5px; margin-top: -1.5px;
-  opacity: 0;
-  animation: hc-pflow 3.6s linear infinite;
-  will-change: left, opacity;
-}
-.hc-flow-stream .p.l { animation-name: hc-pflowL; }
-.hc-flow-stream .p.dim {
-  background: rgba(255,255,255,0.7);
-  box-shadow: 0 0 3px rgba(255,255,255,0.4);
-  width: 2px; height: 2px;
-  margin-left: -1px; margin-top: -1px;
-}
-@keyframes hc-pflow {
-  0%   { left: -12%; opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { left: 112%; opacity: 0; }
-}
-@keyframes hc-pflowL {
-  0%   { left: 112%; opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { left: -12%; opacity: 0; }
-}
-
-/* footer rail under ops desk */
-.hero-ops-foot {
-  margin-top: 22px;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px;
-  font-size: 9.5px; letter-spacing: 0.32em;
-  color: var(--faint);
-  text-transform: uppercase;
-}
-.hero-ops-foot strong { color: var(--text); font-weight: 600; letter-spacing: 0.32em; }
-.hero-ops-foot .blink { animation: hc-live 1.9s var(--ease-smooth) infinite; }
-
 /* ---------- backdrop chart + ghost numbers ---------- */
 .backdrop {
   position: fixed;
@@ -1144,36 +812,6 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
     font-size: 14px;
   }
   .hero-tagline .ht-sep { width: 16px; margin: 0 10px; }
-
-  .hero-ops {
-    margin-top: 28px;
-    width: min(420px, 96vw);
-  }
-  .hero-ops-grid {
-    grid-template-columns: 1fr;
-  }
-  .hc-panel + .hc-panel { border-left: 1px solid var(--line); border-top: none; }
-  .hc-connector {
-    flex-direction: row;
-    border-top: none; border-bottom: none;
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-    padding: 6px 0;
-  }
-  .hc-connector::before, .hc-connector::after { display: none; }
-  .hc-flow { transform: rotate(90deg); animation: hc-flow-v 3.6s var(--ease-smooth) infinite; }
-  @keyframes hc-flow-v {
-    0%, 100% { transform: rotate(90deg) translateX(-3px); opacity: 0.4; }
-    50%      { transform: rotate(90deg) translateX(3px);  opacity: 0.8; }
-  }
-  .hc-connector-label { position: static; transform: none; margin-left: 10px; }
-  .hero-ops-foot {
-    font-size: 8.5px; letter-spacing: 0.22em;
-    flex-direction: column; gap: 8px;
-    text-align: center;
-  }
-  .hc-stat-v { font-size: 15px; }
-  .hc-head-meta { display: none; }
 }
 
 @media (max-width: 440px) {
@@ -1514,75 +1152,128 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   100% { stroke-dashoffset: -480; opacity: 1;   }
 }
 
-/* -------- Home bg: cosmic horizon + perspective grid -------- */
-.hbg-star { fill: #fff; }
-@keyframes hbg-twinkle {
-  0%, 100% { opacity: var(--hbg-op, 0.4); }
-  50%      { opacity: 0; }
-}
-.hbg-grid {
-  stroke: rgba(255,255,255,0.10);
+/* -------- Home bg: skyline being built + capital flow ribbons -------- */
+.hbg-vline {
+  stroke: rgba(255,255,255,0.045);
   stroke-width: 1;
-  fill: none;
 }
-.hbg-grid-faint {
-  stroke: rgba(255,255,255,0.05);
+.hbg-hline {
+  stroke: rgba(255,255,255,0.035);
   stroke-width: 1;
-  fill: none;
 }
-.hbg-horizon {
+.hbg-ground-line {
   stroke: rgba(255,255,255,0.55);
   stroke-width: 1;
 }
-.hbg-sun-ring {
+
+/* far skyline silhouettes — soft, no outline */
+.hbg-far rect { mix-blend-mode: screen; }
+
+/* near skyline outlines drawn over rising fills */
+.hbg-near-out {
   fill: none;
-  stroke: rgba(255,255,255,0.28);
+  stroke: rgba(255,255,255,0.45);
   stroke-width: 1;
 }
-.hbg-orbit {
-  fill: none;
+
+/* windows that twinkle as buildings rise */
+.hbg-win {
+  fill: #fff;
+  opacity: 0;
+  animation: hbg-win-on 5s ease-in-out infinite;
+}
+@keyframes hbg-win-on {
+  0%, 18%  { opacity: 0; }
+  28%      { opacity: 0.85; }
+  68%      { opacity: 0.55; }
+  82%      { opacity: 0.85; }
+  100%     { opacity: 0; }
+}
+
+/* flowing capital ribbons across the sky */
+.hbg-flow-line {
   stroke: rgba(255,255,255,0.18);
   stroke-width: 1;
-  stroke-dasharray: 2 9;
+  stroke-dasharray: 1 6;
 }
-@keyframes hbg-orbit-dash {
-  to { stroke-dashoffset: -110; }
+.hbg-flow-dot {
+  fill: #fff;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.6));
 }
-@keyframes hbg-orbit-dash-rev {
-  to { stroke-dashoffset: 110; }
-}
-@keyframes hbg-scan {
-  0%   { transform: translateY(-220px); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(220px); opacity: 0; }
-}
-.hbg-sun-core {
-  animation: hbg-sun-pulse 6s ease-in-out infinite;
-  transform-origin: 800px 540px;
-  transform-box: fill-box;
-}
-/* scroll-driven parallax layers — JS writes transforms; CSS smooths them */
-.hbg-parallax {
+.hbg-flow-dot.dim { opacity: 0.55; filter: none; }
+.hbg-flow-row {
+  animation: hbg-flow-slide linear infinite;
   will-change: transform;
-  transition: transform 0.6s cubic-bezier(.2,.7,.2,1);
 }
-.hbg-parallax--stars { transition-duration: 0.9s; }
-.hbg-parallax--grid  { transition-duration: 0.45s; }
-.hbg-parallax--sun   { transition-duration: 0.7s; }
-.hbg-parallax--orbits { transition-duration: 0.8s; }
+.hbg-flow-row.rev { animation-name: hbg-flow-slide-rev; }
+@keyframes hbg-flow-slide {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(1600px); }
+}
+@keyframes hbg-flow-slide-rev {
+  0%   { transform: translateX(1600px); }
+  100% { transform: translateX(0); }
+}
+
+/* construction crane */
+.hbg-crane-rail {
+  stroke: rgba(255,255,255,0.7);
+  stroke-width: 1.4;
+}
+.hbg-crane-x {
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 1;
+}
+.hbg-crane-cab {
+  fill: rgba(255,255,255,0.85);
+  stroke: rgba(255,255,255,0.4);
+}
+.hbg-crane-jib {
+  transform-origin: 0 -10px;
+}
+.hbg-crane-arm {
+  stroke: rgba(255,255,255,0.8);
+  stroke-width: 1.4;
+}
+.hbg-crane-arm-fine {
+  stroke: rgba(255,255,255,0.45);
+  stroke-width: 0.8;
+}
+.hbg-crane-cable {
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 0.8;
+}
+.hbg-crane-load {
+  fill: rgba(255,255,255,0.85);
+}
+
+/* ticker tape — "money talks" */
+.hbg-tape-rule {
+  stroke: rgba(255,255,255,0.18);
+  stroke-width: 1;
+}
+.hbg-tape-text {
+  fill: rgba(255,255,255,0.55);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: pre;
+}
+.hbg-tape-slide {
+  animation: hbg-tape-slide 60s linear infinite;
+  will-change: transform;
+}
+@keyframes hbg-tape-slide {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-3200px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hbg-parallax { transition: none; transform: none !important; }
-}
-@keyframes hbg-sun-pulse {
-  0%, 100% { opacity: 0.92; }
-  50%      { opacity: 1; }
-}
-@keyframes hbg-meteor {
-  0%   { transform: translate(0,0);     opacity: 0; }
-  8%   { opacity: 1; }
-  60%  { opacity: 1; }
-  100% { transform: translate(560px,260px); opacity: 0; }
+  .hbg-flow-row,
+  .hbg-tape-slide,
+  .hbg-win { animation: none; }
+  .hbg-win { opacity: 0.7; }
 }
 
 /* -------- Contact bg: global network -------- */
@@ -3626,129 +3317,57 @@ function ContactBg() {
   );
 }
 
-// -------- Home: cosmic horizon — perspective grid, glowing sun, starfield --------
+// -------- Home: skyline being built + capital flow ribbons (money talks) --------
 function HomeBg() {
-  const VANISH_X = 800;
-  const HORIZON_Y = 540;
+  const HORIZON_Y = 740;
+  const TICKER = "EULCORP  ◆  CAPITAL · BUILD · ESTATE · TECH  ◆  ES 7,432 +0.42%   NQ 24,856 +0.61%   GC 4,561 +0.18%   YIELD 4.32%   $ COMPOUND THE CYCLE $   AUM $412M   IRR 21.8%   MOIC 2.34×   ";
 
-  // refs for scroll-driven parallax / warp motion
-  const starsRef   = _s_R.useRef(null);
-  const meteorsRef = _s_R.useRef(null);
-  const orbitsRef  = _s_R.useRef(null);
-  const sunRef     = _s_R.useRef(null);
-  const gridRef    = _s_R.useRef(null);
-  const horizonRef = _s_R.useRef(null);
-  const skyRef     = _s_R.useRef(null);
+  // Two-pass pseudo-random so the layout is deterministic but varied.
+  const rnd = (n) => {
+    const x = Math.sin(n * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  };
 
-  _s_R.useEffect(() => {
-    let raf = 0;
-    const apply = () => {
-      const y  = window.scrollY || window.pageYOffset || 0;
-      const vh = window.innerHeight || 1;
-      // p ramps 0..1 across the first viewport, then keeps climbing softly
-      const p = Math.min(y / vh, 1.4);
-      const e = p < 1 ? p : 1 + (p - 1) * 0.4;
-
-      if (starsRef.current)
-        starsRef.current.style.transform = `translate3d(0, ${-e * 90}px, 0) scale(${1 + e * 0.18})`;
-      if (meteorsRef.current)
-        meteorsRef.current.style.transform = `translate3d(${e * 180}px, ${e * 70}px, 0)`;
-      if (orbitsRef.current)
-        orbitsRef.current.style.transform = `translate3d(0, ${e * 36}px, 0) rotate(${e * 6}deg)`;
-      if (sunRef.current)
-        sunRef.current.style.transform = `translate3d(0, ${e * 70}px, 0) scale(${Math.max(0.7, 1 - e * 0.28)})`;
-      if (gridRef.current)
-        gridRef.current.style.transform = `translate3d(0, ${e * 140}px, 0) scale(${1 + e * 0.12})`;
-      if (horizonRef.current)
-        horizonRef.current.style.transform = `translate3d(0, ${e * 28}px, 0)`;
-      if (skyRef.current)
-        skyRef.current.style.opacity = String(Math.max(0, 1 - e * 0.55));
-    };
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => { raf = 0; apply(); });
-    };
-    apply();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
+  // Distant skyline — already complete, faint, parallax layer behind.
+  const farSkyline = _s_R.useMemo(() => {
+    const arr = [];
+    let cursor = -30;
+    let idx = 1;
+    while (cursor < 1640) {
+      const w = 26 + Math.floor(rnd(idx * 5 + 1) * 40);
+      const h = 70  + Math.floor(rnd(idx * 9 + 3) * 170);
+      arr.push({ x: cursor, w, h, idx });
+      cursor += w + Math.floor(rnd(idx * 3) * 4);
+      idx++;
+    }
+    return arr;
   }, []);
 
-  const stars = _s_R.useMemo(() => {
-    const rnd = (n) => {
-      const x = Math.sin(n * 12.9898) * 43758.5453;
-      return x - Math.floor(x);
-    };
-    return Array.from({ length: 120 }, (_, i) => ({
-      cx: rnd(i + 1) * 1600,
-      cy: rnd(i + 200) * (HORIZON_Y - 40),
-      r:  0.5 + rnd(i + 300) * 1.4,
-      op: 0.25 + rnd(i + 400) * 0.7,
-      dur: 2.4 + rnd(i + 500) * 4.2,
-      delay: -rnd(i + 600) * 6,
-    }));
+  // Foreground skyline — buildings rising on a loop (construction).
+  const nearSkyline = _s_R.useMemo(() => {
+    const arr = [];
+    let cursor = 40;
+    let idx = 1;
+    while (cursor < 1560) {
+      const w = 56 + Math.floor(rnd(idx * 7 + 11) * 86);          // 56..142
+      const h = 150 + Math.floor(rnd(idx * 11 + 17) * 390);        // 150..540
+      const rise = 7.5 + rnd(idx * 13 + 5) * 7;                    // 7.5..14.5s
+      const delay = -rnd(idx * 19 + 31) * 14;                      // staggered
+      arr.push({ x: cursor, w, h, idx, rise, delay });
+      cursor += w + 6 + Math.floor(rnd(idx * 23) * 18);
+      idx++;
+    }
+    return arr;
   }, []);
 
-  const verticals = [];
-  for (let i = -12; i <= 12; i++) {
-    const bx = VANISH_X + i * 360;
-    verticals.push(
-      <line key={`v${i}`} x1={bx} y1={900} x2={VANISH_X} y2={HORIZON_Y}
-            className={i === 0 ? "hbg-grid" : "hbg-grid-faint"} />
-    );
-  }
-
-  const ROWS = 11;
-  const rowDur = 7.2;
-  const rows = Array.from({ length: ROWS }, (_, i) => {
-    const begin = -(i * (rowDur / ROWS));
-    return (
-      <line key={`h${i}`} x1="0" x2="1600" y1={HORIZON_Y} y2={HORIZON_Y} className="hbg-grid">
-        <animate attributeName="y1"
-          values={`${HORIZON_Y};900`} keyTimes="0;1"
-          calcMode="spline" keySplines="0.45 0 1 1"
-          dur={`${rowDur}s`} begin={`${begin}s`} repeatCount="indefinite" />
-        <animate attributeName="y2"
-          values={`${HORIZON_Y};900`} keyTimes="0;1"
-          calcMode="spline" keySplines="0.45 0 1 1"
-          dur={`${rowDur}s`} begin={`${begin}s`} repeatCount="indefinite" />
-        <animate attributeName="opacity"
-          values="0;1;1;0" keyTimes="0;0.12;0.85;1"
-          dur={`${rowDur}s`} begin={`${begin}s`} repeatCount="indefinite" />
-      </line>
-    );
-  });
-
-  const SCANS = 5;
-  const scanDur = 6.5;
-  const sunScan = Array.from({ length: SCANS }, (_, i) => (
-    <rect
-      key={`s${i}`}
-      x={VANISH_X - 215} y={HORIZON_Y - 4}
-      width="430" height="5"
-      fill="#000"
-      style={{ animation: `hbg-scan ${scanDur}s linear ${-(i * (scanDur / SCANS))}s infinite` }}
-    />
-  ));
-
-  const meteors = Array.from({ length: 3 }, (_, i) => {
-    const x = 200 + i * 480;
-    const y = 80 + i * 70;
-    const dur = 7 + i * 2.5;
-    const delay = -i * 4.2;
-    return (
-      <g key={`m${i}`} style={{ animation: `hbg-meteor ${dur}s ease-in ${delay}s infinite` }}>
-        <line x1={x} y1={y} x2={x - 80} y2={y - 36}
-              stroke="rgba(255,255,255,0.85)" strokeWidth="1.2"
-              strokeLinecap="round" />
-        <circle cx={x} cy={y} r="1.6" fill="#fff" />
-      </g>
-    );
-  });
+  // Flowing capital ribbons — long horizontal lines that slide across the sky.
+  const flows = [
+    { y: 110, dur: 18, dly: 0,    rev: false },
+    { y: 200, dur: 24, dly: -6,   rev: true  },
+    { y: 295, dur: 21, dly: -12,  rev: false },
+    { y: 420, dur: 28, dly: -4,   rev: true  },
+    { y: 520, dur: 22, dly: -9,   rev: false },
+  ];
 
   return (
     <svg
@@ -3758,75 +3377,197 @@ function HomeBg() {
       aria-hidden="true"
     >
       <defs>
-        <radialGradient id="hbg-sun" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0"    stopColor="#fff" stopOpacity="0.92" />
-          <stop offset="0.32" stopColor="#fff" stopOpacity="0.22" />
-          <stop offset="1"    stopColor="#fff" stopOpacity="0" />
-        </radialGradient>
         <linearGradient id="hbg-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0.05" />
+          <stop offset="0"    stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.82" stopColor="#fff" stopOpacity="0.04" />
+          <stop offset="1"    stopColor="#fff" stopOpacity="0.10" />
         </linearGradient>
-        <linearGradient id="hbg-ground" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.06" />
-          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        <linearGradient id="hbg-far" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.07" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0.15" />
         </linearGradient>
-        <radialGradient id="hbg-vignette" cx="0.5" cy="0.42" r="0.62">
+        <linearGradient id="hbg-near" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.12" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0.26" />
+        </linearGradient>
+        <radialGradient id="hbg-glow" cx="0.5" cy="1" r="0.55">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.22" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="hbg-vig" cx="0.5" cy="0.42" r="0.72">
           <stop offset="0"    stopColor="#000" stopOpacity="0.55" />
-          <stop offset="0.55" stopColor="#000" stopOpacity="0.18" />
+          <stop offset="0.6"  stopColor="#000" stopOpacity="0.18" />
           <stop offset="1"    stopColor="#000" stopOpacity="0" />
         </radialGradient>
-        <clipPath id="hbg-ground-clip">
-          <rect x="0" y={HORIZON_Y} width="1600" height={900 - HORIZON_Y} />
-        </clipPath>
-        <clipPath id="hbg-sun-clip">
-          <circle cx={VANISH_X} cy={HORIZON_Y} r="218" />
+        <clipPath id="hbg-sky-clip">
+          <rect x="0" y="0" width="1600" height={HORIZON_Y} />
         </clipPath>
       </defs>
 
-      <rect ref={skyRef} x="0" y="0" width="1600" height={HORIZON_Y} fill="url(#hbg-sky)" style={{ transition: "opacity 0.2s linear" }} />
-      <rect x="0" y={HORIZON_Y} width="1600" height={900 - HORIZON_Y} fill="url(#hbg-ground)" />
+      {/* sky wash */}
+      <rect x="0" y="0" width="1600" height="900" fill="url(#hbg-sky)" />
 
-      <g ref={starsRef} className="hbg-parallax hbg-parallax--stars">
-        {stars.map((s, i) => (
-          <circle
-            key={i} cx={s.cx} cy={s.cy} r={s.r} className="hbg-star"
-            style={{
-              "--hbg-op": s.op,
-              opacity: s.op,
-              animation: `hbg-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
-            }}
-          />
+      {/* abstract financial grid */}
+      <g className="hbg-grid-wrap" clipPath="url(#hbg-sky-clip)">
+        {Array.from({ length: 17 }, (_, i) => (
+          <line key={`vg${i}`} className="hbg-vline" x1={i * 100} y1="0" x2={i * 100} y2={HORIZON_Y} />
+        ))}
+        {Array.from({ length: 8 }, (_, i) => (
+          <line key={`hg${i}`} className="hbg-hline" x1="0" y1={i * 100} x2="1600" y2={i * 100} />
         ))}
       </g>
 
-      <g ref={meteorsRef} className="hbg-parallax">{meteors}</g>
-
-      <g ref={orbitsRef} className="hbg-parallax hbg-parallax--orbits" style={{ transformOrigin: `${VANISH_X}px ${HORIZON_Y}px` }}>
-        <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="720" ry="138"
-                 className="hbg-orbit"
-                 style={{ animation: "hbg-orbit-dash 26s linear infinite", opacity: 0.45 }} />
-        <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="520" ry="96"
-                 className="hbg-orbit"
-                 style={{ animation: "hbg-orbit-dash-rev 18s linear infinite" }} />
+      {/* flowing capital ribbons — long sliding lines with a leading dot */}
+      <g className="hbg-flow-wrap" clipPath="url(#hbg-sky-clip)">
+        {flows.map((f, i) => (
+          <g key={i}
+             className={`hbg-flow-row${f.rev ? " rev" : ""}`}
+             style={{ animationDuration: `${f.dur}s`, animationDelay: `${f.dly}s` }}>
+            <line x1="-1600" x2="0"    y1={f.y} y2={f.y} className="hbg-flow-line" />
+            <line x1="0"     x2="1600" y1={f.y} y2={f.y} className="hbg-flow-line" />
+            <circle cx="0"     cy={f.y} r="2.6" className="hbg-flow-dot" />
+            <circle cx="-1100" cy={f.y} r="1.8" className="hbg-flow-dot dim" />
+          </g>
+        ))}
       </g>
 
-      <g ref={sunRef} className="hbg-parallax hbg-parallax--sun" style={{ transformOrigin: `${VANISH_X}px ${HORIZON_Y}px` }}>
-        <circle cx={VANISH_X} cy={HORIZON_Y} r="220" fill="url(#hbg-sun)" className="hbg-sun-core" />
-        <circle cx={VANISH_X} cy={HORIZON_Y} r="138" className="hbg-sun-ring" />
-        <g clipPath="url(#hbg-sun-clip)">{sunScan}</g>
+      {/* horizon glow */}
+      <ellipse cx="820" cy={HORIZON_Y + 30} rx="980" ry="170" fill="url(#hbg-glow)" />
+
+      {/* far skyline (static silhouettes) */}
+      <g className="hbg-far">
+        {farSkyline.map((b) => (
+          <rect key={`f${b.idx}`}
+                x={b.x} y={HORIZON_Y - b.h}
+                width={b.w} height={b.h}
+                fill="url(#hbg-far)" />
+        ))}
       </g>
 
-      <line ref={horizonRef} x1="0" y1={HORIZON_Y} x2="1600" y2={HORIZON_Y} className="hbg-horizon hbg-parallax" />
+      {/* near skyline — each building rises from the ground, loops */}
+      <g className="hbg-near">
+        {nearSkyline.map((b) => {
+          const top = HORIZON_Y - b.h;
+          // sparse windows: ~2-4 columns, rows every 26px
+          const cols = Math.max(2, Math.min(5, Math.floor(b.w / 26)));
+          const rows = Math.max(2, Math.floor(b.h / 30));
+          const wins = [];
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              if (rnd(b.idx * 100 + r * 7 + c) < 0.32) continue; // skip some
+              const colGap = (b.w - 10) / cols;
+              const wx = b.x + 5 + c * colGap + colGap / 2 - 1.5;
+              const wy = top + 10 + r * 26;
+              if (wy > HORIZON_Y - 14) break;
+              const wdelay = -(rnd(b.idx * 17 + r * 3 + c) * 7);
+              const wdur   = 4 + rnd(b.idx * 31 + r * 2 + c) * 4.5;
+              wins.push(
+                <rect key={`w${b.idx}-${r}-${c}`}
+                      x={wx} y={wy} width="3" height="7"
+                      className="hbg-win"
+                      style={{ animationDelay: `${wdelay}s`, animationDuration: `${wdur}s` }} />
+              );
+            }
+          }
+          return (
+            <g key={`n${b.idx}`}>
+              {/* fill (rises) */}
+              <rect x={b.x} y={top} width={b.w} height={b.h}
+                    fill="url(#hbg-near)" opacity="0.92">
+                <animate attributeName="height"
+                         from="0" to={b.h}
+                         dur={`${b.rise}s`} begin={`${b.delay}s`}
+                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
+                         repeatCount="indefinite" />
+                <animate attributeName="y"
+                         from={HORIZON_Y} to={top}
+                         dur={`${b.rise}s`} begin={`${b.delay}s`}
+                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
+                         repeatCount="indefinite" />
+              </rect>
+              {/* outline (rises too, sharper edge) */}
+              <rect x={b.x} y={top} width={b.w} height={b.h}
+                    className="hbg-near-out">
+                <animate attributeName="height"
+                         from="0" to={b.h}
+                         dur={`${b.rise}s`} begin={`${b.delay}s`}
+                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
+                         repeatCount="indefinite" />
+                <animate attributeName="y"
+                         from={HORIZON_Y} to={top}
+                         dur={`${b.rise}s`} begin={`${b.delay}s`}
+                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
+                         repeatCount="indefinite" />
+              </rect>
+              {/* lit windows */}
+              <g>{wins}</g>
+            </g>
+          );
+        })}
+      </g>
 
-      <g clipPath="url(#hbg-ground-clip)">
-        <g ref={gridRef} className="hbg-parallax hbg-parallax--grid" style={{ transformOrigin: `${VANISH_X}px ${HORIZON_Y}px` }}>
-          {verticals}
-          {rows}
+      {/* construction crane — tall mast with slowly swinging jib */}
+      <g className="hbg-crane" transform="translate(1240, 200)">
+        <g className="hbg-crane-mast-g">
+          <line x1="-5" y1="0" x2="-5" y2="540" className="hbg-crane-rail" />
+          <line x1="5"  y1="0" x2="5"  y2="540" className="hbg-crane-rail" />
+          {Array.from({ length: 22 }, (_, i) => (
+            <g key={i} transform={`translate(0, ${i * 24})`}>
+              <line x1="-5" x2="5" y1="0"  y2="24" className="hbg-crane-x" />
+              <line x1="5"  x2="-5" y1="0" y2="24" className="hbg-crane-x" />
+              <line x1="-5" x2="5" y1="12" y2="12" className="hbg-crane-x" />
+            </g>
+          ))}
+        </g>
+        {/* cabin at top */}
+        <rect x="-9" y="-14" width="18" height="14" className="hbg-crane-cab" />
+        {/* jib — slowly swings */}
+        <g className="hbg-crane-jib">
+          <animateTransform attributeName="transform" type="rotate"
+            values="-8;8;-8" keyTimes="0;0.5;1"
+            calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
+            dur="22s" repeatCount="indefinite" />
+          <line x1="-110" x2="280" y1="-10" y2="-10" className="hbg-crane-arm" />
+          <line x1="-110" x2="0"   y1="-34" y2="-10" className="hbg-crane-arm" />
+          <line x1="280"  x2="0"   y1="-34" y2="-10" className="hbg-crane-arm" />
+          {/* truss segments */}
+          {Array.from({ length: 8 }, (_, i) => (
+            <line key={`a${i}`}
+                  x1={-110 + i * 50} y1="-10"
+                  x2={-110 + (i + 1) * 50} y2="-34"
+                  className="hbg-crane-arm-fine" />
+          ))}
+          {/* hook + payload (drops + raises) */}
+          <g className="hbg-crane-hook" transform="translate(120, 0)">
+            <line x1="0" x2="0" y1="-10" y2="90" className="hbg-crane-cable">
+              <animate attributeName="y2"
+                       values="60;160;60" keyTimes="0;0.5;1"
+                       dur="9s" repeatCount="indefinite" />
+            </line>
+            <rect x="-7" y="86" width="14" height="10" className="hbg-crane-load">
+              <animate attributeName="y"
+                       values="56;156;56" keyTimes="0;0.5;1"
+                       dur="9s" repeatCount="indefinite" />
+            </rect>
+          </g>
         </g>
       </g>
 
-      <rect x="0" y="0" width="1600" height="900" fill="url(#hbg-vignette)" />
+      {/* horizon ground line */}
+      <line x1="0" y1={HORIZON_Y} x2="1600" y2={HORIZON_Y} className="hbg-ground-line" />
+
+      {/* ticker tape — "money talks" — slides across at horizon */}
+      <g className="hbg-tape" transform={`translate(0, ${HORIZON_Y + 50})`}>
+        <line x1="0" x2="1600" y1="-22" y2="-22" className="hbg-tape-rule" />
+        <line x1="0" x2="1600" y1="22"  y2="22"  className="hbg-tape-rule" />
+        <g className="hbg-tape-slide">
+          <text x="0"    y="6" className="hbg-tape-text">{TICKER}{TICKER}</text>
+          <text x="3200" y="6" className="hbg-tape-text">{TICKER}{TICKER}</text>
+        </g>
+      </g>
+
+      {/* vignette */}
+      <rect x="0" y="0" width="1600" height="900" fill="url(#hbg-vig)" />
     </svg>
   );
 }
@@ -4152,283 +3893,7 @@ function fmtHeroDate(d) {
   return `${String(d.getDate()).padStart(2, "0")} ${_MONTHS_UC[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// ---------- Hero Ops Desk: live TRADING ↔ ESTATE terminal ----------
-// continuous RAF time, throttled, so every value flows instead of snapping
-function useOpsTime(fps = 24) {
-  const [t, setT] = useState(0);
-  useEffect(() => {
-    let raf, last = 0;
-    const min = 1000 / fps;
-    const start = performance.now();
-    const tick = (now) => {
-      raf = requestAnimationFrame(tick);
-      if (now - last < min) return;
-      last = now;
-      setT((now - start) / 1000);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [fps]);
-  return t;
-}
-
-// Catmull-Rom → cubic Bezier path (buttery sparklines)
-function _smoothPath(pts) {
-  if (pts.length < 2) return "";
-  const d = [`M${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)}`];
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[i + 2] || p2;
-    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
-    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
-    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
-    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
-    d.push(`C${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`);
-  }
-  return d.join(" ");
-}
-
-function TradingPanel({ t }) {
-  const W = 200, H = 56;
-  const N = 30;
-  const speed = 1.4;
-
-  const pts = [];
-  const k = t * speed;
-  for (let i = 0; i < N; i++) {
-    const xi = i + k;
-    const y = H * 0.5
-      + Math.sin(xi * 0.55) * 12
-      + Math.cos(xi * 0.23) * 8
-      + Math.sin(xi * 1.1)  * 3.5
-      + Math.sin(xi * 0.07) * 6;
-    pts.push([(i / (N - 1)) * W, H - y]);
-  }
-
-  const line = _smoothPath(pts);
-  const fill = `${line} L${W.toFixed(2)} ${H.toFixed(2)} L0 ${H.toFixed(2)} Z`;
-  const head = pts[pts.length - 1];
-  const tail = pts.slice(-4, -1).reverse(); // 3 trailing points behind the head
-
-  // pulse ring — 2s loop, scales out and fades
-  const phase = (t % 2) / 2;
-  const pulseR = 2.4 + phase * 6;
-  const pulseO = 0.45 * (1 - phase);
-
-  // continuous, always-changing stats
-  const pnl = 11280 + Math.sin(t * 0.32) * 720 + Math.sin(t * 0.13) * 260 + t * 1.4;
-  const pct = 1.42  + Math.sin(t * 0.27) * 0.62 + Math.sin(t * 0.71) * 0.12;
-  const vol = 24800 + Math.round(Math.sin(t * 0.5) * 1400 + Math.sin(t * 0.13) * 540 + t * 3.5);
-  const positions = ["LONG /ES", "LONG /NQ", "FLAT", "LONG /CL", "SHORT /VX"];
-  const pos = positions[Math.floor(t * 0.12) % positions.length];
-
-  return (
-    <div className="hc-panel hc-panel--trade">
-      <span className="hc-tick tl" /><span className="hc-tick tr" />
-      <span className="hc-tick bl" /><span className="hc-tick br" />
-      <div className="hc-head">
-        <span className="hc-dot hc-dot-live" />
-        <span className="hc-head-label">Trading Desk</span>
-        <span className="hc-head-meta">/ES · /NQ · /CL</span>
-      </div>
-      <div className="hc-figure">
-        <svg className="hc-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="hc-spark-grad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#ffffff" stopOpacity="0.34" />
-              <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <g className="hc-spark-grid">
-            <line x1="0" x2={W} y1={H * 0.25} y2={H * 0.25} />
-            <line x1="0" x2={W} y1={H * 0.5}  y2={H * 0.5} />
-            <line x1="0" x2={W} y1={H * 0.75} y2={H * 0.75} />
-          </g>
-          <path className="hc-spark-fill" d={fill} />
-          <path className="hc-spark-line" d={line} />
-          {tail.map((p, i) => (
-            <circle key={i} className="hc-spark-trail"
-                    cx={p[0].toFixed(2)} cy={p[1].toFixed(2)}
-                    r={(1.6 - i * 0.4).toFixed(2)}
-                    opacity={(0.38 - i * 0.10).toFixed(2)} />
-          ))}
-          <circle className="hc-spark-pulse"
-                  cx={head[0].toFixed(2)} cy={head[1].toFixed(2)}
-                  r={pulseR.toFixed(2)} opacity={pulseO.toFixed(2)} />
-          <circle className="hc-spark-dot"
-                  cx={head[0].toFixed(2)} cy={head[1].toFixed(2)} r="2.2" />
-        </svg>
-      </div>
-      <div className="hc-stats">
-        <div className="hc-stat">
-          <span className="hc-stat-k">SESSION P&L</span>
-          <span className="hc-stat-v up"><span className="arrow">▲</span>${Math.round(pnl).toLocaleString()}</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">POSITION</span>
-          <span className="hc-stat-v">{pos}</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">DAILY %</span>
-          <span className="hc-stat-v up"><span className="arrow">▲</span>{pct.toFixed(2)}%</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">VOL</span>
-          <span className="hc-stat-v">{vol.toLocaleString()}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AllocationsPanel({ t }) {
-  const W = 200, H = 56;
-
-  // Five sleeves: EQ (public equities), PE (private equity), CR (credit),
-  // MA (macro), VC (venture). Weights breathe gently around target allocation.
-  const sleeves = useMemo(() => ([
-    { k: "EQ", base: 0.32 },
-    { k: "PE", base: 0.24 },
-    { k: "CR", base: 0.18 },
-    { k: "MA", base: 0.14 },
-    { k: "VC", base: 0.12 },
-  ]), []);
-
-  const weights = sleeves.map((s, i) => {
-    const w = s.base + Math.sin(t * 0.11 + i * 1.37) * 0.012 + Math.sin(t * 0.23 + i) * 0.006;
-    return Math.max(0.04, w);
-  });
-  const total = weights.reduce((a, b) => a + b, 0);
-  const norm  = weights.map((w) => w / total);
-
-  // build stacked segments along W
-  let cursor = 0;
-  const BAR_Y = 18, BAR_H = 18;
-  const segs = norm.map((p, i) => {
-    const x0 = cursor * W;
-    cursor += p;
-    const x1 = cursor * W;
-    return { ...sleeves[i], x: x0, w: Math.max(0.6, x1 - x0), pct: p };
-  });
-
-  // a slow-drifting "live exposure" marker (0..1)
-  const exp = 0.5 + 0.42 * Math.sin(t * 0.18) + 0.06 * Math.sin(t * 0.71);
-  const expX = Math.max(2, Math.min(W - 2, exp * W));
-
-  // Stats (continuous, tabular-clean)
-  const aum   = 412.6 + Math.sin(t * 0.07) * 1.4 + t * 0.0024;          // $M
-  const moic  = 2.34 + Math.sin(t * 0.13) * 0.018;
-  const irr   = 21.8 + Math.sin(t * 0.16) * 0.42 + Math.sin(t * 0.43) * 0.10;
-  const dry   = 92.4 + Math.sin(t * 0.09) * 0.6;                         // $M
-
-  return (
-    <div className="hc-panel hc-panel--alloc">
-      <span className="hc-tick tl" /><span className="hc-tick tr" />
-      <span className="hc-tick bl" /><span className="hc-tick br" />
-      <div className="hc-head">
-        <span className="hc-dot hc-dot-hold" />
-        <span className="hc-head-label">Allocations Book</span>
-        <span className="hc-head-meta">EQ · PE · CR · MA · VC</span>
-      </div>
-      <div className="hc-figure">
-        <svg className="hc-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-          <line className="hc-base-rule" x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} />
-          {/* stacked allocation bar */}
-          {segs.map((s, i) => (
-            <g key={s.k}>
-              <rect className="hc-alloc-seg"
-                    x={s.x.toFixed(2)} y={BAR_Y} width={s.w.toFixed(2)} height={BAR_H}
-                    opacity={(0.36 + i * 0.12).toFixed(2)} />
-              {s.w > 14 ? (
-                <text className="hc-alloc-lbl"
-                      x={(s.x + s.w / 2).toFixed(2)} y={BAR_Y + BAR_H / 2 + 2.2}
-                      textAnchor="middle">{s.k}</text>
-              ) : null}
-            </g>
-          ))}
-          {/* segment dividers */}
-          {segs.slice(0, -1).map((s, i) => (
-            <line key={`d${i}`} className="hc-alloc-div"
-                  x1={(s.x + s.w).toFixed(2)} x2={(s.x + s.w).toFixed(2)}
-                  y1={BAR_Y - 1} y2={BAR_Y + BAR_H + 1} />
-          ))}
-          {/* live exposure marker (drifts across the bar) */}
-          <g className="hc-alloc-mark" transform={`translate(${expX.toFixed(2)}, 0)`}>
-            <line x1="0" x2="0" y1={BAR_Y - 4} y2={BAR_Y + BAR_H + 4} />
-            <polygon points="-3,-6 3,-6 0,-2" transform={`translate(0, ${BAR_Y - 4})`} />
-          </g>
-          <text className="hc-alloc-cap" x="0" y={BAR_Y - 5}>LIVE EXPOSURE</text>
-        </svg>
-      </div>
-      <div className="hc-stats">
-        <div className="hc-stat">
-          <span className="hc-stat-k">AUM</span>
-          <span className="hc-stat-v">${aum.toFixed(1)}M</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">MOIC</span>
-          <span className="hc-stat-v">{moic.toFixed(2)}×</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">NET IRR</span>
-          <span className="hc-stat-v up"><span className="arrow">▲</span>{irr.toFixed(1)}%</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">DRY POWDER</span>
-          <span className="hc-stat-v">${dry.toFixed(1)}M</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const _FLOW_PARTICLES = [
-  { y: 22, dir: 0, delay: 0.0, dur: 3.4, dim: false },
-  { y: 50, dir: 0, delay: 1.3, dur: 4.0, dim: true  },
-  { y: 76, dir: 1, delay: 0.7, dur: 3.7, dim: false },
-  { y: 36, dir: 1, delay: 2.2, dur: 4.4, dim: true  },
-  { y: 64, dir: 0, delay: 2.6, dur: 3.9, dim: false },
-  { y: 18, dir: 1, delay: 3.1, dur: 4.2, dim: true  },
-  { y: 88, dir: 0, delay: 3.5, dur: 3.6, dim: false },
-];
-
-function HeroOpsDesk() {
-  const t = useOpsTime(24);
-  return (
-    <div className="hero-ops" role="group" aria-label="Live operations desk">
-      <div className="hero-ops-rail">
-        <span>● Live Ops Desk</span>
-        <span className="hor-line" />
-        <span>Capital ↔ Conviction</span>
-      </div>
-      <div className="hero-ops-grid">
-        <TradingPanel t={t} />
-        <div className="hc-connector" aria-hidden="true">
-          <div className="hc-flow-stream">
-            {_FLOW_PARTICLES.map((p, i) => (
-              <span key={i}
-                    className={`p${p.dir ? " l" : ""}${p.dim ? " dim" : ""}`}
-                    style={{
-                      top: `${p.y}%`,
-                      animationDelay: `${p.delay}s`,
-                      animationDuration: `${p.dur}s`,
-                    }} />
-            ))}
-          </div>
-          <span className="hc-flow">⇌</span>
-          <span className="hc-connector-label">Capital Flow</span>
-        </div>
-        <AllocationsPanel t={t} />
-      </div>
-      <div className="hero-ops-foot">
-        <span><strong>EULCORP</strong> · One book. Every cycle.</span>
-        <span><span className="blink">●</span> Tape open · Book live</span>
-      </div>
-    </div>
-  );
-}
+// ---------- (Hero Ops Desk removed — hero is wordmark + tagline only) ----------
 
 // ---------- Hero ----------
 function Hero({ wordmarkStyle }) {
@@ -4446,7 +3911,6 @@ function Hero({ wordmarkStyle }) {
         Trade the tape <span className="ht-sep" /> compound the cycle.
       </p>
       <p className="hero-subtag">A private investment house. Closed book — clients by introduction only.</p>
-      <HeroOpsDesk />
     </section>);
 
 }

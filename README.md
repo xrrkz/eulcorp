@@ -25,8 +25,9 @@ bar. Each section crossfades to its own animated black-and-white background.
   SI, VX. Looked up via `window.claude.complete` when available; falls back to
   seed values (and an `OFFLINE` status) outside that environment.
 - **Home** — animated `EULCORP` wordmark (scramble-decode reveal + shimmer,
-  hover/click to re-trigger) with corner annotations, over a looping SVG
-  candlestick chart (chop → wick tap → demand zone → mid-tap → breakout).
+  hover/click to re-trigger) with corner annotations and a tagline, over an
+  animated skyline-being-built background (rising buildings, swinging
+  construction crane, flowing capital ribbons, scrolling ticker tape).
 - **About** — philosophy statement and a four-item principles list, over a
   drifting-words background.
 - **Portfolio** — three verticals (Eulcorp Capital, Build, Estate), over an
