@@ -1460,6 +1460,18 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   transform-origin: 800px 540px;
   transform-box: fill-box;
 }
+/* scroll-driven parallax layers — JS writes transforms; CSS smooths them */
+.hbg-parallax {
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(.2,.7,.2,1);
+}
+.hbg-parallax--stars { transition-duration: 0.9s; }
+.hbg-parallax--grid  { transition-duration: 0.45s; }
+.hbg-parallax--sun   { transition-duration: 0.7s; }
+.hbg-parallax--orbits { transition-duration: 0.8s; }
+@media (prefers-reduced-motion: reduce) {
+  .hbg-parallax { transition: none; transform: none !important; }
+}
 @keyframes hbg-sun-pulse {
   0%, 100% { opacity: 0.92; }
   50%      { opacity: 1; }
@@ -3486,6 +3498,53 @@ function HomeBg() {
   const VANISH_X = 800;
   const HORIZON_Y = 540;
 
+  // refs for scroll-driven parallax / warp motion
+  const starsRef   = _s_R.useRef(null);
+  const meteorsRef = _s_R.useRef(null);
+  const orbitsRef  = _s_R.useRef(null);
+  const sunRef     = _s_R.useRef(null);
+  const gridRef    = _s_R.useRef(null);
+  const horizonRef = _s_R.useRef(null);
+  const skyRef     = _s_R.useRef(null);
+
+  _s_R.useEffect(() => {
+    let raf = 0;
+    const apply = () => {
+      const y  = window.scrollY || window.pageYOffset || 0;
+      const vh = window.innerHeight || 1;
+      // p ramps 0..1 across the first viewport, then keeps climbing softly
+      const p = Math.min(y / vh, 1.4);
+      const e = p < 1 ? p : 1 + (p - 1) * 0.4;
+
+      if (starsRef.current)
+        starsRef.current.style.transform = `translate3d(0, ${-e * 90}px, 0) scale(${1 + e * 0.18})`;
+      if (meteorsRef.current)
+        meteorsRef.current.style.transform = `translate3d(${e * 180}px, ${e * 70}px, 0)`;
+      if (orbitsRef.current)
+        orbitsRef.current.style.transform = `translate3d(0, ${e * 36}px, 0) rotate(${e * 6}deg)`;
+      if (sunRef.current)
+        sunRef.current.style.transform = `translate3d(0, ${e * 70}px, 0) scale(${Math.max(0.7, 1 - e * 0.28)})`;
+      if (gridRef.current)
+        gridRef.current.style.transform = `translate3d(0, ${e * 140}px, 0) scale(${1 + e * 0.12})`;
+      if (horizonRef.current)
+        horizonRef.current.style.transform = `translate3d(0, ${e * 28}px, 0)`;
+      if (skyRef.current)
+        skyRef.current.style.opacity = String(Math.max(0, 1 - e * 0.55));
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => { raf = 0; apply(); });
+    };
+    apply();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const stars = _s_R.useMemo(() => {
     const rnd = (n) => {
       const x = Math.sin(n * 12.9898) * 43758.5453;
@@ -3592,10 +3651,10 @@ function HomeBg() {
         </clipPath>
       </defs>
 
-      <rect x="0" y="0" width="1600" height={HORIZON_Y} fill="url(#hbg-sky)" />
+      <rect ref={skyRef} x="0" y="0" width="1600" height={HORIZON_Y} fill="url(#hbg-sky)" style={{ transition: "opacity 0.2s linear" }} />
       <rect x="0" y={HORIZON_Y} width="1600" height={900 - HORIZON_Y} fill="url(#hbg-ground)" />
 
-      <g>
+      <g ref={starsRef} className="hbg-parallax hbg-parallax--stars">
         {stars.map((s, i) => (
           <circle
             key={i} cx={s.cx} cy={s.cy} r={s.r} className="hbg-star"
@@ -3608,24 +3667,30 @@ function HomeBg() {
         ))}
       </g>
 
-      {meteors}
+      <g ref={meteorsRef} className="hbg-parallax">{meteors}</g>
 
-      <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="720" ry="138"
-               className="hbg-orbit"
-               style={{ animation: "hbg-orbit-dash 26s linear infinite", opacity: 0.45 }} />
-      <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="520" ry="96"
-               className="hbg-orbit"
-               style={{ animation: "hbg-orbit-dash-rev 18s linear infinite" }} />
+      <g ref={orbitsRef} className="hbg-parallax hbg-parallax--orbits" style={{ transformOrigin: `${VANISH_X}px ${HORIZON_Y}px` }}>
+        <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="720" ry="138"
+                 className="hbg-orbit"
+                 style={{ animation: "hbg-orbit-dash 26s linear infinite", opacity: 0.45 }} />
+        <ellipse cx={VANISH_X} cy={HORIZON_Y} rx="520" ry="96"
+                 className="hbg-orbit"
+                 style={{ animation: "hbg-orbit-dash-rev 18s linear infinite" }} />
+      </g>
 
-      <circle cx={VANISH_X} cy={HORIZON_Y} r="220" fill="url(#hbg-sun)" className="hbg-sun-core" />
-      <circle cx={VANISH_X} cy={HORIZON_Y} r="138" className="hbg-sun-ring" />
-      <g clipPath="url(#hbg-sun-clip)">{sunScan}</g>
+      <g ref={sunRef} className="hbg-parallax hbg-parallax--sun" style={{ transformOrigin: `${VANISH_X}px ${HORIZON_Y}px` }}>
+        <circle cx={VANISH_X} cy={HORIZON_Y} r="220" fill="url(#hbg-sun)" className="hbg-sun-core" />
+        <circle cx={VANISH_X} cy={HORIZON_Y} r="138" className="hbg-sun-ring" />
+        <g clipPath="url(#hbg-sun-clip)">{sunScan}</g>
+      </g>
 
-      <line x1="0" y1={HORIZON_Y} x2="1600" y2={HORIZON_Y} className="hbg-horizon" />
+      <line ref={horizonRef} x1="0" y1={HORIZON_Y} x2="1600" y2={HORIZON_Y} className="hbg-horizon hbg-parallax" />
 
       <g clipPath="url(#hbg-ground-clip)">
-        {verticals}
-        {rows}
+        <g ref={gridRef} className="hbg-parallax hbg-parallax--grid" style={{ transformOrigin: `${VANISH_X}px ${HORIZON_Y}px` }}>
+          {verticals}
+          {rows}
+        </g>
       </g>
 
       <rect x="0" y="0" width="1600" height="900" fill="url(#hbg-vignette)" />
