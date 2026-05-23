@@ -299,6 +299,16 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
   margin: 0 14px;
   opacity: 0.55;
 }
+.hero-subtag {
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  animation: ht-fade 1.2s ease-out 0.95s forwards;
+}
 @keyframes ht-fade {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -367,7 +377,7 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
   animation: hc-scan 6.8s linear infinite;
   z-index: 2;
 }
-.hc-panel--estate::before { animation-delay: -3.4s; }
+.hc-panel--alloc::before { animation-delay: -3.4s; }
 @keyframes hc-scan {
   0%   { transform: translateX(0);    opacity: 0; }
   10%  { opacity: 0.65; }
@@ -470,18 +480,46 @@ html[data-bg="deep-black"] .ticker-wrap { background: rgba(0,0,0,0.35); }
   filter: drop-shadow(0 0 4px rgba(255,255,255,0.55));
 }
 
-/* estate "skyline" mini-graphic — windows breathe via inline opacity */
-.hc-skyline-bar {
-  fill: var(--text);
-  opacity: 0.88;
-}
-.hc-skyline-window {
-  fill: var(--text);
-}
-.hc-skyline-ground {
+/* shared baseline rule under panel figures */
+.hc-base-rule {
   stroke: var(--text);
   stroke-width: 1;
-  opacity: 0.6;
+  opacity: 0.45;
+}
+
+/* allocations stacked bar — luxe minimal: hairline divs + drifting marker */
+.hc-alloc-seg {
+  fill: var(--text);
+  transition: opacity 0.6s var(--ease-smooth);
+}
+.hc-alloc-div {
+  stroke: #000;
+  stroke-width: 1;
+  opacity: 0.85;
+}
+.hc-alloc-lbl {
+  fill: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+.hc-alloc-mark line {
+  stroke: var(--text);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.55));
+}
+.hc-alloc-mark polygon {
+  fill: var(--text);
+}
+.hc-alloc-cap {
+  fill: var(--faint);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.4px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
 }
 
 .hc-stats {
@@ -1393,23 +1431,48 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
   to   { transform: translateX(-18%); }
 }
 
-/* -------- Portfolio bg: isometric blueprint -------- */
-.bg-iso-line {
+/* -------- Portfolio bg: capital grid + allocation rings -------- */
+.bg-grid-line {
   stroke: rgba(255,255,255,0.045);
   stroke-width: 1;
 }
-.bg-bldg polygon {
-  fill: rgba(255,255,255,0.04);
-  stroke: rgba(255,255,255,0.35);
+.bg-alloc-ring-outer {
+  fill: none;
+  stroke: rgba(255,255,255,0.12);
+  stroke-width: 1;
+  stroke-dasharray: 2 8;
+}
+.bg-alloc-ring-inner {
+  fill: none;
+  stroke: rgba(255,255,255,0.06);
   stroke-width: 1;
 }
-.bg-bldg {
-  animation: bldg-pulse 4.2s ease-in-out infinite;
-  transform-origin: center;
+.bg-alloc-ring-arc {
+  fill: none;
+  stroke: rgba(255,255,255,0.32);
+  stroke-width: 1.2;
+  stroke-dasharray: 360 1320;
+  animation: bg-ring-arc 9s ease-in-out infinite alternate;
 }
-@keyframes bldg-pulse {
-  0%, 100% { opacity: 0.45; }
-  50%      { opacity: 1; }
+.bg-alloc-ring-lbl {
+  fill: rgba(255,255,255,0.32);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+}
+.bg-alloc-ring-center {
+  fill: rgba(255,255,255,0.45);
+}
+@keyframes bg-ring-spin-cw {
+  to { transform: rotate(360deg); }
+}
+@keyframes bg-ring-spin-ccw {
+  to { transform: rotate(-360deg); }
+}
+@keyframes bg-ring-arc {
+  0%   { stroke-dashoffset: 0;    opacity: 0.6; }
+  100% { stroke-dashoffset: -480; opacity: 1;   }
 }
 
 /* -------- Home bg: cosmic horizon + perspective grid -------- */
@@ -3156,11 +3219,12 @@ function AboutSection() {
           <span className="eyebrow-line" />
           <span>02 — PHILOSOPHY</span>
         </div>
-        <h2 className="section-title">Built to last.<br />Built one of none.</h2>
+        <h2 className="section-title">Quietly compounding.<br />For a few.</h2>
         <p className="section-lede">
-          Eulcorp is a diversified holding company building across markets,
-          real estate, construction, and technology. We move with discipline.
-          We're early — and we believe early is the best place to be.
+          Eulcorp is a private investment house deploying capital across public
+          markets, private equity, credit, and venture. A closed book — a small
+          roster of clients introduced by reference. We move with discipline,
+          on long horizons, and we say no to almost everything.
         </p>
         <ul className="principles">
           <li><span className="p-num">01</span><span className="p-text">Patience compounds. Conviction is built, not bought.</span></li>
@@ -3175,25 +3239,36 @@ function AboutSection() {
 
 const VERTICALS = [
   {
-    id: "capital",
-    name: "Eulcorp Capital",
-    sub: "Investments & Trading",
+    id: "markets",
+    name: "Eulcorp Markets",
+    sub: "Public Markets",
     tag: "01",
-    blurb: "Discretionary positions across futures, equities, and rates. Disciplined sizing, defined risk, asymmetric setups.",
+    blurb: "Discretionary positions across equities, futures, rates, and credit. Disciplined sizing, defined risk, asymmetric setups.",
     stats: [
-      { k: "FOCUS",   v: "INDICES · COMMODITIES" },
-      { k: "HORIZON", v: "INTRADAY → SWING" },
+      { k: "FOCUS",   v: "EQUITIES · MACRO · CREDIT" },
+      { k: "HORIZON", v: "INTRADAY → MULTI-YEAR" },
     ],
   },
   {
-    id: "estate",
-    name: "Eulcorp Estate",
-    sub: "Real Estate",
+    id: "private",
+    name: "Eulcorp Private",
+    sub: "Private Equity & Credit",
     tag: "02",
-    blurb: "Acquisition and development of residential and mixed-use properties. Long-hold thesis, cash-flow first, appreciation second.",
+    blurb: "Direct and co-invest positions in private companies and structured credit. Long-hold thesis, cash-flow first, control second.",
     stats: [
-      { k: "STRATEGY", v: "BUY · HOLD · COMPOUND" },
-      { k: "ASSET",    v: "SFR · MULTIFAMILY" },
+      { k: "STRATEGY", v: "BUY · BUILD · COMPOUND" },
+      { k: "MANDATE",  v: "BUYOUT · GROWTH · CREDIT" },
+    ],
+  },
+  {
+    id: "ventures",
+    name: "Eulcorp Ventures",
+    sub: "Early-Stage Venture",
+    tag: "03",
+    blurb: "Concentrated checks into founders building what doesn't exist yet. Patient money. Decade-plus holds.",
+    stats: [
+      { k: "STAGE",  v: "SEED → SERIES B" },
+      { k: "TICKET", v: "CONCENTRATED · LEAD" },
     ],
   },
 ];
@@ -3206,7 +3281,7 @@ function PortfolioSection() {
           <span className="eyebrow-line" />
           <span>03 — VERTICALS</span>
         </div>
-        <h2 className="section-title">What we build.</h2>
+        <h2 className="section-title">What we run.</h2>
         <div className="cards">
           {VERTICALS.map((v) => (
             <article key={v.id} className="card" data-tag={v.tag}>
@@ -3319,18 +3394,27 @@ function AboutBg() {
   );
 }
 
-// -------- Portfolio: isometric blueprint grid + three light tiles --------
+// -------- Portfolio: capital grid + three rotating allocation rings --------
 function PortfolioBg() {
-  // isometric grid lines (two sets at +30°/-30°)
-  const lines = [];
-  const SP = 60;
-  for (let i = -30; i < 50; i++) {
-    // right-leaning
-    const y = i * SP;
-    lines.push(<line key={`r${i}`} x1="-200" y1={y + 0} x2="2200" y2={y + 1300} className="bg-iso-line" />);
-    lines.push(<line key={`l${i}`} x1="-200" y1={y + 1300} x2="2200" y2={y + 0} className="bg-iso-line" />);
+  // a clean rectilinear "capital grid" — fine vertical & horizontal hairlines
+  const vlines = [];
+  const hlines = [];
+  const VSP = 80, HSP = 80;
+  for (let x = 0; x <= 1600; x += VSP) {
+    vlines.push(<line key={`v${x}`} x1={x} y1="0" x2={x} y2="900" className="bg-grid-line" />);
   }
-  // three large translucent "buildings" (isometric box outlines), pulsing
+  for (let y = 0; y <= 900; y += HSP) {
+    hlines.push(<line key={`h${y}`} x1="0" y1={y} x2="1600" y2={y} className="bg-grid-line" />);
+  }
+
+  // Three allocation rings — each labeled along its circumference.
+  // Composed of a dashed ring + a "weight" arc that breathes via dashoffset.
+  const rings = [
+    { id: "r-markets",  label: "MARKETS",  cx: 460,  cy: 470, r: 210, dir: 1,  dur: 64 },
+    { id: "r-private",  label: "PRIVATE",  cx: 960,  cy: 430, r: 250, dir: -1, dur: 88 },
+    { id: "r-ventures", label: "VENTURES", cx: 1300, cy: 520, r: 180, dir: 1,  dur: 56 },
+  ];
+
   return (
     <svg
       className="bg-svg bg-portfolio"
@@ -3338,23 +3422,33 @@ function PortfolioBg() {
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
     >
-      {lines}
-      {/* Buildings — each a stacked diamond + sides */}
-      <g className="bg-bldg" style={{ animationDelay: "0s" }}>
-        <polygon points="320,520 480,440 640,520 480,600" />
-        <polygon points="320,520 320,640 480,720 480,600" />
-        <polygon points="640,520 640,640 480,720 480,600" />
-      </g>
-      <g className="bg-bldg" style={{ animationDelay: "2.4s" }}>
-        <polygon points="780,400 980,300 1180,400 980,500" />
-        <polygon points="780,400 780,560 980,660 980,500" />
-        <polygon points="1180,400 1180,560 980,660 980,500" />
-      </g>
-      <g className="bg-bldg" style={{ animationDelay: "4.8s" }}>
-        <polygon points="1240,580 1380,510 1520,580 1380,650" />
-        <polygon points="1240,580 1240,700 1380,770 1380,650" />
-        <polygon points="1520,580 1520,700 1380,770 1380,650" />
-      </g>
+      <defs>
+        {rings.map((r) => (
+          <path key={`${r.id}-p`} id={`${r.id}-path`}
+                d={`M ${r.cx - r.r} ${r.cy} A ${r.r} ${r.r} 0 1 1 ${r.cx + r.r} ${r.cy} A ${r.r} ${r.r} 0 1 1 ${r.cx - r.r} ${r.cy}`} />
+        ))}
+      </defs>
+
+      {vlines}
+      {hlines}
+
+      {rings.map((r) => (
+        <g key={r.id} className="bg-alloc-ring"
+           style={{
+             transformOrigin: `${r.cx}px ${r.cy}px`,
+             animation: `bg-ring-spin-${r.dir > 0 ? "cw" : "ccw"} ${r.dur}s linear infinite`,
+           }}>
+          <circle cx={r.cx} cy={r.cy} r={r.r}     className="bg-alloc-ring-outer" />
+          <circle cx={r.cx} cy={r.cy} r={r.r - 14} className="bg-alloc-ring-inner" />
+          <circle cx={r.cx} cy={r.cy} r={r.r}     className="bg-alloc-ring-arc" />
+          <text className="bg-alloc-ring-lbl">
+            <textPath href={`#${r.id}-path`} startOffset="0%">
+              {`${r.label}  ·  ${r.label}  ·  ${r.label}  ·  ${r.label}  ·  `}
+            </textPath>
+          </text>
+          <circle cx={r.cx} cy={r.cy} r="2" className="bg-alloc-ring-center" />
+        </g>
+      ))}
     </svg>
   );
 }
@@ -4150,90 +4244,101 @@ function TradingPanel({ t }) {
   );
 }
 
-function EstatePanel({ t }) {
+function AllocationsPanel({ t }) {
   const W = 200, H = 56;
-  const buildings = useMemo(() => ([
-    { x: 6,   w: 26, h: 30 },
-    { x: 38,  w: 22, h: 44 },
-    { x: 66,  w: 30, h: 36 },
-    { x: 102, w: 24, h: 50 },
-    { x: 132, w: 28, h: 28 },
-    { x: 166, w: 26, h: 40 },
+
+  // Five sleeves: EQ (public equities), PE (private equity), CR (credit),
+  // MA (macro), VC (venture). Weights breathe gently around target allocation.
+  const sleeves = useMemo(() => ([
+    { k: "EQ", base: 0.32 },
+    { k: "PE", base: 0.24 },
+    { k: "CR", base: 0.18 },
+    { k: "MA", base: 0.14 },
+    { k: "VC", base: 0.12 },
   ]), []);
 
-  // each window has a stable phase & period, opacity breathes continuously
-  const windowSlots = useMemo(() => {
-    const out = [];
-    buildings.forEach((b, bi) => {
-      const cols = Math.max(2, Math.floor(b.w / 6));
-      const rows = Math.max(2, Math.floor(b.h / 6));
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const wx = b.x + 2 + c * (b.w - 4) / cols;
-          const wy = (H - b.h) + 3 + r * (b.h - 4) / rows;
-          const ww = (b.w - 4) / cols - 1.2;
-          const wh = (b.h - 4) / rows - 1.2;
-          const key = bi * 100 + r * 10 + c;
-          const phase  = (key * 0.61) % (Math.PI * 2);
-          const period = 2.4 + ((key * 17) % 32) / 10; // 2.4..5.5 s
-          out.push({ wx, wy, ww, wh, key, phase, period });
-        }
-      }
-    });
-    return out;
-  }, [buildings]);
+  const weights = sleeves.map((s, i) => {
+    const w = s.base + Math.sin(t * 0.11 + i * 1.37) * 0.012 + Math.sin(t * 0.23 + i) * 0.006;
+    return Math.max(0.04, w);
+  });
+  const total = weights.reduce((a, b) => a + b, 0);
+  const norm  = weights.map((w) => w / total);
 
-  // continuous estate stats
-  const doors = 142 + (Math.floor(t / 18) % 4);
-  const sqft  = 218400 + Math.round(Math.sin(t * 0.08) * 420 + t * 0.18);
-  const occ   = 96.4 + Math.sin(t * 0.19) * 1.15 + Math.sin(t * 0.51) * 0.32;
-  const irr   = 17.5 + Math.sin(t * 0.16) * 0.72 + Math.sin(t * 0.43) * 0.18;
+  // build stacked segments along W
+  let cursor = 0;
+  const BAR_Y = 18, BAR_H = 18;
+  const segs = norm.map((p, i) => {
+    const x0 = cursor * W;
+    cursor += p;
+    const x1 = cursor * W;
+    return { ...sleeves[i], x: x0, w: Math.max(0.6, x1 - x0), pct: p };
+  });
+
+  // a slow-drifting "live exposure" marker (0..1)
+  const exp = 0.5 + 0.42 * Math.sin(t * 0.18) + 0.06 * Math.sin(t * 0.71);
+  const expX = Math.max(2, Math.min(W - 2, exp * W));
+
+  // Stats (continuous, tabular-clean)
+  const aum   = 412.6 + Math.sin(t * 0.07) * 1.4 + t * 0.0024;          // $M
+  const moic  = 2.34 + Math.sin(t * 0.13) * 0.018;
+  const irr   = 21.8 + Math.sin(t * 0.16) * 0.42 + Math.sin(t * 0.43) * 0.10;
+  const dry   = 92.4 + Math.sin(t * 0.09) * 0.6;                         // $M
 
   return (
-    <div className="hc-panel hc-panel--estate">
+    <div className="hc-panel hc-panel--alloc">
       <span className="hc-tick tl" /><span className="hc-tick tr" />
       <span className="hc-tick bl" /><span className="hc-tick br" />
       <div className="hc-head">
         <span className="hc-dot hc-dot-hold" />
-        <span className="hc-head-label">Estate Book</span>
-        <span className="hc-head-meta">SFR · MFR · LAND</span>
+        <span className="hc-head-label">Allocations Book</span>
+        <span className="hc-head-meta">EQ · PE · CR · MA · VC</span>
       </div>
       <div className="hc-figure">
         <svg className="hc-spark" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-          <line className="hc-skyline-ground" x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} />
-          {buildings.map((b, i) => (
-            <rect key={i} className="hc-skyline-bar"
-                  x={b.x} y={H - b.h} width={b.w} height={b.h} />
+          <line className="hc-base-rule" x1="0" x2={W} y1={H - 0.5} y2={H - 0.5} />
+          {/* stacked allocation bar */}
+          {segs.map((s, i) => (
+            <g key={s.k}>
+              <rect className="hc-alloc-seg"
+                    x={s.x.toFixed(2)} y={BAR_Y} width={s.w.toFixed(2)} height={BAR_H}
+                    opacity={(0.36 + i * 0.12).toFixed(2)} />
+              {s.w > 14 ? (
+                <text className="hc-alloc-lbl"
+                      x={(s.x + s.w / 2).toFixed(2)} y={BAR_Y + BAR_H / 2 + 2.2}
+                      textAnchor="middle">{s.k}</text>
+              ) : null}
+            </g>
           ))}
-          {windowSlots.map((w) => {
-            const wave = Math.sin(t * (Math.PI * 2) / w.period + w.phase);
-            const lit  = Math.max(0, (wave + 0.25)) / 1.25;       // 0..1
-            const op   = (0.05 + 0.85 * lit * lit).toFixed(2);    // gamma bias
-            return (
-              <rect key={w.key} className="hc-skyline-window"
-                    x={w.wx.toFixed(2)} y={w.wy.toFixed(2)}
-                    width={w.ww.toFixed(2)} height={w.wh.toFixed(2)}
-                    opacity={op} />
-            );
-          })}
+          {/* segment dividers */}
+          {segs.slice(0, -1).map((s, i) => (
+            <line key={`d${i}`} className="hc-alloc-div"
+                  x1={(s.x + s.w).toFixed(2)} x2={(s.x + s.w).toFixed(2)}
+                  y1={BAR_Y - 1} y2={BAR_Y + BAR_H + 1} />
+          ))}
+          {/* live exposure marker (drifts across the bar) */}
+          <g className="hc-alloc-mark" transform={`translate(${expX.toFixed(2)}, 0)`}>
+            <line x1="0" x2="0" y1={BAR_Y - 4} y2={BAR_Y + BAR_H + 4} />
+            <polygon points="-3,-6 3,-6 0,-2" transform={`translate(0, ${BAR_Y - 4})`} />
+          </g>
+          <text className="hc-alloc-cap" x="0" y={BAR_Y - 5}>LIVE EXPOSURE</text>
         </svg>
       </div>
       <div className="hc-stats">
         <div className="hc-stat">
-          <span className="hc-stat-k">DOORS HELD</span>
-          <span className="hc-stat-v">{doors}</span>
+          <span className="hc-stat-k">AUM</span>
+          <span className="hc-stat-v">${aum.toFixed(1)}M</span>
         </div>
         <div className="hc-stat">
-          <span className="hc-stat-k">SQ. FT.</span>
-          <span className="hc-stat-v">{sqft.toLocaleString()}</span>
+          <span className="hc-stat-k">MOIC</span>
+          <span className="hc-stat-v">{moic.toFixed(2)}×</span>
         </div>
         <div className="hc-stat">
-          <span className="hc-stat-k">OCCUPANCY</span>
-          <span className="hc-stat-v up"><span className="arrow">●</span>{occ.toFixed(1)}%</span>
-        </div>
-        <div className="hc-stat">
-          <span className="hc-stat-k">TRAILING IRR</span>
+          <span className="hc-stat-k">NET IRR</span>
           <span className="hc-stat-v up"><span className="arrow">▲</span>{irr.toFixed(1)}%</span>
+        </div>
+        <div className="hc-stat">
+          <span className="hc-stat-k">DRY POWDER</span>
+          <span className="hc-stat-v">${dry.toFixed(1)}M</span>
         </div>
       </div>
     </div>
@@ -4257,7 +4362,7 @@ function HeroOpsDesk() {
       <div className="hero-ops-rail">
         <span>● Live Ops Desk</span>
         <span className="hor-line" />
-        <span>Capital ↔ Concrete</span>
+        <span>Capital ↔ Conviction</span>
       </div>
       <div className="hero-ops-grid">
         <TradingPanel t={t} />
@@ -4276,11 +4381,11 @@ function HeroOpsDesk() {
           <span className="hc-flow">⇌</span>
           <span className="hc-connector-label">Capital Flow</span>
         </div>
-        <EstatePanel t={t} />
+        <AllocationsPanel t={t} />
       </div>
       <div className="hero-ops-foot">
-        <span><strong>EULCORP</strong> · One book, two hands</span>
-        <span><span className="blink">●</span> Tape open · Title clear</span>
+        <span><strong>EULCORP</strong> · One book. Every cycle.</span>
+        <span><span className="blink">●</span> Tape open · Book live</span>
       </div>
     </div>
   );
@@ -4292,15 +4397,16 @@ function Hero({ wordmarkStyle }) {
   return (
     <section className="hero">
       <div className="wordmark-frame">
-        <span className="wf-corner wf-tl">ONE OF NONE</span>
-        <span className="wf-corner wf-tr">MARKETS · MORTAR</span>
+        <span className="wf-corner wf-tl">BY INVITATION</span>
+        <span className="wf-corner wf-tr">MULTI-STRAT · MULTI-CYCLE</span>
         <Wordmark style={wordmarkStyle} />
         <span className="wf-corner wf-bl">{fmtHeroDate(today)}</span>
         <span className="wf-corner wf-br">NY · LDN · JPN</span>
       </div>
       <p className="hero-tagline">
-        Trade the tape <span className="ht-sep" /> hold the title.
+        Trade the tape <span className="ht-sep" /> compound the cycle.
       </p>
+      <p className="hero-subtag">A private investment house. Closed book — clients by introduction only.</p>
       <HeroOpsDesk />
     </section>);
 
