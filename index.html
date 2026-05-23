@@ -95,24 +95,157 @@ html::before {
       #070d1c 100%);
 }
 
-/* city skyline silhouette — pinned to bottom of viewport, low-contrast
-   so it reads as atmosphere, not foreground */
-html::after {
-  content: "";
-  position: fixed;
+/* ====== animated business backdrop (skyline + sky atmosphere) ====== */
+.bgfx {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* breathing horizon glow */
+.bgfx-horizon {
+  position: absolute;
+  left: -10%; right: -10%;
+  bottom: 0;
+  height: 60vh;
+  background:
+    radial-gradient(ellipse 50% 60% at 50% 100%,
+      rgba(46, 80, 145, 0.42), transparent 65%);
+  animation: bgfx-horizon-pulse 11s ease-in-out infinite;
+  transform-origin: 50% 100%;
+  will-change: opacity, transform;
+}
+@keyframes bgfx-horizon-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1, 1); }
+  50%      { opacity: 1;   transform: scale(1.08, 1.04); }
+}
+
+/* upper-sky starfield (twinkles populated via JS) */
+.bgfx-stars {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 55vh;
+}
+.bgfx-stars .star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgba(255,255,255,0.55);
+  animation: bgfx-star-twinkle var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+  will-change: opacity;
+}
+@keyframes bgfx-star-twinkle {
+  0%, 100% { opacity: var(--lo, 0.15); }
+  50%      { opacity: var(--hi, 0.85); }
+}
+
+/* slow drifting aircraft / satellite beacons */
+.bgfx-aircraft {
+  position: absolute;
+  top: 22%;
+  left: -3%;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 0 6px rgba(255,255,255,0.95),
+    0 0 14px rgba(160,190,255,0.55);
+  animation:
+    bgfx-aircraft-cross 38s linear infinite,
+    bgfx-aircraft-blink 1.6s ease-in-out infinite;
+  will-change: left, opacity;
+}
+.bgfx-aircraft--2 {
+  top: 11%;
+  animation-duration: 56s, 2.1s;
+  animation-delay: -22s, -0.4s;
+  box-shadow:
+    0 0 5px rgba(255,255,255,0.9),
+    0 0 12px rgba(200,170,140,0.45);
+}
+.bgfx-aircraft--3 {
+  top: 32%;
+  animation-duration: 48s, 1.3s;
+  animation-delay: -8s, -1.1s;
+  animation-direction: reverse, normal;
+  opacity: 0.85;
+}
+@keyframes bgfx-aircraft-cross {
+  0%   { left: -3%;  opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { left: 103%; opacity: 0; }
+}
+@keyframes bgfx-aircraft-blink {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(0.45); }
+}
+
+/* slow radar / searchlight sweep, anchored near skyline */
+.bgfx-sweep {
+  position: absolute;
+  left: 50%; bottom: 26vh;
+  width: 1400px; height: 1400px;
+  margin-left: -700px;
+  margin-bottom: -700px;
+  background: conic-gradient(from 250deg at 50% 50%,
+    transparent 0deg,
+    rgba(255,255,255,0.045) 6deg,
+    rgba(160,190,255,0.025) 12deg,
+    transparent 20deg);
+  border-radius: 50%;
+  animation: bgfx-sweep-rotate 28s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 55%);
+          mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 55%);
+}
+@keyframes bgfx-sweep-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* the skyline itself (silhouette + animated windows) */
+.bgfx-skyline {
+  position: absolute;
   left: 0; right: 0; bottom: 0;
+  width: 100%;
   height: 34vh;
   min-height: 220px;
   max-height: 360px;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.78;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 240' preserveAspectRatio='xMidYEnd slice'><path fill='%23000000' d='M0 240 L0 188 L36 188 L36 156 L72 156 L72 178 L108 178 L108 134 L150 134 L150 162 L188 162 L188 96 L222 96 L222 124 L260 124 L260 78 L284 78 L284 56 L302 56 L302 78 L324 78 L324 108 L362 108 L362 144 L402 144 L402 116 L444 116 L444 134 L484 134 L484 86 L522 86 L522 110 L562 110 L562 64 L578 64 L578 38 L590 38 L590 64 L624 64 L624 100 L666 100 L666 134 L706 134 L706 104 L744 104 L744 148 L786 148 L786 96 L826 96 L826 118 L866 118 L866 80 L908 80 L908 108 L948 108 L948 54 L962 54 L962 28 L974 28 L974 54 L1008 54 L1008 94 L1048 94 L1048 144 L1090 144 L1090 114 L1130 114 L1130 138 L1170 138 L1170 84 L1208 84 L1208 108 L1248 108 L1248 64 L1268 64 L1268 42 L1286 42 L1286 66 L1326 66 L1326 96 L1366 96 L1366 132 L1406 132 L1406 102 L1446 102 L1446 152 L1486 152 L1486 178 L1526 178 L1526 198 L1568 198 L1568 214 L1600 214 L1600 240 Z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: cover;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 100%);
           mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 100%);
+}
+.bgfx-silhouette {
+  fill: #000000;
+}
+.bgfx-win {
+  fill: #ffffff;
+  /* slight warm cast via tint without breaking the B&W palette */
+  filter: drop-shadow(0 0 0.6px rgba(255, 240, 210, 0.55));
+}
+.bgfx-win--twinkle {
+  animation: bgfx-win-twinkle var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+  will-change: opacity;
+}
+@keyframes bgfx-win-twinkle {
+  0%, 100% { opacity: var(--lo, 0.18); }
+  40%      { opacity: var(--hi, 0.85); }
+  70%      { opacity: calc(var(--lo, 0.18) + 0.12); }
+}
+
+/* respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bgfx-horizon,
+  .bgfx-stars .star,
+  .bgfx-aircraft,
+  .bgfx-sweep,
+  .bgfx-win--twinkle {
+    animation: none !important;
+  }
+  .bgfx-aircraft { opacity: 0.7; }
+  .bgfx-win--twinkle { opacity: 0.55; }
 }
 /* purple glow layers */
 body::before {
@@ -2124,6 +2257,99 @@ html[data-bg="deep-black"] .socials { background: rgba(0,0,0,0.35); }
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 </head>
 <body style="font-family: &quot;Instrument Serif&quot;">
+<div class="bgfx" aria-hidden="true">
+  <div class="bgfx-horizon"></div>
+  <div class="bgfx-stars"></div>
+  <div class="bgfx-sweep"></div>
+  <div class="bgfx-aircraft bgfx-aircraft--1"></div>
+  <div class="bgfx-aircraft bgfx-aircraft--2"></div>
+  <div class="bgfx-aircraft bgfx-aircraft--3"></div>
+  <svg class="bgfx-skyline" viewBox="0 0 1600 240" preserveAspectRatio="xMidYEnd slice" xmlns="http://www.w3.org/2000/svg">
+    <path class="bgfx-silhouette" d="M0 240 L0 188 L36 188 L36 156 L72 156 L72 178 L108 178 L108 134 L150 134 L150 162 L188 162 L188 96 L222 96 L222 124 L260 124 L260 78 L284 78 L284 56 L302 56 L302 78 L324 78 L324 108 L362 108 L362 144 L402 144 L402 116 L444 116 L444 134 L484 134 L484 86 L522 86 L522 110 L562 110 L562 64 L578 64 L578 38 L590 38 L590 64 L624 64 L624 100 L666 100 L666 134 L706 134 L706 104 L744 104 L744 148 L786 148 L786 96 L826 96 L826 118 L866 118 L866 80 L908 80 L908 108 L948 108 L948 54 L962 54 L962 28 L974 28 L974 54 L1008 54 L1008 94 L1048 94 L1048 144 L1090 144 L1090 114 L1130 114 L1130 138 L1170 138 L1170 84 L1208 84 L1208 108 L1248 108 L1248 64 L1268 64 L1268 42 L1286 42 L1286 66 L1326 66 L1326 96 L1366 96 L1366 132 L1406 132 L1406 102 L1446 102 L1446 152 L1486 152 L1486 178 L1526 178 L1526 198 L1568 198 L1568 214 L1600 214 L1600 240 Z"/>
+    <g class="bgfx-windows"></g>
+  </svg>
+</div>
+<script>
+(function () {
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  // Seeded PRNG so the skyline is stable across reloads (windows don't reshuffle).
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = seed;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // [xStart, xEnd, roofY] — pulled from the skyline path above
+  var buildings = [
+    [36, 72, 156], [108, 150, 134], [188, 222, 96], [222, 260, 124],
+    [284, 302, 56], [324, 362, 108], [402, 444, 116], [484, 522, 86],
+    [578, 590, 38], [624, 666, 100], [706, 744, 104], [786, 826, 96],
+    [866, 908, 80], [948, 974, 28], [1008, 1048, 94], [1090, 1130, 114],
+    [1170, 1208, 84], [1248, 1268, 42], [1326, 1366, 96], [1406, 1446, 102]
+  ];
+
+  var rand = mulberry32(0xE0_1C_07 /* "eulcorp" vibes */);
+  var winsGroup = document.querySelector('.bgfx-windows');
+  var WIN_W = 1.6, WIN_H = 2.2, COL_STEP = 5.5, ROW_STEP = 6.5;
+  var MARGIN_X = 3, MARGIN_TOP = 8, MARGIN_BOT = 14;
+
+  if (winsGroup) {
+    buildings.forEach(function (b) {
+      var bw = b[1] - b[0];
+      var bh = 240 - b[2];
+      if (bw < 6 || bh < 24) return;
+      var cols = Math.max(1, Math.floor((bw - 2 * MARGIN_X) / COL_STEP));
+      var rows = Math.max(1, Math.floor((bh - MARGIN_TOP - MARGIN_BOT) / ROW_STEP));
+      for (var i = 0; i < cols; i++) {
+        for (var j = 0; j < rows; j++) {
+          if (rand() > 0.52) continue;
+          var rect = document.createElementNS(SVG_NS, 'rect');
+          rect.setAttribute('x', (b[0] + MARGIN_X + i * COL_STEP).toFixed(2));
+          rect.setAttribute('y', (b[2] + MARGIN_TOP + j * ROW_STEP).toFixed(2));
+          rect.setAttribute('width', WIN_W);
+          rect.setAttribute('height', WIN_H);
+          var twinkles = rand() < 0.45;
+          rect.setAttribute('class', 'bgfx-win' + (twinkles ? ' bgfx-win--twinkle' : ''));
+          var lo = 0.10 + rand() * 0.20;
+          var hi = 0.55 + rand() * 0.40;
+          rect.style.setProperty('--lo', lo.toFixed(2));
+          rect.style.setProperty('--hi', hi.toFixed(2));
+          rect.style.setProperty('--delay', (rand() * 7).toFixed(2) + 's');
+          rect.style.setProperty('--dur', (3 + rand() * 6).toFixed(2) + 's');
+          rect.style.opacity = twinkles ? lo.toFixed(2) : (0.35 + rand() * 0.55).toFixed(2);
+          winsGroup.appendChild(rect);
+        }
+      }
+    });
+  }
+
+  // Sprinkle stars across the upper portion of the sky.
+  var starsEl = document.querySelector('.bgfx-stars');
+  if (starsEl) {
+    var STAR_COUNT = 60;
+    for (var k = 0; k < STAR_COUNT; k++) {
+      var s = document.createElement('span');
+      s.className = 'star';
+      // skew distribution toward the top so we don't crowd the skyline
+      var topPct = Math.pow(rand(), 1.3) * 95;
+      s.style.left = (rand() * 100).toFixed(2) + '%';
+      s.style.top = topPct.toFixed(2) + '%';
+      var size = 1 + rand() * 1.4;
+      s.style.width = size.toFixed(1) + 'px';
+      s.style.height = size.toFixed(1) + 'px';
+      s.style.setProperty('--lo', (0.05 + rand() * 0.20).toFixed(2));
+      s.style.setProperty('--hi', (0.45 + rand() * 0.45).toFixed(2));
+      s.style.setProperty('--delay', (rand() * 6).toFixed(2) + 's');
+      s.style.setProperty('--dur', (2.5 + rand() * 5).toFixed(2) + 's');
+      starsEl.appendChild(s);
+    }
+  }
+})();
+</script>
 <div id="root"></div>
 
 <script type="text/babel" data-module="tweaks-panel.jsx">
