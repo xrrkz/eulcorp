@@ -92,23 +92,18 @@ html::before {
       #ebe7df 100%);
 }
 
-/* city skyline silhouette — pinned to bottom of viewport */
+/* subtle bottom gradient wash — institutional feel */
 html::after {
   content: "";
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  height: 34vh;
-  min-height: 220px;
-  max-height: 360px;
+  height: 28vh;
+  min-height: 180px;
+  max-height: 300px;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 240' preserveAspectRatio='xMidYEnd slice'><path fill='%231a1a1a' d='M0 240 L0 188 L36 188 L36 156 L72 156 L72 178 L108 178 L108 134 L150 134 L150 162 L188 162 L188 96 L222 96 L222 124 L260 124 L260 78 L284 78 L284 56 L302 56 L302 78 L324 78 L324 108 L362 108 L362 144 L402 144 L402 116 L444 116 L444 134 L484 134 L484 86 L522 86 L522 110 L562 110 L562 64 L578 64 L578 38 L590 38 L590 64 L624 64 L624 100 L666 100 L666 134 L706 134 L706 104 L744 104 L744 148 L786 148 L786 96 L826 96 L826 118 L866 118 L866 80 L908 80 L908 108 L948 108 L948 54 L962 54 L962 28 L974 28 L974 54 L1008 54 L1008 94 L1048 94 L1048 144 L1090 144 L1090 114 L1130 114 L1130 138 L1170 138 L1170 84 L1208 84 L1208 108 L1248 108 L1248 64 L1268 64 L1268 42 L1286 42 L1286 66 L1326 66 L1326 96 L1366 96 L1366 132 L1406 132 L1406 102 L1446 102 L1446 152 L1486 152 L1486 178 L1526 178 L1526 198 L1568 198 L1568 214 L1600 214 L1600 240 Z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: cover;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 100%);
-          mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 100%);
+  opacity: 0.5;
+  background: linear-gradient(180deg, transparent 0%, rgba(26,26,26,0.02) 60%, rgba(26,26,26,0.04) 100%);
 }
 /* subtle warm glow layers */
 body::before {
@@ -1148,7 +1143,7 @@ html[data-bg="deep-black"] .socials { background: rgba(245,242,237,0.65); }
   100% { stroke-dashoffset: -480; opacity: 1;   }
 }
 
-/* -------- Home bg: skyline being built + capital flow ribbons -------- */
+/* -------- Home bg: equity curve + capital flow particles -------- */
 .hbg-vline {
   stroke: rgba(26,26,26,0.04);
   stroke-width: 1;
@@ -1157,107 +1152,122 @@ html[data-bg="deep-black"] .socials { background: rgba(245,242,237,0.65); }
   stroke: rgba(26,26,26,0.03);
   stroke-width: 1;
 }
-.hbg-ground-line {
+
+/* equity curve — the ascending NAV line */
+.hbg-equity-path {
+  fill: none;
+  stroke: rgba(26,26,26,0.22);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hbg-equity-fill {
+  opacity: 0.04;
+}
+.hbg-equity-dot {
+  fill: #1a1a1a;
+  filter: drop-shadow(0 0 4px rgba(26,26,26,0.3));
+}
+.hbg-equity-ring {
+  fill: none;
   stroke: rgba(26,26,26,0.25);
   stroke-width: 1;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: hbg-eq-pulse 3s ease-out infinite;
+}
+@keyframes hbg-eq-pulse {
+  0%   { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
 
-/* far skyline silhouettes — soft, no outline */
-.hbg-far rect { mix-blend-mode: screen; }
-
-/* near skyline outlines drawn over rising fills */
-.hbg-near-out {
-  fill: none;
-  stroke: rgba(26,26,26,0.18);
-  stroke-width: 1;
+/* floating metric labels */
+.hbg-metric {
+  fill: rgba(26,26,26,0.18);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.hbg-metric-val {
+  fill: rgba(26,26,26,0.32);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
-/* windows that twinkle as buildings rise */
-.hbg-win {
+/* capital flow particles — drift upward */
+.hbg-particle {
   fill: #1a1a1a;
   opacity: 0;
-  animation: hbg-win-on 5s ease-in-out infinite;
+  animation: hbg-particle-rise linear infinite;
 }
-@keyframes hbg-win-on {
-  0%, 18%  { opacity: 0; }
-  28%      { opacity: 0.85; }
-  68%      { opacity: 0.55; }
-  82%      { opacity: 0.85; }
-  100%     { opacity: 0; }
+@keyframes hbg-particle-rise {
+  0%   { opacity: 0; transform: translateY(0); }
+  10%  { opacity: 0.5; }
+  80%  { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(-400px); }
 }
 
-/* flowing capital ribbons across the sky */
-.hbg-flow-line {
-  stroke: rgba(26,26,26,0.10);
+/* horizontal data flow streams */
+.hbg-stream-line {
+  stroke: rgba(26,26,26,0.06);
   stroke-width: 1;
-  stroke-dasharray: 1 6;
+  stroke-dasharray: 2 8;
 }
-.hbg-flow-dot {
+.hbg-stream-dot {
   fill: #1a1a1a;
-  filter: drop-shadow(0 0 5px rgba(26,26,26,0.25));
+  opacity: 0.4;
 }
-.hbg-flow-dot.dim { opacity: 0.55; filter: none; }
-.hbg-flow-row {
-  animation: hbg-flow-slide linear infinite;
+.hbg-stream-row {
+  animation: hbg-stream-slide linear infinite;
   will-change: transform;
 }
-.hbg-flow-row.rev { animation-name: hbg-flow-slide-rev; }
-@keyframes hbg-flow-slide {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(1600px); }
-}
-@keyframes hbg-flow-slide-rev {
-  0%   { transform: translateX(1600px); }
-  100% { transform: translateX(0); }
+.hbg-stream-row.rev { animation-direction: reverse; }
+@keyframes hbg-stream-slide {
+  0%   { transform: translateX(-800px); }
+  100% { transform: translateX(800px); }
 }
 
-/* construction crane */
-.hbg-crane-rail {
-  stroke: rgba(26,26,26,0.30);
-  stroke-width: 1.4;
-}
-.hbg-crane-x {
-  stroke: rgba(26,26,26,0.20);
+/* bottom axis line */
+.hbg-axis {
+  stroke: rgba(26,26,26,0.12);
   stroke-width: 1;
 }
-.hbg-crane-cab {
-  fill: rgba(26,26,26,0.35);
-  stroke: rgba(26,26,26,0.18);
-}
-.hbg-crane-jib {
-  transform-origin: 0 -10px;
-}
-.hbg-crane-arm {
-  stroke: rgba(26,26,26,0.35);
-  stroke-width: 1.4;
-}
-.hbg-crane-arm-fine {
-  stroke: rgba(26,26,26,0.18);
-  stroke-width: 0.8;
-}
-.hbg-crane-cable {
-  stroke: rgba(26,26,26,0.22);
-  stroke-width: 0.8;
-}
-.hbg-crane-load {
-  fill: rgba(26,26,26,0.35);
+
+/* year markers along the axis */
+.hbg-year {
+  fill: rgba(26,26,26,0.18);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
 }
 
-/* ticker tape — "money talks" */
+/* performance bar clusters */
+.hbg-bar {
+  fill: rgba(26,26,26,0.08);
+  transition: fill 0.3s ease;
+}
+.hbg-bar-accent {
+  fill: rgba(26,26,26,0.18);
+}
+
+/* ticker tape */
 .hbg-tape-rule {
-  stroke: rgba(26,26,26,0.10);
+  stroke: rgba(26,26,26,0.06);
   stroke-width: 1;
 }
 .hbg-tape-text {
-  fill: rgba(26,26,26,0.22);
+  fill: rgba(26,26,26,0.15);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   white-space: pre;
 }
 .hbg-tape-slide {
-  animation: hbg-tape-slide 60s linear infinite;
+  animation: hbg-tape-slide 80s linear infinite;
   will-change: transform;
 }
 @keyframes hbg-tape-slide {
@@ -1266,10 +1276,10 @@ html[data-bg="deep-black"] .socials { background: rgba(245,242,237,0.65); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hbg-flow-row,
+  .hbg-stream-row,
   .hbg-tape-slide,
-  .hbg-win { animation: none; }
-  .hbg-win { opacity: 0.7; }
+  .hbg-particle { animation: none; }
+  .hbg-particle { opacity: 0.3; }
 }
 
 /* -------- Contact bg: global network -------- */
@@ -3079,14 +3089,14 @@ function ContactSection() {
 // PER-SECTION BACKDROPS (all B&W, all subtle, all animated)
 // ========================================================================
 
-// -------- About: drifting block words --------
+// -------- About: drifting block words (PE hedge fund terms) --------
 const ABOUT_WORDS = [
-  { t: "EULCORP",       size: 380, x: -8,  y: 12,  dur: 78, dir:  1 },
-  { t: "VISION",        size: 220, x: 62,  y: 8,   dur: 92, dir: -1 },
-  { t: "DISCIPLINE",    size: 180, x: 18,  y: 58,  dur: 110, dir: 1 },
-  { t: "PATIENCE",      size: 200, x: 56,  y: 68,  dur: 86, dir: -1 },
-  { t: "BUILT TO LAST", size: 130, x: -4,  y: 88,  dur: 120, dir: 1 },
-  { t: "ONE OF NONE",   size: 150, x: 36,  y: 32,  dur: 100, dir: -1 },
+  { t: "ALPHA",         size: 380, x: -8,  y: 12,  dur: 78, dir:  1 },
+  { t: "COMPOUND",      size: 220, x: 62,  y: 8,   dur: 92, dir: -1 },
+  { t: "ASYMMETRIC",    size: 180, x: 18,  y: 58,  dur: 110, dir: 1 },
+  { t: "CONVICTION",    size: 200, x: 56,  y: 68,  dur: 86, dir: -1 },
+  { t: "RISK-ADJUSTED", size: 130, x: -4,  y: 88,  dur: 120, dir: 1 },
+  { t: "LONG HORIZON",  size: 150, x: 36,  y: 32,  dur: 100, dir: -1 },
 ];
 
 function AboutBg() {
@@ -3134,9 +3144,9 @@ function PortfolioBg() {
   // Three allocation rings — each labeled along its circumference.
   // Composed of a dashed ring + a "weight" arc that breathes via dashoffset.
   const rings = [
-    { id: "r-markets",  label: "MARKETS",  cx: 460,  cy: 470, r: 210, dir: 1,  dur: 64 },
-    { id: "r-private",  label: "PRIVATE",  cx: 960,  cy: 430, r: 250, dir: -1, dur: 88 },
-    { id: "r-ventures", label: "VENTURES", cx: 1300, cy: 520, r: 180, dir: 1,  dur: 56 },
+    { id: "r-markets",  label: "PUBLIC MARKETS · 42%",  cx: 460,  cy: 470, r: 210, dir: 1,  dur: 64 },
+    { id: "r-private",  label: "PRIVATE EQUITY · 38%",  cx: 960,  cy: 430, r: 250, dir: -1, dur: 88 },
+    { id: "r-ventures", label: "VENTURE · 20%", cx: 1300, cy: 520, r: 180, dir: 1,  dur: 56 },
   ];
 
   return (
@@ -3311,56 +3321,77 @@ function ContactBg() {
   );
 }
 
-// -------- Home: skyline being built + capital flow ribbons (money talks) --------
+// -------- Home: equity curve + capital flow particles (PE hedge fund) --------
 function HomeBg() {
-  const HORIZON_Y = 740;
-  const TICKER = "EULCORP  ◆  CAPITAL · BUILD · ESTATE · TECH  ◆  ES 7,432 +0.42%   NQ 24,856 +0.61%   GC 4,561 +0.18%   YIELD 4.32%   $ COMPOUND THE CYCLE $   AUM $412M   IRR 21.8%   MOIC 2.34×   ";
+  const AXIS_Y = 720;
+  const TICKER = "EULCORP  ◆  AUM $2.4B  ◆  NET IRR 21.8%  ◆  MOIC 2.34×  ◆  ALPHA +680bps  ◆  SHARPE 1.92  ◆  VINTAGE 2005  ◆  COMPOUND · CONVICTION · PATIENCE  ◆  ";
 
-  // Two-pass pseudo-random so the layout is deterministic but varied.
   const rnd = (n) => {
     const x = Math.sin(n * 12.9898) * 43758.5453;
     return x - Math.floor(x);
   };
 
-  // Distant skyline — already complete, faint, parallax layer behind.
-  const farSkyline = _s_R.useMemo(() => {
+  // Equity curve — ascending NAV line with volatility
+  const equityCurve = _s_R.useMemo(() => {
+    const points = [];
+    const N = 48;
+    let y = 580;
+    for (let i = 0; i <= N; i++) {
+      const x = 120 + (i / N) * 1360;
+      const drift = -4.2;
+      const vol = (rnd(i * 7 + 3) - 0.45) * 28;
+      y = Math.max(140, Math.min(660, y + drift + vol));
+      points.push({ x, y });
+    }
+    return points;
+  }, []);
+
+  const curvePath = equityCurve.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  const fillPath = curvePath + ` L ${equityCurve[equityCurve.length-1].x} ${AXIS_Y} L ${equityCurve[0].x} ${AXIS_Y} Z`;
+  const lastPt = equityCurve[equityCurve.length - 1];
+
+  // Rising capital particles
+  const particles = _s_R.useMemo(() => {
     const arr = [];
-    let cursor = -30;
-    let idx = 1;
-    while (cursor < 1640) {
-      const w = 26 + Math.floor(rnd(idx * 5 + 1) * 40);
-      const h = 70  + Math.floor(rnd(idx * 9 + 3) * 170);
-      arr.push({ x: cursor, w, h, idx });
-      cursor += w + Math.floor(rnd(idx * 3) * 4);
-      idx++;
+    for (let i = 0; i < 24; i++) {
+      arr.push({
+        x: 100 + rnd(i * 13 + 7) * 1400,
+        y: 500 + rnd(i * 17 + 11) * 300,
+        r: 1.2 + rnd(i * 23 + 5) * 1.8,
+        dur: 8 + rnd(i * 31 + 2) * 12,
+        delay: -(rnd(i * 41 + 9) * 18),
+      });
     }
     return arr;
   }, []);
 
-  // Foreground skyline — buildings rising on a loop (construction).
-  const nearSkyline = _s_R.useMemo(() => {
+  // Horizontal data streams
+  const streams = [
+    { y: 160, dur: 22, rev: false },
+    { y: 280, dur: 28, rev: true  },
+    { y: 390, dur: 25, rev: false },
+    { y: 510, dur: 30, rev: true  },
+    { y: 640, dur: 20, rev: false },
+  ];
+
+  // Performance bars — annual returns
+  const bars = _s_R.useMemo(() => {
     const arr = [];
-    let cursor = 40;
-    let idx = 1;
-    while (cursor < 1560) {
-      const w = 56 + Math.floor(rnd(idx * 7 + 11) * 86);          // 56..142
-      const h = 150 + Math.floor(rnd(idx * 11 + 17) * 390);        // 150..540
-      const rise = 7.5 + rnd(idx * 13 + 5) * 7;                    // 7.5..14.5s
-      const delay = -rnd(idx * 19 + 31) * 14;                      // staggered
-      arr.push({ x: cursor, w, h, idx, rise, delay });
-      cursor += w + 6 + Math.floor(rnd(idx * 23) * 18);
-      idx++;
-    }
+    const years = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+    const baseX = 180;
+    const gap = 180;
+    years.forEach((yr, i) => {
+      const h = 40 + rnd(i * 7 + 19) * 120;
+      arr.push({ x: baseX + i * gap, h, yr, accent: i >= 5 });
+    });
     return arr;
   }, []);
 
-  // Flowing capital ribbons — long horizontal lines that slide across the sky.
-  const flows = [
-    { y: 110, dur: 18, dly: 0,    rev: false },
-    { y: 200, dur: 24, dly: -6,   rev: true  },
-    { y: 295, dur: 21, dly: -12,  rev: false },
-    { y: 420, dur: 28, dly: -4,   rev: true  },
-    { y: 520, dur: 22, dly: -9,   rev: false },
+  // Floating metrics
+  const metrics = [
+    { label: "NET IRR", val: "21.8%", x: 180, y: 180 },
+    { label: "SHARPE", val: "1.92", x: 1320, y: 220 },
+    { label: "AUM", val: "$2.4B", x: 1100, y: 140 },
   ];
 
   return (
@@ -3373,190 +3404,100 @@ function HomeBg() {
       <defs>
         <linearGradient id="hbg-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0"    stopColor="#1a1a1a" stopOpacity="0" />
-          <stop offset="0.82" stopColor="#1a1a1a" stopOpacity="0.02" />
-          <stop offset="1"    stopColor="#1a1a1a" stopOpacity="0.05" />
+          <stop offset="0.82" stopColor="#1a1a1a" stopOpacity="0.01" />
+          <stop offset="1"    stopColor="#1a1a1a" stopOpacity="0.03" />
         </linearGradient>
-        <linearGradient id="hbg-far" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#1a1a1a" stopOpacity="0.04" />
-          <stop offset="1" stopColor="#1a1a1a" stopOpacity="0.08" />
-        </linearGradient>
-        <linearGradient id="hbg-near" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="hbg-eq-fill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#1a1a1a" stopOpacity="0.06" />
-          <stop offset="1" stopColor="#1a1a1a" stopOpacity="0.14" />
+          <stop offset="1" stopColor="#1a1a1a" stopOpacity="0" />
         </linearGradient>
-        <radialGradient id="hbg-glow" cx="0.5" cy="1" r="0.55">
-          <stop offset="0" stopColor="#c8bea0" stopOpacity="0.12" />
-          <stop offset="1" stopColor="#c8bea0" stopOpacity="0" />
-        </radialGradient>
         <radialGradient id="hbg-vig" cx="0.5" cy="0.42" r="0.72">
-          <stop offset="0"    stopColor="#f5f2ed" stopOpacity="0.35" />
-          <stop offset="0.6"  stopColor="#f5f2ed" stopOpacity="0.10" />
+          <stop offset="0"    stopColor="#f5f2ed" stopOpacity="0.40" />
+          <stop offset="0.6"  stopColor="#f5f2ed" stopOpacity="0.12" />
           <stop offset="1"    stopColor="#f5f2ed" stopOpacity="0" />
         </radialGradient>
-        <clipPath id="hbg-sky-clip">
-          <rect x="0" y="0" width="1600" height={HORIZON_Y} />
-        </clipPath>
       </defs>
 
       {/* sky wash */}
       <rect x="0" y="0" width="1600" height="900" fill="url(#hbg-sky)" />
 
-      {/* abstract financial grid */}
-      <g className="hbg-grid-wrap" clipPath="url(#hbg-sky-clip)">
+      {/* subtle grid */}
+      <g>
         {Array.from({ length: 17 }, (_, i) => (
-          <line key={`vg${i}`} className="hbg-vline" x1={i * 100} y1="0" x2={i * 100} y2={HORIZON_Y} />
+          <line key={`vg${i}`} className="hbg-vline" x1={i * 100} y1="0" x2={i * 100} y2={AXIS_Y} />
         ))}
         {Array.from({ length: 8 }, (_, i) => (
           <line key={`hg${i}`} className="hbg-hline" x1="0" y1={i * 100} x2="1600" y2={i * 100} />
         ))}
       </g>
 
-      {/* flowing capital ribbons — long sliding lines with a leading dot */}
-      <g className="hbg-flow-wrap" clipPath="url(#hbg-sky-clip)">
-        {flows.map((f, i) => (
+      {/* horizontal data streams */}
+      <g>
+        {streams.map((s, i) => (
           <g key={i}
-             className={`hbg-flow-row${f.rev ? " rev" : ""}`}
-             style={{ animationDuration: `${f.dur}s`, animationDelay: `${f.dly}s` }}>
-            <line x1="-1600" x2="0"    y1={f.y} y2={f.y} className="hbg-flow-line" />
-            <line x1="0"     x2="1600" y1={f.y} y2={f.y} className="hbg-flow-line" />
-            <circle cx="0"     cy={f.y} r="2.6" className="hbg-flow-dot" />
-            <circle cx="-1100" cy={f.y} r="1.8" className="hbg-flow-dot dim" />
+             className={`hbg-stream-row${s.rev ? " rev" : ""}`}
+             style={{ animationDuration: `${s.dur}s` }}>
+            <line x1="-800" x2="800" y1={s.y} y2={s.y} className="hbg-stream-line" />
+            <circle cx="0" cy={s.y} r="2" className="hbg-stream-dot" />
           </g>
         ))}
       </g>
 
-      {/* horizon glow */}
-      <ellipse cx="820" cy={HORIZON_Y + 30} rx="980" ry="170" fill="url(#hbg-glow)" />
-
-      {/* far skyline (static silhouettes) */}
-      <g className="hbg-far">
-        {farSkyline.map((b) => (
-          <rect key={`f${b.idx}`}
-                x={b.x} y={HORIZON_Y - b.h}
-                width={b.w} height={b.h}
-                fill="url(#hbg-far)" />
+      {/* performance bars (faint annual return bars) */}
+      <g>
+        {bars.map((b, i) => (
+          <g key={i}>
+            <rect
+              x={b.x - 20} y={AXIS_Y - b.h}
+              width="40" height={b.h}
+              className={b.accent ? "hbg-bar-accent" : "hbg-bar"}
+              rx="2"
+            />
+            <text x={b.x} y={AXIS_Y + 20} className="hbg-year" textAnchor="middle">{b.yr}</text>
+          </g>
         ))}
       </g>
 
-      {/* near skyline — each building rises from the ground, loops */}
-      <g className="hbg-near">
-        {nearSkyline.map((b) => {
-          const top = HORIZON_Y - b.h;
-          // sparse windows: ~2-4 columns, rows every 26px
-          const cols = Math.max(2, Math.min(5, Math.floor(b.w / 26)));
-          const rows = Math.max(2, Math.floor(b.h / 30));
-          const wins = [];
-          for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              if (rnd(b.idx * 100 + r * 7 + c) < 0.32) continue; // skip some
-              const colGap = (b.w - 10) / cols;
-              const wx = b.x + 5 + c * colGap + colGap / 2 - 1.5;
-              const wy = top + 10 + r * 26;
-              if (wy > HORIZON_Y - 14) break;
-              const wdelay = -(rnd(b.idx * 17 + r * 3 + c) * 7);
-              const wdur   = 4 + rnd(b.idx * 31 + r * 2 + c) * 4.5;
-              wins.push(
-                <rect key={`w${b.idx}-${r}-${c}`}
-                      x={wx} y={wy} width="3" height="7"
-                      className="hbg-win"
-                      style={{ animationDelay: `${wdelay}s`, animationDuration: `${wdur}s` }} />
-              );
-            }
-          }
-          return (
-            <g key={`n${b.idx}`}>
-              {/* fill (rises) */}
-              <rect x={b.x} y={top} width={b.w} height={b.h}
-                    fill="url(#hbg-near)" opacity="0.92">
-                <animate attributeName="height"
-                         from="0" to={b.h}
-                         dur={`${b.rise}s`} begin={`${b.delay}s`}
-                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
-                         repeatCount="indefinite" />
-                <animate attributeName="y"
-                         from={HORIZON_Y} to={top}
-                         dur={`${b.rise}s`} begin={`${b.delay}s`}
-                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
-                         repeatCount="indefinite" />
-              </rect>
-              {/* outline (rises too, sharper edge) */}
-              <rect x={b.x} y={top} width={b.w} height={b.h}
-                    className="hbg-near-out">
-                <animate attributeName="height"
-                         from="0" to={b.h}
-                         dur={`${b.rise}s`} begin={`${b.delay}s`}
-                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
-                         repeatCount="indefinite" />
-                <animate attributeName="y"
-                         from={HORIZON_Y} to={top}
-                         dur={`${b.rise}s`} begin={`${b.delay}s`}
-                         calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"
-                         repeatCount="indefinite" />
-              </rect>
-              {/* lit windows */}
-              <g>{wins}</g>
-            </g>
-          );
-        })}
+      {/* equity curve — the NAV line */}
+      <g>
+        <path d={fillPath} fill="url(#hbg-eq-fill)" className="hbg-equity-fill" />
+        <path d={curvePath} className="hbg-equity-path" />
+        <circle cx={lastPt.x} cy={lastPt.y} r="4" className="hbg-equity-dot" />
+        <circle cx={lastPt.x} cy={lastPt.y} r="12" className="hbg-equity-ring" />
       </g>
 
-      {/* construction crane — tall mast with slowly swinging jib */}
-      <g className="hbg-crane" transform="translate(1240, 200)">
-        <g className="hbg-crane-mast-g">
-          <line x1="-5" y1="0" x2="-5" y2="540" className="hbg-crane-rail" />
-          <line x1="5"  y1="0" x2="5"  y2="540" className="hbg-crane-rail" />
-          {Array.from({ length: 22 }, (_, i) => (
-            <g key={i} transform={`translate(0, ${i * 24})`}>
-              <line x1="-5" x2="5" y1="0"  y2="24" className="hbg-crane-x" />
-              <line x1="5"  x2="-5" y1="0" y2="24" className="hbg-crane-x" />
-              <line x1="-5" x2="5" y1="12" y2="12" className="hbg-crane-x" />
-            </g>
-          ))}
-        </g>
-        {/* cabin at top */}
-        <rect x="-9" y="-14" width="18" height="14" className="hbg-crane-cab" />
-        {/* jib — slowly swings */}
-        <g className="hbg-crane-jib">
-          <animateTransform attributeName="transform" type="rotate"
-            values="-8;8;-8" keyTimes="0;0.5;1"
-            calcMode="spline" keySplines="0.42 0 0.58 1; 0.42 0 0.58 1"
-            dur="22s" repeatCount="indefinite" />
-          <line x1="-110" x2="280" y1="-10" y2="-10" className="hbg-crane-arm" />
-          <line x1="-110" x2="0"   y1="-34" y2="-10" className="hbg-crane-arm" />
-          <line x1="280"  x2="0"   y1="-34" y2="-10" className="hbg-crane-arm" />
-          {/* truss segments */}
-          {Array.from({ length: 8 }, (_, i) => (
-            <line key={`a${i}`}
-                  x1={-110 + i * 50} y1="-10"
-                  x2={-110 + (i + 1) * 50} y2="-34"
-                  className="hbg-crane-arm-fine" />
-          ))}
-          {/* hook + payload (drops + raises) */}
-          <g className="hbg-crane-hook" transform="translate(120, 0)">
-            <line x1="0" x2="0" y1="-10" y2="90" className="hbg-crane-cable">
-              <animate attributeName="y2"
-                       values="60;160;60" keyTimes="0;0.5;1"
-                       dur="9s" repeatCount="indefinite" />
-            </line>
-            <rect x="-7" y="86" width="14" height="10" className="hbg-crane-load">
-              <animate attributeName="y"
-                       values="56;156;56" keyTimes="0;0.5;1"
-                       dur="9s" repeatCount="indefinite" />
-            </rect>
+      {/* rising capital particles */}
+      <g>
+        {particles.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x} cy={p.y} r={p.r}
+            className="hbg-particle"
+            style={{ animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s` }}
+          />
+        ))}
+      </g>
+
+      {/* floating metrics */}
+      <g>
+        {metrics.map((m, i) => (
+          <g key={i}>
+            <text x={m.x} y={m.y} className="hbg-metric">{m.label}</text>
+            <text x={m.x} y={m.y + 22} className="hbg-metric-val">{m.val}</text>
           </g>
-        </g>
+        ))}
       </g>
 
-      {/* horizon ground line */}
-      <line x1="0" y1={HORIZON_Y} x2="1600" y2={HORIZON_Y} className="hbg-ground-line" />
+      {/* axis line */}
+      <line x1="100" y1={AXIS_Y} x2="1500" y2={AXIS_Y} className="hbg-axis" />
 
-      {/* ticker tape — "money talks" — slides across at horizon */}
-      <g className="hbg-tape" transform={`translate(0, ${HORIZON_Y + 50})`}>
-        <line x1="0" x2="1600" y1="-22" y2="-22" className="hbg-tape-rule" />
-        <line x1="0" x2="1600" y1="22"  y2="22"  className="hbg-tape-rule" />
+      {/* ticker tape — institutional data feed */}
+      <g className="hbg-tape" transform={`translate(0, ${AXIS_Y + 60})`}>
+        <line x1="0" x2="1600" y1="-16" y2="-16" className="hbg-tape-rule" />
+        <line x1="0" x2="1600" y1="16"  y2="16"  className="hbg-tape-rule" />
         <g className="hbg-tape-slide">
-          <text x="0"    y="6" className="hbg-tape-text">{TICKER}{TICKER}</text>
-          <text x="3200" y="6" className="hbg-tape-text">{TICKER}{TICKER}</text>
+          <text x="0"    y="5" className="hbg-tape-text">{TICKER}{TICKER}</text>
+          <text x="3200" y="5" className="hbg-tape-text">{TICKER}{TICKER}</text>
         </g>
       </g>
 
